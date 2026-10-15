@@ -1,0 +1,14 @@
+*.pdf
+
+# Secrets and local settings
+.env
+.env.*
+*.local.*
+
+# Python
+__pycache__/
+.venv/
+
+# .NET build output
+bin/
+obj/
