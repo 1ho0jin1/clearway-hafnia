@@ -75,11 +75,34 @@ an API; never write XProtect or gateway paths and fields from memory.
   `traffic_flows_in_the_open_lanes`.
 - Starting state: one prompt (*Road conditions analysis*); no gateway rules, analytics events, user-defined events,
   webhooks, alarm definitions or basic users. Analytics events are disabled.
-- Installed: Git, the .NET 8 runtime (no SDK), Edge, Windows PowerShell 5.1, MilestonePSTools 25.2.61.
-  Not installed: Python, Node.js, the .NET SDK, VS Code. Installers we depend on belong in the setup docs.
+- Installed: Git, Python 3.12.10 (we installed it: python.org, all users, with the `py` launcher), the .NET 8
+  runtime (no SDK), Edge, Windows PowerShell 5.1, MilestonePSTools 25.2.61.
+  Not installed: Node.js, the .NET SDK, VS Code. Installers we depend on belong in the setup docs.
 - The NVIDIA T4 GPU has no driver installed.
 - Logs: gateway `C:\ProgramData\VideoOS\Hafnia.Vlm.Gateway\logs`; XProtect `C:\ProgramData\Milestone\<component>\Logs`.
 
 ## Repository layout
 
-Not decided yet. Update this section, and add build, run and setup commands, as the project takes shape.
+Python 3.12 (installed from python.org, `py` launcher), standard library only so far.
+
+| Path | What |
+|---|---|
+| `hafnia/gateway.py` | Hafnia gateway client: session, quota, prompts by title, `ask`, `wait_all` with per-phase timing |
+| `hafnia/xprotect.py` | Camera name → ID lookup through MilestonePSTools (10-30 s) |
+| `scripts/bench_hafnia.py` | Latency benchmark per phase; capped by `--max-requests` and `--stop-at` |
+| `scripts/report_bench.py` | Turns a run folder's `results.jsonl` into a self-contained `report.html` |
+| `scripts/export_frames.ps1` | Exports 2 fps recorded JPEGs of each completed request's clip to `run/<name>/frames/` (git-ignored; same day only, 24 h retention) |
+| `scripts/report_compare.py` | Hafnia vs another model on the same clips: `opus_results.jsonl` + `scores.json` → `compare.html` |
+| `run/<name>/` | Model run results, committed: `results.jsonl` (Hafnia rows, with answers), `report.html`; for comparisons `opus_results.jsonl`, `scores.json`, `compare.html` |
+
+## Commands
+
+The gateway password lives in the user-scope environment variable `HAFNIA_GW_PASSWORD`. Shells started by Claude Code
+do not inherit it, so load it first in the same command:
+
+```powershell
+$env:HAFNIA_GW_PASSWORD = [Environment]::GetEnvironmentVariable('HAFNIA_GW_PASSWORD', 'User')
+py scripts\bench_hafnia.py --dry-run          # plan and allowance; costs nothing
+py scripts\bench_hafnia.py --run-dir run\<name> --label <tag> ...   # several runs can share one folder
+py scripts\report_bench.py run\<name>         # writes run\<name>\report.html
+```
