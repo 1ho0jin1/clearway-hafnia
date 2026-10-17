@@ -16,3 +16,7 @@ obj/
 
 # Exported video frames (large; regenerate with scripts\export_frames.ps1)
 run/*/frames/
+
+# Raw and converted video (large; see data\README for where each clip comes from)
+data/*.mp4
+data/clips/

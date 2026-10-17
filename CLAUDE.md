@@ -7,6 +7,25 @@ and Hafnia VLM (a vision-language model reached through the Hafnia gateway on th
 **Judging includes reproducibility:** the judges must be able to set the solution up on a fresh machine from this
 repository alone. Every design decision should keep that possible.
 
+## Project direction (decided 2026-10-16)
+
+- Solo entry, about two weeks (submission around 2026-10-30). Theme restricted to **traffic and security**.
+- Architecture: **tiered routing**, Hafnia used where it is strong and gated by cheaper checks.
+  - **Tier 0, on the machine** (T4 GPU, every frame, < 1 s): detection and tracking (sudden stop or collision,
+    stopped vehicle, wrong way, person on the road, loitering), image health (blur, contrast, fog index), tamper
+    (repeating frame fingerprints, frozen clock).
+  - **Router**: deduplication, cooldown, severity and confidence, today's remaining Hafnia allowance.
+  - **Tier 1, Hafnia** (about 5 s, 500 a day): keyword prompt per event type, sent with `PromptId`; gateway rule →
+    XProtect analytics event → alarm and bookmark.
+  - **Top tier is the human operator**, who gets the XProtect alarm with evidence.
+- **No frontier model in the product**, and no local VLM tier (nothing performant fits a T4). Opus (Claude Code) is
+  used **offline only**, as a judge: scoring tests, tuning prompts, measured comparisons.
+- Demo stories: an accident (our own clip; tier 0 under 1 s, Hafnia confirms), camera health and tampering
+  (condensation, looped feeds), fog and visibility on the highway.
+- Differentiator: measured results. Tiered pipeline vs "Hafnia on every event": requests per day, time to alarm,
+  accuracy.
+- Own clips are allowed (participant confirmed).
+
 ## Where things run
 
 - The dev machine is **p021** (Windows Server 2022, UTC clock). It is rebuilt fresh on failure (about 25 min) and
@@ -51,7 +70,8 @@ an API; never write XProtect or gateway paths and fields from memory.
 - Uninstalling or upgrading XProtect, Smart Client or the Hafnia plug-in. `C:\Program Files\VideoOS\MIPPlugins`.
 - The gateway's *Reset System* button, its tray-icon password reset, and its *Hafnia VLM Settings* and
   *XProtect Settings*. Only the two *Advanced Settings* sections may change.
-- XProtect's default rules, recording storage and camera hardware settings.
+- XProtect's default rules, recording storage, and the hardware settings of the five organizer cameras (our own
+  test cameras, added with `scripts/add_test_camera.ps1`, are ours to change).
 - Do not shut the machine down (it cannot be started again). Ask before restarting services or rebooting.
   Never stop the Recording Server less than 90 s after it started.
 - Keep fewer than 25 gateway prompts.
@@ -78,7 +98,10 @@ an API; never write XProtect or gateway paths and fields from memory.
 - Installed: Git, Python 3.12.10 (we installed it: python.org, all users, with the `py` launcher), the .NET 8
   runtime (no SDK), Edge, Windows PowerShell 5.1, MilestonePSTools 25.2.61.
   Not installed: Node.js, the .NET SDK, VS Code. Installers we depend on belong in the setup docs.
-- The NVIDIA T4 GPU has no driver installed.
+- ffmpeg 9.0.2 (gyan.dev essentials build, SHA-256 checked), portable at
+  `C:\tools\ffmpeg\ffmpeg-9.0.2-essentials_build\bin` (not on PATH).
+- The NVIDIA T4 GPU has no driver installed. The organizers' GRID installer is at `C:\hackathon\nvidia\`; ask before
+  installing it (it may need a reboot).
 - Logs: gateway `C:\ProgramData\VideoOS\Hafnia.Vlm.Gateway\logs`; XProtect `C:\ProgramData\Milestone\<component>\Logs`.
 
 ## Repository layout
@@ -93,7 +116,9 @@ Python 3.12 (installed from python.org, `py` launcher), standard library only so
 | `scripts/report_bench.py` | Turns a run folder's `results.jsonl` into a self-contained `report.html` |
 | `scripts/export_frames.ps1` | Exports 2 fps recorded JPEGs of each completed request's clip to `run/<name>/frames/` (git-ignored; same day only, 24 h retention) |
 | `scripts/report_compare.py` | Hafnia vs another model on the same clips: `opus_results.jsonl` + `scores.json` → `compare.html` |
+| `scripts/add_test_camera.ps1` | Injects a clip as a new StableFPS test camera (organizers' procedure); restarts the Recording Server only with `-RestartRecordingServer` |
 | `run/<name>/` | Model run results, committed: `results.jsonl` (Hafnia rows, with answers), `report.html`; for comparisons `opus_results.jsonl`, `scores.json`, `compare.html` |
+| `data/` | Source videos (`*.mp4`) and converted clips (`data/clips/`), both git-ignored: too large, and judges must download them from their source |
 
 ## Commands
 
@@ -106,3 +131,51 @@ py scripts\bench_hafnia.py --dry-run          # plan and allowance; costs nothin
 py scripts\bench_hafnia.py --run-dir run\<name> --label <tag> ...   # several runs can share one folder
 py scripts\report_bench.py run\<name>         # writes run\<name>\report.html
 ```
+
+Inject a clip as a test camera (convert first; see the script's header for the ffmpeg line):
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\add_test_camera.ps1 -Clip data\clips\<W>x<H>_<name> -Port 105
+# exit code 3 = copied and revision bumped, Recording Server restart needed: ask the participant, then add -RestartRecordingServer
+```
+
+## Findings so far
+
+**Latency** (`run/bench-20261015`, 12 requests): median 5.3 s from submit to answer (range 4.1–13.3 s); Hafnia's own
+answer phase about 3–4 s; 5 requests at once all finish within 7 s (parallel, no queueing); clip length 5 → 30 s barely
+changes latency, and every clip costs 1 request. The one 13.3 s outlier was a cold first export.
+
+**Quality vs Opus** (same 12 clips, blind Opus agents on 2 fps stills, answer key from the frames; `compare.html`):
+Opus 24/24 key facts, Hafnia 17.5/24. Hafnia missed lens condensation twice ("clear, dry"), the cracked window in the
+5 s vandalism clip (the event *is* in that clip), and called fog "rainy". It ties on traffic and roadworks scenes.
+Default model: "The latest general traffic model (recommended)". Hafnia never noticed the clips loop; Opus did.
+Caveats: 5 distinct scenes, one generic prompt, Opus judged its own answers. Targeted keyword prompts are untested.
+
+**Clip windows:** cameras record on motion, so a window can have no recording ("Fetch Video: ... No recordings
+available within the provided time range"). Such a failure costs nothing; pick recorded spans or retry slightly earlier.
+
+**How video reaches Hafnia:** the gateway accepts only `xprotect://` URIs. It resolves video sources through
+plug-ins, and the only one installed is `Plugins\Hafnia.Vlm.Gateway.Plugins.XProtect.dll`. So any footage must be
+recorded by XProtect, i.e. played as a camera. Calling the Hafnia cloud API directly would need the key stored in the
+gateway: off limits (house rules); ask the organizers if ever needed.
+
+**Injecting footage as a camera** (StableFPS driver, inside the Recording Server):
+- Clips: H.264 Annex B, no extension, named `<W>x<H>_<name>`, 10 fps like the organizer cameras, in
+  `C:\Program Files (x86)\Milestone\XProtect Recording Server\Drivers\NativeDrivers\StableFPS_DATA\Video\H264`.
+  The 32-bit driver keeps all clips in RAM, 1.7 GB in total.
+- The driver reads its **file list** only when the Recording Server starts, so a new file needs the `versionid` in
+  `...\NativeDrivers\resources\StableFPS.xml` bumped and the Recording Server restarted.
+- **Which clip a camera plays** is a hardware setting (`VideoH264Files`, `FileName`) that applies live, without a
+  restart. Plan: convert a batch of clips, restart once, then test by swapping the clip on a "test bench" camera.
+- Each camera is one StableFPS hardware on its own port: organizer cameras use `http://127.0.0.1:100`–`104`, ours
+  start at `105`. The record-on-motion rule covers All Cameras, so new cameras record automatically.
+- **Recording Server restart** = stop and start the Windows service `Milestone XProtect Recording Server` only (not a
+  reboot). For 2–3 minutes all cameras have no live video and no recording, and Hafnia exports fail (free). Stored
+  recordings, the Management and Event Servers, the gateway, RDP and Tailscale are unaffected. Never stop it within
+  90 s of its start. Push to GitHub before restarting, in case the machine needs a rebuild.
+
+**Current state (2026-10-17):** `data/construction_aeria_footage.mp4` (27.8 s drone footage of a construction site;
+**source and licence not yet recorded: TODO**) is converted to `data/clips/1920x1080_construction_aerial` and copied
+into the driver folder; `StableFPS.xml` revision bumped 2.26 → 3.26. **The Recording Server restart is pending** (the
+participant chose to wait), so the camera on port 105 does not exist yet. To do: give `add_test_camera.ps1` the
+organizers' hung-service fallback (end the process, start the service) and batch support with a clip-swap command.
