@@ -3,8 +3,10 @@
 Solo entry, 2026-10-18 → submission about 2026-10-30. Deliverable: this repository (a demo video is optional).
 Judging weighs **creativity and validity** most; reproducibility counts, but a best-effort setup is enough.
 
-**Scope (decided 2026-10-18): analyse what happens in the scene only.** No camera-status checks (fog, condensation,
-blocked, moved, tampered or looped feeds).
+**Scope (decided 2026-10-18): traffic incidents, analysed from what happens in the scene.** No camera-status checks
+(fog, condensation, blocked, moved, tampered or looped feeds), and no crime or security incidents: every Hafnia model is
+a traffic model, and it scored 0 of 8 on robberies and shootings while getting 8 of 9 accident answers right
+(`run/bench-20261018`). Security rows in the tables below are out of scope.
 
 ## Concept: verified, prioritized incidents
 

@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import math
 import statistics
 import sys
 import time
@@ -38,6 +39,9 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Measure Hafnia VLM latency per phase.")
     p.add_argument("--cameras", nargs="+", help="camera names (default: every camera)")
     p.add_argument("--clip-seconds", nargs="+", type=int, default=[10], help="clip lengths to try (default 10)")
+    p.add_argument("--loop-windows", type=Path,
+                   help="clips.json: cameras listed there get one window as long as their looped clip (at least "
+                        "--clip-seconds), so one full loop is always inside; --clip-seconds is used for the rest")
     p.add_argument("--repeat", type=int, default=1, help="runs of each camera x clip length (default 1)")
     p.add_argument("--concurrency", type=int, default=1, help="requests submitted together (default 1)")
     what = p.add_mutually_exclusive_group()
@@ -97,7 +101,12 @@ def main() -> int:
     if unknown := [n for n in names if n not in cams]:
         sys.exit(f"Unknown cameras: {', '.join(unknown)}. Known: {', '.join(sorted(cams))}")
 
-    plan = [(n, s) for _ in range(args.repeat) for n in names for s in args.clip_seconds]
+    loop_len = {}
+    if args.loop_windows:
+        manifest = json.loads(args.loop_windows.read_text(encoding="utf-8"))
+        loop_len = {c["camera"]: math.ceil(c["seconds"]) for c in manifest.get("clips", []) if "seconds" in c}
+    plan = [(n, max(loop_len[n], s) if n in loop_len else s)
+            for _ in range(args.repeat) for n in names for s in args.clip_seconds]
     print(f"Plan: {len(plan)} requests ({len(names)} cameras x {len(args.clip_seconds)} clip lengths x "
           f"{args.repeat} repeats), {args.concurrency} at a time. Each completed one costs 1 of 500 today.")
     if len(plan) > args.max_requests:

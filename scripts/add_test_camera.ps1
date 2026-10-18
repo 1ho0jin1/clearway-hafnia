@@ -9,7 +9,10 @@ it acts, so running it again changes nothing.
 
     # 1. Convert any video to the driver's format: H.264 Annex B, no extension, named <width>x<height>_<name>
     ffmpeg -i in.mp4 -an -vf "fps=10,format=yuv420p" -c:v libx264 -profile:v main -crf 23 -bf 0 -g 10 `
-           -keyint_min 10 -sc_threshold 0 -bsf:v h264_mp4toannexb -f h264 data\clips\1920x1080_my_camera
+           -keyint_min 10 -sc_threshold 0 -bsf:v h264_mp4toannexb -f h264 raw.h264
+    #    then normalize the layout (SPS/PPS once, no SEI, 4-byte start codes). Without this the Recording Server logs
+    #    "Unable to add one or more frames to the frame collector. Error code = 5" and the camera stays black.
+    py scripts\annexb_normalize.py raw.h264 data\clips\1920x1080_my_camera
     # 2. Add it (run as the logged-in Administrator; MilestonePSTools refuses SYSTEM)
     powershell -NoProfile -ExecutionPolicy Bypass -File scripts\add_test_camera.ps1 `
            -Clip data\clips\1920x1080_my_camera -Port 105 -RestartRecordingServer
@@ -184,12 +187,16 @@ if ($group -and "$($cam.Id)" -notin @(Get-VmsDeviceGroupMember -Group $group | F
 }
 
 # --- 4. Proof: a live frame of the clip's size (a fresh StableFPS hardware streams a 640x480 test pattern first) ----
-$until = (Get-Date).AddMinutes(3)
+# Re-read the camera each try: the object from right after creation never delivered a frame in testing (2026-10-18),
+# while a fresh lookup of the same camera did.
+$until = (Get-Date).AddMinutes(5)
 while ($true) {
     $snap = $null
-    try { $snap = Get-Snapshot -Camera $cam -Live -LiveTimeoutMS 10000 } catch { }
+    Clear-VmsCache
+    $fresh = Get-VmsCamera -Id $cam.Id
+    try { $snap = Get-Snapshot -Camera $fresh -Live -LiveTimeoutMS 10000 } catch { }
     if ($snap -and $snap.Width -eq $width -and $snap.Height -eq $height) { break }
-    if ((Get-Date) -gt $until) { throw ('no {0}x{1} live frame from {2} after 3 minutes (last: {3})' -f $width, $height, $name, $(if ($snap) { "$($snap.Width)x$($snap.Height)" } else { 'none' })) }
+    if ((Get-Date) -gt $until) { throw ('no {0}x{1} live frame from {2} after 5 minutes (last: {3})' -f $width, $height, $name, $(if ($snap) { "$($snap.Width)x$($snap.Height)" } else { 'none' })) }
     Start-Sleep -Seconds 10
 }
 Write-Step ('ready: camera {0} (id {1}) plays {2} at {3} fps; live frame {4}x{5}' -f $cam.Name, $cam.Id, $clipFile.Name, $Fps, $snap.Width, $snap.Height)

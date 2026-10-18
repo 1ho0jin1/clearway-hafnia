@@ -10,9 +10,11 @@ The detailed plan and schedule are in `docs/PLAN.md`: keep it current.
 
 ## Project direction (decided 2026-10-16, refined 2026-10-18)
 
-- Solo entry, submission around 2026-10-30. Theme restricted to **traffic and security**.
-- **Scope: analyse what happens in the scene only.** No camera-status checks (fog, condensation, blocked, moved,
-  tampered or looped feeds): decided 2026-10-18.
+- Solo entry, submission around 2026-10-30. Theme restricted to **traffic**.
+- **Scope: traffic incidents, analysed from what happens in the scene** (decided 2026-10-18). No camera-status
+  checks (fog, condensation, blocked, moved, tampered or looped feeds). No crime or security incidents (robbery,
+  shooting, arson, vandalism): every Hafnia model is a traffic model and scored 0 of 8 on crime
+  (`run/bench-20261018`). Cameras `test_06`–`test_10` (crime clips) stay installed but are out of scope.
 - Concept: **verified, prioritized incidents.** Tier 0 proposes candidate incidents with their event time, Hafnia
   verifies, classifies and describes them, and the type decides the alarm's owner and priority. The router sends
   event-centred clip windows and learns per camera how far to trust tier 0 from Hafnia's verdicts.
@@ -26,8 +28,8 @@ The detailed plan and schedule are in `docs/PLAN.md`: keep it current.
   - **Top tier is the human operator**, who gets the XProtect alarm with evidence.
 - **No frontier model in the product**, and no local VLM tier (nothing performant fits a T4). Opus (Claude Code) is
   used **offline only**, as a judge: scoring tests, tuning prompts, measured comparisons.
-- Demo stories: an accident (our own clip; tier 0 under 1 s, Hafnia confirms), vandalism, and false alarms that
-  Hafnia suppresses on normal traffic.
+- Demo stories: an accident (our own clips; tier 0 under 1 s, Hafnia confirms), and false alarms that Hafnia
+  suppresses on normal traffic.
 - Differentiator: measured results. Tiered pipeline vs "Hafnia on every event": requests per day, time to alarm,
   accuracy.
 - Own clips are allowed (participant confirmed).
@@ -122,7 +124,10 @@ Python 3.12 (installed from python.org, `py` launcher), standard library only so
 | `scripts/report_bench.py` | Turns a run folder's `results.jsonl` into a self-contained `report.html` |
 | `scripts/export_frames.ps1` | Exports 2 fps recorded JPEGs of each completed request's clip to `run/<name>/frames/` (git-ignored; same day only, 24 h retention) |
 | `scripts/report_compare.py` | Hafnia vs another model on the same clips: `opus_results.jsonl` + `scores.json` → `compare.html` |
-| `scripts/add_test_camera.ps1` | Injects a clip as a new StableFPS test camera (organizers' procedure); restarts the Recording Server only with `-RestartRecordingServer` |
+| `scripts/add_test_camera.ps1` | Injects a clip as a new StableFPS test camera (organizers' procedure); restarts the Recording Server only with `-RestartRecordingServer`; ends a hung service process instead of needing a reboot |
+| `scripts/annexb_normalize.py` | Rewrites ffmpeg's Annex B output into the layout StableFPS accepts (run after every conversion) |
+| `scripts/report_recognition.py` | One-word classification vs ground truth (confusion matrix) and judged descriptions → `recognition.html` |
+| `data/clips.json` | Incident clips: neutral camera name, source file, length, label, ground truth; organizer cameras as controls |
 | `run/<name>/` | Model run results, committed: `results.jsonl` (Hafnia rows, with answers), `report.html`; for comparisons `opus_results.jsonl`, `scores.json`, `compare.html` |
 | `data/` | Source videos (`*.mp4`) and converted clips (`data/clips/`), both git-ignored: too large, and judges must download them from their source |
 
@@ -157,6 +162,24 @@ Opus 24/24 key facts, Hafnia 17.5/24. Hafnia missed lens condensation twice ("cl
 Default model: "The latest general traffic model (recommended)". Hafnia never noticed the clips loop; Opus did.
 Caveats: 5 distinct scenes, one generic prompt, Opus judged its own answers. Targeted keyword prompts are untested.
 
+**Incident recognition** (`run/bench-20261018/recognition.html`, 39 requests; 10 incident clips as neutral cameras
+`test_01`–`test_10`, 5 organizer cameras as controls; ground truth in `data/clips.json`):
+- **Every Hafnia model is a traffic model**, per the gateway's own `GET /api/Models` (descriptions: "specialized in
+  multimodal traffic analysis"): `traffic-general` (default) plus three variants named "(deprecated)". Their IDs
+  contain `7b`/`8b`, which may mean parameter counts: unconfirmed. The kit documents only the endpoint, not the models.
+  There is no security model.
+- **Accidents, asked directly** ("reply with exactly one word"): 8 of 9 answers correct, including a subtle light
+  contact. **Accidents in a free description:** only 2 of 5 caught, and twice it wrote "no collisions" for a visible
+  crash. For detection, always ask a targeted keyword question; never parse free descriptions.
+- **Crime: 0 of 8** (robberies, shootings) answered NONE or ACCIDENT; descriptions missed masks and weapons (a man
+  collapsing after a shooting became "slips on the slick pavement"). The `vandalism` control was NONE both times,
+  although a generic description on 2026-10-15 did describe the broken window.
+- Normal-traffic controls: 8 of 8 NONE (no false alarms). Same answer on both repeats: 13 of 14 clips.
+- Median 8.4 s per request with 5 at once. One export failed inside XProtect ("Index was out of range"): free.
+- All missed incidents were verified to lie inside the window Hafnia received (1 fps frames of each window).
+- Implication: Hafnia is a strong, cheap traffic-incident verifier; security incidents need tier 0 evidence and
+  rules of our own, or must be reported honestly as out of Hafnia's domain.
+
 **Clip windows:** cameras record on motion, so a window can have no recording ("Fetch Video: ... No recordings
 available within the provided time range"). Such a failure costs nothing; pick recorded spans or retry slightly earlier.
 
@@ -180,7 +203,16 @@ gateway: off limits (house rules); ask the organizers if ever needed.
   recordings, the Management and Event Servers, the gateway, RDP and Tailscale are unaffected. Never stop it within
   90 s of its start. Push to GitHub before restarting, in case the machine needs a rebuild.
 
-**Current state (2026-10-17):** `data/construction_aeria_footage.mp4` (27.8 s drone footage of a construction site;
+**Clip format pitfall (2026-10-18):** ffmpeg's Annex B output (SPS/PPS before every keyframe, an x264 SEI, some
+3-byte start codes) makes the Recording Server log "Unable to add one or more frames to the frame collector. Error
+code = 5" and the camera stays black. Always run `scripts/annexb_normalize.py` after ffmpeg: SPS/PPS once, no SEI,
+4-byte start codes, like the organizer clips. Replacing a clip's content needs another Recording Server restart.
+
+**Current state (2026-10-18):** cameras `test_01`–`test_10` (ports 106–115, device group Hackathon) play the
+incident clips listed in `data/clips.json`; the Recording Server was restarted twice today. The construction clip is
+in the driver folder (normalized) but has no camera.
+
+**Earlier state (2026-10-17):** `data/construction_aeria_footage.mp4` (27.8 s drone footage of a construction site;
 **source and licence not yet recorded: TODO**) is converted to `data/clips/1920x1080_construction_aerial` and copied
 into the driver folder; `StableFPS.xml` revision bumped 2.26 → 3.26. **The Recording Server restart is pending** (the
 participant chose to wait), so the camera on port 105 does not exist yet. To do: give `add_test_camera.ps1` the

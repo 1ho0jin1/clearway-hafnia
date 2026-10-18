@@ -1,0 +1,15 @@
+{
+  "judge": "claude-opus-5-5, from contact sheets of the source videos and 1 fps frames of each window (run/bench-20261018/frames, git-ignored). All missed incidents were verified to be inside the window Hafnia received.",
+  "describe": {
+    "test_01": {"score": 1, "note": "Caught: 'colliding with a parked auto-rickshaw ... rider is thrown from the bike'. Rider 'walks away' is not shown."},
+    "test_02": {"score": 1, "note": "Caught: 'A train ... colliding with a motorcycle ... rider to be thrown to the ground'. Calls it 'minor injuries'."},
+    "test_03": {"score": 0, "note": "Missed: describes vehicles stopping and passing; no contact between the motorbike and the bicycle. Hard clip."},
+    "test_04": {"score": 0, "note": "Missed and contradicted: 'Traffic flows smoothly with no collisions', while a cyclist is knocked down."},
+    "test_05": {"score": 0, "note": "Missed and contradicted: 'The rider yields ... no collisions', while the scooter crashes into the truck."},
+    "test_06": {"score": 0.5, "note": "Accurate about what is visible (hooded person with a bag crossing a lot at night), but flags nothing suspicious; no fire is visible."},
+    "test_07": {"score": 0, "note": "Missed: 'enters ... carrying a white tray ... no signs of distress or conflict', while masked men rush in."},
+    "test_08": {"score": 0, "note": "Missed: 'steps back outside and closes the door'; the masked intruder enters. No mention of the mask."},
+    "test_09": {"score": 0.5, "note": "Partly: sees the fall, but explains it as 'slips on the slick pavement'; the scene shows a man collapsing near a car (shooting)."},
+    "test_10": {"score": 0, "note": "Missed: 'pedestrian exits the vehicle'; no person on the ground, no one aiming."}
+  }
+}
