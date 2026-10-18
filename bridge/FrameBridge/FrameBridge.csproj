@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Stand-alone MIP .NET library app (component integration): .NET Framework, never .NET 8 (xprotect-plugins skill). -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 26.1 matches XProtect 2026 R1 on the machine. -->
+    <PackageReference Include="MilestoneSystems.VideoOS.Platform.SDK" Version="26.1.*" />
+  </ItemGroup>
+
+</Project>

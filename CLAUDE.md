@@ -131,6 +131,10 @@ Python 3.12 (installed from python.org, `py` launcher), standard library only so
 | `scripts/event_windows.ps1`, `scripts/locate_event.py` | Find when a looped clip's event was recorded (frame matching) and write event-centred windows for `bench_hafnia.py --windows` |
 | `tier0/` | Tier 0: `source.py` (frames from a video file, streamed, looped), `pipeline.py` (YOLO + ByteTrack), `rules.py` (track features, collision / fall / sudden-stop rules, incident merging) |
 | `scripts/eval_tier0.py` | Offline tier 0 evaluation (recall on accident clips, false candidates on normal traffic); `--set`, `--imgsz`, `--conf`, `--cap-negatives` for tuning |
+| `bridge/FrameBridge/` | C# (.NET Framework 4.8, MIP SDK 26.1.*) live frame bridge; build: `dotnet build -c Release` in that folder (needs the .NET 8 SDK, installed 2026-10-18) |
+| `hafnia/xprotect_rest.py` | XProtect REST client (Windows-auth token via PowerShell): cameras, JpegGetLive, alarms (trigger, update, snapshot), bookmarks |
+| `incident/` | Live pipeline: `bridge.py` (read FrameBridge), `router.py` (cooldown, open incident, rejected spots, budget), `verify.py` (Hafnia check + description) |
+| `scripts/run_live.py` | The end-to-end pipeline on live cameras; logs to `run/live-<UTC>/events.jsonl` |
 | `data/clips.json` | Incident clips: neutral camera name, source file, length, label, ground truth; organizer cameras as controls |
 | `run/<name>/` | Model run results, committed: `results.jsonl` (Hafnia rows, with answers), `report.html`; for comparisons `opus_results.jsonl`, `scores.json`, `compare.html` |
 | `data/` | Source videos (`*.mp4`) and converted clips (`data/clips/`), both git-ignored: too large, and judges must download them from their source |
@@ -197,6 +201,17 @@ struck rider is never detected (small, occluded); 1280 px and a relative speed d
 The GPU driver is installed (596.86; done by someone else between 2026-10-15 and 10-18), no reboot needed.
 Long evaluations: launch them as a detached process (`Start-Process ... -RedirectStandardOutput`, `python -u`) so
 they survive a Claude Code session ending, then poll the process.
+
+**Live end to end** (`run/live-20261018T142327Z/README.md`; `scripts/run_live.py`, `incident/`, `bridge/FrameBridge`):
+the REST task JpegGetLive returns keyframes only (1 per second), so live frames come from **FrameBridge**, a .NET
+Framework 4.8 console app on the MIP .NET library (`JPEGLiveSource`, Windows login, no password) that streams binary
+records to Python at 9.5–10.2 fps. First 5-min run: unverified Low alarm 0.6–0.8 s after the event, Hafnia's verdict
+6–9 s after it; one accident confirmed (alarm → High, description, bookmark), two false candidates closed; 3 checks
+plus 1 description instead of ~305 requests for every tier 0 candidate. Open problem: the free description contradicted
+the confirmed verdict.
+XProtect REST quirks found: alarm PATCH needs every field (read the alarm first); "Reasons for Closing" is off, so
+reasonForClosing must be empty; bookmarks need timeTriggered and return a `reference`, not an id; JpegGetLive needs
+width and height; task responses are wrapped in `result`, alarm reads in `data`; reads lag writes by about a second.
 
 **Clip windows:** cameras record on motion, so a window can have no recording ("Fetch Video: ... No recordings
 available within the provided time range"). Such a failure costs nothing; pick recorded spans or retry slightly earlier.
