@@ -1,0 +1,2 @@
+# Python 3.12; the gateway client itself needs only the standard library.
+pillow>=11  # scripts/locate_event.py: matching recorded frames to a source frame

@@ -44,6 +44,10 @@ def parse_args() -> argparse.Namespace:
                         "--clip-seconds), so one full loop is always inside; --clip-seconds is used for the rest")
     p.add_argument("--repeat", type=int, default=1, help="runs of each camera x clip length (default 1)")
     p.add_argument("--concurrency", type=int, default=1, help="requests submitted together (default 1)")
+    p.add_argument("--windows", type=Path,
+                   help="JSON {camera: {start, end}} of exact UTC windows (scripts/event_windows.ps1); overrides "
+                        "--clip-seconds and --end-offset for the cameras it lists")
+    p.add_argument("--model", help="AiModelId from GET /api/Models (default: the gateway's default model)")
     what = p.add_mutually_exclusive_group()
     what.add_argument("--prompt", default="Describe what happens in this video.", help="prompt text")
     what.add_argument("--prompt-title", help="title of a saved prompt (gateway rules then check the answer)")
@@ -105,7 +109,12 @@ def main() -> int:
     if args.loop_windows:
         manifest = json.loads(args.loop_windows.read_text(encoding="utf-8"))
         loop_len = {c["camera"]: math.ceil(c["seconds"]) for c in manifest.get("clips", []) if "seconds" in c}
-    plan = [(n, max(loop_len[n], s) if n in loop_len else s)
+    fixed = {}
+    if args.windows:
+        fixed = {cam: (parse_time(w["start"]), parse_time(w["end"]))
+                 for cam, w in json.loads(args.windows.read_text(encoding="utf-8")).items()}
+    plan = [(n, round((fixed[n][1] - fixed[n][0]).total_seconds()) if n in fixed
+             else max(loop_len[n], s) if n in loop_len else s)
             for _ in range(args.repeat) for n in names for s in args.clip_seconds]
     print(f"Plan: {len(plan)} requests ({len(names)} cameras x {len(args.clip_seconds)} clip lengths x "
           f"{args.repeat} repeats), {args.concurrency} at a time. Each completed one costs 1 of 500 today.")
@@ -116,8 +125,11 @@ def main() -> int:
         q = gw.quota()
         print(f"Allowance: {q['DailySummaryCount']} of {q['DailySummaryQuota']} used, resets {q['DailySummaryReset']}"
               if q else "Allowance: not available right now")
-        default_model = next((m["Name"] for m in gw.models() if m.get("IsDefault")), "?")
-        print(f"Model: {default_model}")
+        models = gw.models()
+        if args.model and args.model not in {m["Id"] for m in models}:
+            sys.exit(f"Unknown model '{args.model}'. Known: {', '.join(m['Id'] for m in models)}")
+        model_id = args.model or next((m["Id"] for m in models if m.get("IsDefault")), None)
+        print(f"Model: {model_id}")
 
         prompt, prompt_id = args.prompt, None
         if args.prompt_title:
@@ -140,7 +152,8 @@ def main() -> int:
             labels, tracked = {}, []
             end = dt.datetime.now(dt.timezone.utc) - dt.timedelta(seconds=args.end_offset)
             for cam, secs in batch:
-                created = gw.ask(video_uri(cams[cam], end - dt.timedelta(seconds=secs), end), prompt, prompt_id)
+                start_t, end_t = fixed.get(cam, (end - dt.timedelta(seconds=secs), end))
+                created = gw.ask(video_uri(cams[cam], start_t, end_t), prompt, prompt_id, args.model)
                 t = Tracked(created["Id"], submitted=time.monotonic(), summary=created)
                 labels[t.id] = f"{cam} {secs}s"
                 tracked.append(t)
@@ -150,8 +163,9 @@ def main() -> int:
 
             gw.wait_all(tracked, poll=args.poll, on_change=show)
             for t, (cam, secs) in zip(tracked, batch):
-                row = {"id": t.id, "label": args.label,
-                       "clip_end_utc": f"{end:%Y-%m-%dT%H:%M:%SZ}", "camera": cam, "clip_s": secs, "batch_size": len(batch), "progress": t.progress,
+                win_end = fixed[cam][1] if cam in fixed else end
+                row = {"id": t.id, "label": args.label, "model": model_id,
+                       "clip_end_utc": f"{win_end:%Y-%m-%dT%H:%M:%SZ}", "camera": cam, "clip_s": secs, "batch_size": len(batch), "progress": t.progress,
                        **spans(t), "server_total": server_seconds(t.summary),
                        "response": t.summary.get("Response"), "error": t.summary.get("LastError")}
                 rows.append(row)

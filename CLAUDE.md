@@ -127,6 +127,7 @@ Python 3.12 (installed from python.org, `py` launcher), standard library only so
 | `scripts/add_test_camera.ps1` | Injects a clip as a new StableFPS test camera (organizers' procedure); restarts the Recording Server only with `-RestartRecordingServer`; ends a hung service process instead of needing a reboot |
 | `scripts/annexb_normalize.py` | Rewrites ffmpeg's Annex B output into the layout StableFPS accepts (run after every conversion) |
 | `scripts/report_recognition.py` | One-word classification vs ground truth (confusion matrix) and judged descriptions → `recognition.html` |
+| `scripts/event_windows.ps1`, `scripts/locate_event.py` | Find when a looped clip's event was recorded (frame matching) and write event-centred windows for `bench_hafnia.py --windows` |
 | `data/clips.json` | Incident clips: neutral camera name, source file, length, label, ground truth; organizer cameras as controls |
 | `run/<name>/` | Model run results, committed: `results.jsonl` (Hafnia rows, with answers), `report.html`; for comparisons `opus_results.jsonl`, `scores.json`, `compare.html` |
 | `data/` | Source videos (`*.mp4`) and converted clips (`data/clips/`), both git-ignored: too large, and judges must download them from their source |
@@ -177,6 +178,11 @@ Caveats: 5 distinct scenes, one generic prompt, Opus judged its own answers. Tar
 - Normal-traffic controls: 8 of 8 NONE (no false alarms). Same answer on both repeats: 13 of 14 clips.
 - Median 8.4 s per request with 5 at once. One export failed inside XProtect ("Index was out of range"): free.
 - All missed incidents were verified to lie inside the window Hafnia received (1 fps frames of each window).
+- **Event-centred windows fix most misses** (`run/bench-20261018b/README.md`, 34 requests): a 6 s window centred on the
+  impact (located in the recordings by `scripts/event_windows.ps1`) gave 10 of 10 accident answers and 4 of 5 caught
+  descriptions, against 8 of 9 and 2 of 5 with full 12–18 s loops; median 5.2 s. The three older traffic models were
+  no better than the default (3–4 of 5 accidents). The window matters far more than the model; whether through frame
+  sampling or resolution is not yet separated (experiments B, slow motion, and C, crop).
 - Implication: Hafnia is a strong, cheap traffic-incident verifier; security incidents need tier 0 evidence and
   rules of our own, or must be reported honestly as out of Hafnia's domain.
 
