@@ -11,21 +11,23 @@ The detailed plan and schedule are in `docs/PLAN.md`: keep it current.
 ## Project direction (decided 2026-10-16, refined 2026-10-18)
 
 - Solo entry, submission around 2026-10-30. Theme restricted to **traffic and security**.
-- Concept: **diagnose, don't just detect.** Tier 0 notices a change, Hafnia names the cause, the cause decides the
-  alarm's owner and priority. The router learns per camera how far to trust tier 0 from Hafnia's verdicts.
+- **Scope: analyse what happens in the scene only.** No camera-status checks (fog, condensation, blocked, moved,
+  tampered or looped feeds): decided 2026-10-18.
+- Concept: **verified, prioritized incidents.** Tier 0 proposes candidate incidents with their event time, Hafnia
+  verifies, classifies and describes them, and the type decides the alarm's owner and priority. The router sends
+  event-centred clip windows and learns per camera how far to trust tier 0 from Hafnia's verdicts.
   Every slice ships with measured ablations (validity).
 - Architecture: **tiered routing**, Hafnia used where it is strong and gated by cheaper checks.
   - **Tier 0, on the machine** (T4 GPU, every frame, < 1 s): detection and tracking (sudden stop or collision,
-    stopped vehicle, wrong way, person on the road, loitering), image health (blur, contrast, fog index), tamper
-    (repeating frame fingerprints, frozen clock).
+    stopped vehicle, wrong way, person on the road, throw or loitering at a building).
   - **Router**: deduplication, cooldown, severity and confidence, today's remaining Hafnia allowance.
   - **Tier 1, Hafnia** (about 5 s, 500 a day): keyword prompt per event type, sent with `PromptId`; gateway rule →
     XProtect analytics event → alarm and bookmark.
   - **Top tier is the human operator**, who gets the XProtect alarm with evidence.
 - **No frontier model in the product**, and no local VLM tier (nothing performant fits a T4). Opus (Claude Code) is
   used **offline only**, as a judge: scoring tests, tuning prompts, measured comparisons.
-- Demo stories: an accident (our own clip; tier 0 under 1 s, Hafnia confirms), camera health and tampering
-  (condensation, looped feeds), fog and visibility on the highway.
+- Demo stories: an accident (our own clip; tier 0 under 1 s, Hafnia confirms), vandalism, and false alarms that
+  Hafnia suppresses on normal traffic.
 - Differentiator: measured results. Tiered pipeline vs "Hafnia on every event": requests per day, time to alarm,
   accuracy.
 - Own clips are allowed (participant confirmed).
