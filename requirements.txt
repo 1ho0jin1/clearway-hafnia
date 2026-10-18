@@ -1,2 +1,11 @@
-# Python 3.12; the gateway client itself needs only the standard library.
-pillow>=11  # scripts/locate_event.py: matching recorded frames to a source frame
+# Python 3.12. The Hafnia gateway client (hafnia/) needs only the standard library.
+# Tier 0 runs in a virtual environment:
+#   py -3.12 -m venv .venv
+#   .venv\Scripts\python.exe -m pip install torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cu128
+#   .venv\Scripts\python.exe -m pip install -r requirements.txt
+# The detector weights (YOLO11m, models/yolo11m.pt) download on first use. Ultralytics is AGPL-3.0.
+ultralytics==8.4.182
+opencv-python==5.0.0.93
+numpy==2.5.2
+lap              # ByteTrack's assignment solver; Ultralytics would otherwise install it at run time
+pillow>=11       # scripts/locate_event.py: matching recorded frames to a source frame

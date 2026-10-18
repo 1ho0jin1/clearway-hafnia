@@ -20,3 +20,7 @@ run/*/frames/
 # Raw and converted video (large; see data\README for where each clip comes from)
 data/*.mp4
 data/clips/
+
+# Model weights (downloaded by Ultralytics on first use)
+models/
+*.pt

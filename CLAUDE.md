@@ -108,8 +108,9 @@ an API; never write XProtect or gateway paths and fields from memory.
   Not installed: Node.js, the .NET SDK, VS Code. Installers we depend on belong in the setup docs.
 - ffmpeg 9.0.2 (gyan.dev essentials build, SHA-256 checked), portable at
   `C:\tools\ffmpeg\ffmpeg-9.0.2-essentials_build\bin` (not on PATH).
-- The NVIDIA T4 GPU has no driver installed. The organizers' GRID installer is at `C:\hackathon\nvidia\`; ask before
-  installing it (it may need a reboot).
+- The NVIDIA T4 GPU has its driver (GRID 596.86) and `nvidia-smi`; XProtect also uses it for video decoding.
+- Tier 0 Python environment: `.venv` (git-ignored) with torch 2.11.0+cu128, Ultralytics 8.4.182; see
+  `requirements.txt`. YOLO weights download to `models/` (git-ignored).
 - Logs: gateway `C:\ProgramData\VideoOS\Hafnia.Vlm.Gateway\logs`; XProtect `C:\ProgramData\Milestone\<component>\Logs`.
 
 ## Repository layout
@@ -128,6 +129,8 @@ Python 3.12 (installed from python.org, `py` launcher), standard library only so
 | `scripts/annexb_normalize.py` | Rewrites ffmpeg's Annex B output into the layout StableFPS accepts (run after every conversion) |
 | `scripts/report_recognition.py` | One-word classification vs ground truth (confusion matrix) and judged descriptions → `recognition.html` |
 | `scripts/event_windows.ps1`, `scripts/locate_event.py` | Find when a looped clip's event was recorded (frame matching) and write event-centred windows for `bench_hafnia.py --windows` |
+| `tier0/` | Tier 0: `source.py` (frames from a video file, streamed, looped), `pipeline.py` (YOLO + ByteTrack), `rules.py` (track features, collision / fall / sudden-stop rules, incident merging) |
+| `scripts/eval_tier0.py` | Offline tier 0 evaluation (recall on accident clips, false candidates on normal traffic); `--set`, `--imgsz`, `--conf`, `--cap-negatives` for tuning |
 | `data/clips.json` | Incident clips: neutral camera name, source file, length, label, ground truth; organizer cameras as controls |
 | `run/<name>/` | Model run results, committed: `results.jsonl` (Hafnia rows, with answers), `report.html`; for comparisons `opus_results.jsonl`, `scores.json`, `compare.html` |
 | `data/` | Source videos (`*.mp4`) and converted clips (`data/clips/`), both git-ignored: too large, and judges must download them from their source |
@@ -185,6 +188,15 @@ Caveats: 5 distinct scenes, one generic prompt, Opus judged its own answers. Tar
   sampling or resolution is not yet separated (experiments B, slow motion, and C, crop).
 - Implication: Hafnia is a strong, cheap traffic-incident verifier; security incidents need tier 0 evidence and
   rules of our own, or must be reported honestly as out of Hafnia's domain.
+
+**Tier 0, offline** (`run/tier0-20261018/README.md`; `tier0/`, `scripts/eval_tier0.py`, venv in `.venv`): YOLO11m
+at 640 px + ByteTrack + rules (collision = contact plus a sharp stop; fall = person box upright → lying; sudden stop).
+4 of 5 accident impacts found; 0.74 false candidates/min on normal traffic, from 2 spots repeating every loop; none on
+the 13-min highway or the crowd. 22.3 frames/s on the T4 (about 2 cameras at 10 fps). `test_01` is missed because the
+struck rider is never detected (small, occluded); 1280 px and a relative speed drop were tried and were worse.
+The GPU driver is installed (596.86; done by someone else between 2026-10-15 and 10-18), no reboot needed.
+Long evaluations: launch them as a detached process (`Start-Process ... -RedirectStandardOutput`, `python -u`) so
+they survive a Claude Code session ending, then poll the process.
 
 **Clip windows:** cameras record on motion, so a window can have no recording ("Fetch Video: ... No recordings
 available within the provided time range"). Such a failure costs nothing; pick recorded spans or retry slightly earlier.
