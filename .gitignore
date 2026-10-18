@@ -24,3 +24,6 @@ data/clips/
 # Model weights (downloaded by Ultralytics on first use)
 models/
 *.pt
+
+# Pipeline pages embed video frames (footage licences not yet recorded)
+run/*/pipeline.html
