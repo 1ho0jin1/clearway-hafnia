@@ -55,11 +55,25 @@ function Restart-RecordingServer {
     $deadline = (Get-Date).AddSeconds(60)
     while ((Get-Service $RsService).Status -ne 'Stopped') {
         if ((Get-Date) -gt $deadline) {
-            throw 'the Recording Server did not stop within 60 s. Do not retry: see the xprotect-hackathon skill, troubleshooting (restart the machine)'
+            # A hung service refuses every later stop; retrying does not help. End its process instead, as the
+            # organizers' Configure-StableFPS.ps1 does, so the machine does not need a reboot.
+            $hung = (Get-CimInstance Win32_Service -Filter "Name='$RsService'").ProcessId
+            Write-Step "the Recording Server did not stop within 60 s: ending its process $hung"
+            if ($hung) { Stop-Process -Id $hung -Force }
+            $until = (Get-Date).AddMinutes(2)
+            while ((Get-Date) -lt $until) {
+                $now = Get-CimInstance Win32_Service -Filter "Name='$RsService'"
+                if ($now.State -eq 'Stopped' -or ($now.ProcessId -and $now.ProcessId -ne $hung)) { break }
+                Start-Sleep -Seconds 2
+            }
+            $now = Get-CimInstance Win32_Service -Filter "Name='$RsService'"
+            if ($now.State -ne 'Stopped' -and $now.ProcessId -eq $hung) { throw "process $hung could not be ended: restart the machine" }
+            break
         }
         if ((Get-Service $RsService).Status -eq 'Running') { try { Stop-Service $RsService -Force -ErrorAction Stop } catch { } }
         Start-Sleep -Seconds 5
     }
+    if ((Get-Service $RsService).Status -eq 'Running') { return }   # the service manager already restarted it
     Write-Step 'starting the Recording Server'
     Start-Service $RsService
     (Get-Service $RsService).WaitForStatus('Running', [TimeSpan]::FromMinutes(3))

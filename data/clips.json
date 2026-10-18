@@ -1,0 +1,35 @@
+{
+  "_comment": "Incident test clips. Camera names are neutral so nothing in a name hints at the answer. Source videos are git-ignored in data/; source and licence: TODO (ask the participant). Ground truth written from contact sheets of the source files.",
+  "labels": ["ACCIDENT", "ROBBERY", "SHOOTING", "ARSON", "VANDALISM", "FIGHT", "NONE"],
+  "clips": [
+    {"camera": "test_01", "source": "accident_footage1.mp4", "seconds": 17.3, "label": "ACCIDENT",
+     "truth": "An auto-rickshaw collides with a motorcyclist on the far road (about 10 s); rider and motorcycle end up on the road, people react."},
+    {"camera": "test_02", "source": "accident_footage2.mp4", "seconds": 14.9, "label": "ACCIDENT",
+     "truth": "Railway level crossing: a motorcyclist falls on the tracks (3-7 s) and a passenger train passes over the spot."},
+    {"camera": "test_03", "source": "accident_footage3.mp4", "seconds": 12.7, "label": "ACCIDENT", "hard": true,
+     "truth": "A motorcycle and a girl on a bicycle make light contact (2.5-4 s) and stop; nobody falls."},
+    {"camera": "test_04", "source": "accident_footage4.mp4", "seconds": 13.3, "label": "ACCIDENT",
+     "truth": "Night: a motorcyclist hits a cyclist (about 1 s); the cyclist and bicycle fall; people come to help."},
+    {"camera": "test_05", "source": "accident_footage5.mp4", "seconds": 11.9, "label": "ACCIDENT",
+     "truth": "A scooter crashes into a parked three-wheeler truck (about 2.5 s); the rider falls; people come to help."},
+    {"camera": "test_06", "source": "arsonry_footage1.mp4", "seconds": 34.3, "label": "ARSON", "hard": true,
+     "accept": ["ARSON", "NONE"],
+     "truth": "Night parking lot: a hooded person carrying a bag loiters and walks off. No fire is visible in the frame."},
+    {"camera": "test_07", "source": "robbery_footage1.mp4", "seconds": 9.0, "label": "ROBBERY",
+     "truth": "Gaming arcade: masked men enter (about 4.5 s) and one rushes toward the woman at the machines."},
+    {"camera": "test_08", "source": "robbery_footage2.mp4", "seconds": 3.5, "label": "ROBBERY",
+     "truth": "A masked person in black enters an office through the door carrying a bag (intruder)."},
+    {"camera": "test_09", "source": "shooting_footage1.mp4", "seconds": 37.1, "label": "SHOOTING", "hard": true,
+     "accept": ["SHOOTING", "FIGHT"],
+     "truth": "Gas station at night: a man in white collapses near a car (9-10 s), crawls and runs off. No weapon or muzzle flash visible."},
+    {"camera": "test_10", "source": "shooting_footage2.mp4", "seconds": 15.7, "label": "SHOOTING",
+     "truth": "Residential street, daytime: a person on the ground beside one car; a man at another car's open door holds his arms out as if aiming."}
+  ],
+  "controls": [
+    {"camera": "vandalism", "label": "VANDALISM"},
+    {"camera": "busy_street", "label": "NONE"},
+    {"camera": "highway_traffic_overcast_weather", "label": "NONE"},
+    {"camera": "traffic_flows_in_the_open_lanes", "label": "NONE"},
+    {"camera": "city_street_7_condensation_inside_housing", "label": "NONE"}
+  ]
+}
