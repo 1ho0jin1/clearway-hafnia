@@ -95,6 +95,9 @@ an API; never write XProtect or gateway paths and fields from memory.
 - Document every manual step a script cannot do: switching analytics events on in Management Client, and generating
   Hafnia webhook addresses in Smart Client (they embed prompt and camera IDs).
 - Times sent to the gateway are UTC with `Z`; never an offset like `+02:00` (the `+` becomes a space in the URI).
+- Repository text files are UTF-8. Never rewrite them with Windows PowerShell 5.1's `Get-Content -Raw` /
+  `Set-Content` (they use the legacy codepage and garble `–`, `→`, `×`); use the Edit tool or Python with
+  `encoding="utf-8"`.
 
 ## Machine facts
 
