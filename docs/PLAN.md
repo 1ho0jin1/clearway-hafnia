@@ -70,9 +70,9 @@ All new clips go in with **one** Recording Server restart; afterwards a "test be
 | 3 | Oct 20 | Tier 0 incident rules and the labelled clip set; offline evaluation | 0 | precision and recall per event type recorded |
 | 4 | Oct 21 | Hafnia prompt tuning (verify and classify), Opus as judge; fixed vs event-centred window experiment | ~80 | â‰¥ 90% correct keyword on the labelled clips, window effect measured |
 | 5 | Oct 22 | XProtect plumbing: basic user, analytics events, alarm definitions with priorities, Python helpers (events, alarms, bookmarks) | 0 | an alarm raised, re-prioritized and closed from Python |
-| 6â€“7 | Oct 23â€“24 | **End-to-end slice, live:** tier 0 â†’ router â†’ Hafnia â†’ alarm and bookmark; first ablation numbers | ~60 | an incident on a camera gives a verified, prioritized alarm on its own |
+| 6–7 | Oct 23–24 | **End-to-end slice, live:** tier 0 → router → Hafnia → alarm and bookmark; first ablation numbers | ~60 | an incident on a camera gives a verified, prioritized alarm on its own |
 | 8 | Oct 25 | Learned trust in the router, measured over a replayed day | ~40 | requests fall while recall holds |
-| 9â€“10 | Oct 26â€“27 | Dashboard | 0 (stored answers) | operator view complete |
+| 9–10 | Oct 26–27 | Dashboard | 0 (stored answers) | operator view complete |
 | 11 | Oct 28 | Final evaluation and report | ~150 | measured results and charts committed |
 | 12 | Oct 29 | Half-day best-effort `setup.ps1` and README; optional demo video | ~20 | documented setup |
 | 13 | Oct 30 | Spare time, submission | | |
@@ -89,23 +89,43 @@ All new clips go in with **one** Recording Server restart; afterwards a "test be
 ## Status and TODO (2026-10-19)
 
 Done: Hafnia benchmarks (latency, recognition, event-centred windows, models), tier 0 offline (4 of 5 accidents),
-FrameBridge live frames at 10 fps, the live pipeline end to end (`run/live-20261018T142327Z`), the pipeline page.
+FrameBridge live frames at 10 fps, the live pipeline end to end (`run/live-20261018T142327Z`), the pipeline page, and
+the measured comparison below.
 
-- [x] **Measured comparison: tiered vs Hafnia-only polling** (done 2026-10-19, `run/compare-20261019/README.md`: tiered 5 requests, 3 of 5 accident cameras, 0 false alarms; polling 42 requests, 5 of 5, 21 alarms, 2 false). on the same recorded footage. Accident cameras
-      `test_01`â€“`test_05` plus normal traffic (`traffic_flows_in_the_open_lanes`, `highway_traffic_overcast_weather`),
-      two loops each. Polling: consecutive 6 s windows (~50 requests). Tiered: tier 0 on the same recorded frames,
-      the router, event-centred windows (~5â€“10 requests). Report recall, false alarms, requests and time to verdict.
-      The computed comparison is in `CLAUDE.md` ("Tiered vs Hafnia-only").
-- [ ] **Router: after a rejection, mute only candidates inside the window Hafnia already checked** (today the spot and camera are muted for minutes, which blocked `test_03`'s real impact 4.6 s after a rejected candidate).
+Note on numbers from the test cameras: they loop 12–17 s clips, so a "5-minute run" replays each accident about 20
+times and a 36 s span holds 2–3 replays. Count accident cameras caught, not impacts or raw candidates.
+
+### Measured: tiered vs Hafnia-only polling (`run/compare-20261019/README.md`)
+
+Same 36 s of recording on 7 cameras (5 accident, 2 normal traffic); ground truth located by frame matching.
+
+| | Hafnia-only polling (6 s windows) | Tiered |
+|---|---|---|
+| Hafnia requests | 42 | 5 |
+| Accident cameras caught | 5 of 5 | 3 of 5 |
+| Alarms raised | 21 | 3 |
+| False alarms | 2 | 0 |
+| Median impact → verdict | 9.8 s | 7.8 s (plus an unverified alarm in under 1 s, live) |
+
+Tiered misses: `test_01` (tier 0 never detects the struck rider) and `test_03` (router: Hafnia rejected a candidate
+4.6 s before the impact, and muting that spot and the camera suppressed the real impact's 32 candidates).
+
+### TODO
+
+- [ ] **Router: after a rejection, mute only candidates inside the window Hafnia already checked**; later candidates
+      get their own check. Would have recovered `test_03` and caught `test_05` at its first impact.
+- [ ] **Re-run the tiered side of `scripts/bench_tiered_vs_polling.py` after the router fix** (about 5–10 requests)
+      and update `run/compare-20261019` or add a new run; goal 4 of 5 accident cameras, still 0 false alarms.
 - [ ] Router: check the daily budget before `decide()` (today `decide()` counts the request and starts the cooldown
       even when the budget check then blocks it).
 - [ ] Router: use tier 0's score and candidate type; rank candidates across cameras when the budget is tight.
+- [ ] Recall: tier 0 misses `test_01`. Options: a low-rate polling fallback per camera (polling caught every accident
+      camera, so a few checks an hour would cap the miss time cheaply), better small-object detection, an aftermath
+      trigger. Measure the fallback's cost and recall with the same benchmark.
 - [ ] Learned trust: per camera and spot, how often Hafnia agreed with tier 0, feeding thresholds (today: only muting
       rejected spots for 10 minutes).
 - [ ] The free description contradicted a confirmed accident: test a description prompt that assumes the accident, or
       put only the verified label on the alarm.
 - [ ] Aftermath candidates (people around a fallen bike): their own incident type, or accepted as closed.
-- [ ] Recall: tier 0 misses `test_01` (struck rider never detected); options: low-rate polling fallback, better
-      small-object detection, aftermath trigger.
 - [ ] Operator dashboard from the pipeline page, live.
 - [ ] Footage sources and licences for `data/` (needed before any frames are shared).
