@@ -85,3 +85,26 @@ All new clips go in with **one** Recording Server restart; afterwards a "test be
 | `JpegGetLive` too slow | Lower frame rate for slow events; MIP SDK (C#) for fast ones |
 | GPU driver needs a reboot | Ask first; meanwhile CPU detection at a low frame rate |
 | Hafnia misclassifies incidents | Report the measured accuracy honestly; keep tier 0's type with a lower priority |
+
+## Status and TODO (2026-10-19)
+
+Done: Hafnia benchmarks (latency, recognition, event-centred windows, models), tier 0 offline (4 of 5 accidents),
+FrameBridge live frames at 10 fps, the live pipeline end to end (`run/live-20261018T142327Z`), the pipeline page.
+
+- [ ] **Measured comparison: tiered vs Hafnia-only polling** on the same recorded footage. Accident cameras
+      `test_01`–`test_05` plus normal traffic (`traffic_flows_in_the_open_lanes`, `highway_traffic_overcast_weather`),
+      two loops each. Polling: consecutive 6 s windows (~50 requests). Tiered: tier 0 on the same recorded frames,
+      the router, event-centred windows (~5–10 requests). Report recall, false alarms, requests and time to verdict.
+      The computed comparison is in `CLAUDE.md` ("Tiered vs Hafnia-only").
+- [ ] Router: check the daily budget before `decide()` (today `decide()` counts the request and starts the cooldown
+      even when the budget check then blocks it).
+- [ ] Router: use tier 0's score and candidate type; rank candidates across cameras when the budget is tight.
+- [ ] Learned trust: per camera and spot, how often Hafnia agreed with tier 0, feeding thresholds (today: only muting
+      rejected spots for 10 minutes).
+- [ ] The free description contradicted a confirmed accident: test a description prompt that assumes the accident, or
+      put only the verified label on the alarm.
+- [ ] Aftermath candidates (people around a fallen bike): their own incident type, or accepted as closed.
+- [ ] Recall: tier 0 misses `test_01` (struck rider never detected); options: low-rate polling fallback, better
+      small-object detection, aftermath trigger.
+- [ ] Operator dashboard from the pipeline page, live.
+- [ ] Footage sources and licences for `data/` (needed before any frames are shared).

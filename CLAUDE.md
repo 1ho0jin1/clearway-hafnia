@@ -213,6 +213,15 @@ XProtect REST quirks found: alarm PATCH needs every field (read the alarm first)
 reasonForClosing must be empty; bookmarks need timeTriggered and return a `reference`, not an id; JpegGetLive needs
 width and height; task responses are wrapped in `result`, alarm reads in `data`; reads lag writes by about a second.
 
+**Tiered vs Hafnia-only (computed 2026-10-19, not yet measured head to head; TODO in `docs/PLAN.md`):** without tier 0
+the only trigger is polling. Continuous 6 s polling costs 600 requests an hour per camera (14,400 a day: 29× the daily
+allowance for one camera); 15 s polling 5,760 a day. The live run cost 4 requests for 2 cameras in 5 minutes, against
+100 for 6 s polling. Accuracy: tiered recall is bounded by tier 0 (4 of 5 accidents offline; `test_01` missed), while
+Hafnia found `test_01` with a full-loop window, so polling would catch it. Hafnia was 10 of 10 on accidents with
+event-centred 6 s windows and 8 of 9 with longer ones; unaligned polling windows can split an impact (unmeasured).
+False alarms reaching the operator: none seen tiered. Tiered gives an unverified alarm in under 1 s and a verdict in
+6–9 s; polling gives no early alarm and a verdict about window length plus 5–9 s after the event.
+
 **Clip windows:** cameras record on motion, so a window can have no recording ("Fetch Video: ... No recordings
 available within the provided time range"). Such a failure costs nothing; pick recorded spans or retry slightly earlier.
 
