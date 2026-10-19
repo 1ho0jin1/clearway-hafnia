@@ -1,0 +1,1598 @@
+{
+ "span": [
+  "2026-10-19T14:27:40+00:00",
+  "2026-10-19T14:28:16+00:00"
+ ],
+ "params": {
+  "out": "run\\compare-20261019",
+  "cameras": [
+   "test_01",
+   "test_02",
+   "test_03",
+   "test_04",
+   "test_05",
+   "traffic_flows_in_the_open_lanes",
+   "highway_traffic_overcast_weather"
+  ],
+  "span": 36.0,
+  "end_ago": 90.0,
+  "poll_seconds": 6.0,
+  "aftermath": 6.0,
+  "concurrency": 6,
+  "dry_run": false
+ },
+ "cameras": {
+  "test_01": {
+   "impacts": [
+    "2026-10-19T14:27:56.171000+00:00",
+    "2026-10-19T14:28:13.471000+00:00"
+   ],
+   "match_ratio": 0.075,
+   "frames": 533
+  },
+  "test_02": {
+   "impacts": [
+    "2026-10-19T14:27:40.921000+00:00",
+    "2026-10-19T14:27:55.821000+00:00",
+    "2026-10-19T14:28:10.721000+00:00"
+   ],
+   "match_ratio": 0.167,
+   "frames": 509
+  },
+  "test_03": {
+   "impacts": [
+    "2026-10-19T14:27:50.394000+00:00",
+    "2026-10-19T14:28:03.094000+00:00",
+    "2026-10-19T14:28:15.794000+00:00"
+   ],
+   "match_ratio": 0.204,
+   "frames": 487
+  },
+  "test_04": {
+   "impacts": [
+    "2026-10-19T14:27:40.422000+00:00",
+    "2026-10-19T14:27:53.722000+00:00",
+    "2026-10-19T14:28:07.022000+00:00"
+   ],
+   "match_ratio": 0.182,
+   "frames": 493
+  },
+  "test_05": {
+   "impacts": [
+    "2026-10-19T14:27:44.398000+00:00",
+    "2026-10-19T14:27:56.298000+00:00",
+    "2026-10-19T14:28:08.198000+00:00"
+   ],
+   "match_ratio": 0.223,
+   "frames": 479
+  },
+  "traffic_flows_in_the_open_lanes": {
+   "impacts": [],
+   "match_ratio": null,
+   "frames": 420
+  },
+  "highway_traffic_overcast_weather": {
+   "impacts": [],
+   "match_ratio": null,
+   "frames": 73
+  }
+ },
+ "polling": {
+  "summary": {
+   "requests": 42,
+   "impacts_found": "13/14",
+   "accident_cameras_found": "5/5",
+   "false_alarms": 2,
+   "alarms": 21,
+   "median_impact_to_verdict_s": 9.8
+  },
+  "rows": [
+   {
+    "camera": "test_01",
+    "start": "2026-10-19T14:27:40+00:00",
+    "end": "2026-10-19T14:27:46+00:00",
+    "progress": "Completed",
+    "answer": "ACCIDENT",
+    "error": "",
+    "label": "ACCIDENT",
+    "hafnia_s": 7.8
+   },
+   {
+    "camera": "test_01",
+    "start": "2026-10-19T14:27:46+00:00",
+    "end": "2026-10-19T14:27:52+00:00",
+    "progress": "Completed",
+    "answer": "NONE",
+    "error": "",
+    "label": "NONE",
+    "hafnia_s": 7.7
+   },
+   {
+    "camera": "test_01",
+    "start": "2026-10-19T14:27:52+00:00",
+    "end": "2026-10-19T14:27:58+00:00",
+    "progress": "Completed",
+    "answer": "ACCIDENT",
+    "error": "",
+    "label": "ACCIDENT",
+    "hafnia_s": 8.9
+   },
+   {
+    "camera": "test_01",
+    "start": "2026-10-19T14:27:58+00:00",
+    "end": "2026-10-19T14:28:04+00:00",
+    "progress": "Completed",
+    "answer": "ACCIDENT",
+    "error": "",
+    "label": "ACCIDENT",
+    "hafnia_s": 7.5
+   },
+   {
+    "camera": "test_01",
+    "start": "2026-10-19T14:28:04+00:00",
+    "end": "2026-10-19T14:28:10+00:00",
+    "progress": "Completed",
+    "answer": "NONE",
+    "error": "",
+    "label": "NONE",
+    "hafnia_s": 9.5
+   },
+   {
+    "camera": "test_01",
+    "start": "2026-10-19T14:28:10+00:00",
+    "end": "2026-10-19T14:28:16+00:00",
+    "progress": "Completed",
+    "answer": "ACCIDENT",
+    "error": "",
+    "label": "ACCIDENT",
+    "hafnia_s": 7.1
+   },
+   {
+    "camera": "test_02",
+    "start": "2026-10-19T14:27:40+00:00",
+    "end": "2026-10-19T14:27:46+00:00",
+    "progress": "Completed",
+    "answer": "ACCIDENT",
+    "error": "",
+    "label": "ACCIDENT",
+    "hafnia_s": 7.7
+   },
+   {
+    "camera": "test_02",
+    "start": "2026-10-19T14:27:46+00:00",
+    "end": "2026-10-19T14:27:52+00:00",
+    "progress": "Completed",
+    "answer": "ACCIDENT",
+    "error": "",
+    "label": "ACCIDENT",
+    "hafnia_s": 9.8
+   },
+   {
+    "camera": "test_02",
+    "start": "2026-10-19T14:27:52+00:00",
+    "end": "2026-10-19T14:27:58+00:00",
+    "progress": "Completed",
+    "answer": "ACCIDENT",
+    "error": "",
+    "label": "ACCIDENT",
+    "hafnia_s": 7.6
+   },
+   {
+    "camera": "test_02",
+    "start": "2026-10-19T14:27:58+00:00",
+    "end": "2026-10-19T14:28:04+00:00",
+    "progress": "Completed",
+    "answer": "ACCIDENT",
+    "error": "",
+    "label": "ACCIDENT",
+    "hafnia_s": 9.7
+   },
+   {
+    "camera": "test_02",
+    "start": "2026-10-19T14:28:04+00:00",
+    "end": "2026-10-19T14:28:10+00:00",
+    "progress": "Completed",
+    "answer": "ACCIDENT",
+    "error": "",
+    "label": "ACCIDENT",
+    "hafnia_s": 9.4
+   },
+   {
+    "camera": "test_02",
+    "start": "2026-10-19T14:28:10+00:00",
+    "end": "2026-10-19T14:28:16+00:00",
+    "progress": "Completed",
+    "answer": "ACCIDENT",
+    "error": "",
+    "label": "ACCIDENT",
+    "hafnia_s": 7.9
+   },
+   {
+    "camera": "test_03",
+    "start": "2026-10-19T14:27:40+00:00",
+    "end": "2026-10-19T14:27:46+00:00",
+    "progress": "Completed",
+    "answer": "NONE",
+    "error": "",
+    "label": "NONE",
+    "hafnia_s": 6.5
+   },
+   {
+    "camera": "test_03",
+    "start": "2026-10-19T14:27:46+00:00",
+    "end": "2026-10-19T14:27:52+00:00",
+    "progress": "Completed",
+    "answer": "ACCIDENT",
+    "error": "",
+    "label": "ACCIDENT",
+    "hafnia_s": 6.5
+   },
+   {
+    "camera": "test_03",
+    "start": "2026-10-19T14:27:52+00:00",
+    "end": "2026-10-19T14:27:58+00:00",
+    "progress": "Completed",
+    "answer": "NONE",
+    "error": "",
+    "label": "NONE",
+    "hafnia_s": 8.5
+   },
+   {
+    "camera": "test_03",
+    "start": "2026-10-19T14:27:58+00:00",
+    "end": "2026-10-19T14:28:04+00:00",
+    "progress": "Completed",
+    "answer": "ACCIDENT",
+    "error": "",
+    "label": "ACCIDENT",
+    "hafnia_s": 8.3
+   },
+   {
+    "camera": "test_03",
+    "start": "2026-10-19T14:28:04+00:00",
+    "end": "2026-10-19T14:28:10+00:00",
+    "progress": "Completed",
+    "answer": "NONE",
+    "error": "",
+    "label": "NONE",
+    "hafnia_s": 8.1
+   },
+   {
+    "camera": "test_03",
+    "start": "2026-10-19T14:28:10+00:00",
+    "end": "2026-10-19T14:28:16+00:00",
+    "progress": "Completed",
+    "answer": "NONE",
+    "error": "",
+    "label": "NONE",
+    "hafnia_s": 7.5
+   },
+   {
+    "camera": "test_04",
+    "start": "2026-10-19T14:27:40+00:00",
+    "end": "2026-10-19T14:27:46+00:00",
+    "progress": "Completed",
+    "answer": "ACCIDENT",
+    "error": "",
+    "label": "ACCIDENT",
+    "hafnia_s": 6.3
+   },
+   {
+    "camera": "test_04",
+    "start": "2026-10-19T14:27:46+00:00",
+    "end": "2026-10-19T14:27:52+00:00",
+    "progress": "Completed",
+    "answer": "NONE",
+    "error": "",
+    "label": "NONE",
+    "hafnia_s": 8.4
+   },
+   {
+    "camera": "test_04",
+    "start": "2026-10-19T14:27:52+00:00",
+    "end": "2026-10-19T14:27:58+00:00",
+    "progress": "Completed",
+    "answer": "ACCIDENT",
+    "error": "",
+    "label": "ACCIDENT",
+    "hafnia_s": 7.2
+   },
+   {
+    "camera": "test_04",
+    "start": "2026-10-19T14:27:58+00:00",
+    "end": "2026-10-19T14:28:04+00:00",
+    "progress": "Completed",
+    "answer": "NONE",
+    "error": "",
+    "label": "NONE",
+    "hafnia_s": 8.2
+   },
+   {
+    "camera": "test_04",
+    "start": "2026-10-19T14:28:04+00:00",
+    "end": "2026-10-19T14:28:10+00:00",
+    "progress": "Completed",
+    "answer": "ACCIDENT",
+    "error": "",
+    "label": "ACCIDENT",
+    "hafnia_s": 8.9
+   },
+   {
+    "camera": "test_04",
+    "start": "2026-10-19T14:28:10+00:00",
+    "end": "2026-10-19T14:28:16+00:00",
+    "progress": "Completed",
+    "answer": "NONE",
+    "error": "",
+    "label": "NONE",
+    "hafnia_s": 6.9
+   },
+   {
+    "camera": "test_05",
+    "start": "2026-10-19T14:27:40+00:00",
+    "end": "2026-10-19T14:27:46+00:00",
+    "progress": "Completed",
+    "answer": "ACCIDENT",
+    "error": "",
+    "label": "ACCIDENT",
+    "hafnia_s": 7.2
+   },
+   {
+    "camera": "test_05",
+    "start": "2026-10-19T14:27:46+00:00",
+    "end": "2026-10-19T14:27:52+00:00",
+    "progress": "Completed",
+    "answer": "ACCIDENT",
+    "error": "",
+    "label": "ACCIDENT",
+    "hafnia_s": 7.0
+   },
+   {
+    "camera": "test_05",
+    "start": "2026-10-19T14:27:52+00:00",
+    "end": "2026-10-19T14:27:58+00:00",
+    "progress": "Completed",
+    "answer": "ACCIDENT",
+    "error": "",
+    "label": "ACCIDENT",
+    "hafnia_s": 7.7
+   },
+   {
+    "camera": "test_05",
+    "start": "2026-10-19T14:27:58+00:00",
+    "end": "2026-10-19T14:28:04+00:00",
+    "progress": "Completed",
+    "answer": "ACCIDENT",
+    "error": "",
+    "label": "ACCIDENT",
+    "hafnia_s": 8.4
+   },
+   {
+    "camera": "test_05",
+    "start": "2026-10-19T14:28:04+00:00",
+    "end": "2026-10-19T14:28:10+00:00",
+    "progress": "Completed",
+    "answer": "ACCIDENT",
+    "error": "",
+    "label": "ACCIDENT",
+    "hafnia_s": 6.7
+   },
+   {
+    "camera": "test_05",
+    "start": "2026-10-19T14:28:10+00:00",
+    "end": "2026-10-19T14:28:16+00:00",
+    "progress": "Completed",
+    "answer": "ACCIDENT",
+    "error": "",
+    "label": "ACCIDENT",
+    "hafnia_s": 7.3
+   },
+   {
+    "camera": "traffic_flows_in_the_open_lanes",
+    "start": "2026-10-19T14:27:40+00:00",
+    "end": "2026-10-19T14:27:46+00:00",
+    "progress": "Completed",
+    "answer": "NONE",
+    "error": "",
+    "label": "NONE",
+    "hafnia_s": 4.5
+   },
+   {
+    "camera": "traffic_flows_in_the_open_lanes",
+    "start": "2026-10-19T14:27:46+00:00",
+    "end": "2026-10-19T14:27:52+00:00",
+    "progress": "Completed",
+    "answer": "NONE",
+    "error": "",
+    "label": "NONE",
+    "hafnia_s": 4.4
+   },
+   {
+    "camera": "traffic_flows_in_the_open_lanes",
+    "start": "2026-10-19T14:27:52+00:00",
+    "end": "2026-10-19T14:27:58+00:00",
+    "progress": "Completed",
+    "answer": "NONE",
+    "error": "",
+    "label": "NONE",
+    "hafnia_s": 6.9
+   },
+   {
+    "camera": "traffic_flows_in_the_open_lanes",
+    "start": "2026-10-19T14:27:58+00:00",
+    "end": "2026-10-19T14:28:04+00:00",
+    "progress": "Completed",
+    "answer": "NONE",
+    "error": "",
+    "label": "NONE",
+    "hafnia_s": 6.7
+   },
+   {
+    "camera": "traffic_flows_in_the_open_lanes",
+    "start": "2026-10-19T14:28:04+00:00",
+    "end": "2026-10-19T14:28:10+00:00",
+    "progress": "Completed",
+    "answer": "NONE",
+    "error": "",
+    "label": "NONE",
+    "hafnia_s": 5.4
+   },
+   {
+    "camera": "traffic_flows_in_the_open_lanes",
+    "start": "2026-10-19T14:28:10+00:00",
+    "end": "2026-10-19T14:28:16+00:00",
+    "progress": "Completed",
+    "answer": "NONE",
+    "error": "",
+    "label": "NONE",
+    "hafnia_s": 5.2
+   },
+   {
+    "camera": "highway_traffic_overcast_weather",
+    "start": "2026-10-19T14:27:40+00:00",
+    "end": "2026-10-19T14:27:46+00:00",
+    "progress": "Failed",
+    "answer": "",
+    "error": "Fetch Video: An error was returned from the VMS: No recordings available within the provided time range.",
+    "label": "FAILED",
+    "hafnia_s": 0.5
+   },
+   {
+    "camera": "highway_traffic_overcast_weather",
+    "start": "2026-10-19T14:27:46+00:00",
+    "end": "2026-10-19T14:27:52+00:00",
+    "progress": "Failed",
+    "answer": "",
+    "error": "Fetch Video: An error was returned from the VMS: No recordings available within the provided time range.",
+    "label": "FAILED",
+    "hafnia_s": 0.5
+   },
+   {
+    "camera": "highway_traffic_overcast_weather",
+    "start": "2026-10-19T14:27:52+00:00",
+    "end": "2026-10-19T14:27:58+00:00",
+    "progress": "Failed",
+    "answer": "",
+    "error": "Fetch Video: An error was returned from the VMS: No recordings available within the provided time range.",
+    "label": "FAILED",
+    "hafnia_s": 0.5
+   },
+   {
+    "camera": "highway_traffic_overcast_weather",
+    "start": "2026-10-19T14:27:58+00:00",
+    "end": "2026-10-19T14:28:04+00:00",
+    "progress": "Failed",
+    "answer": "",
+    "error": "Fetch Video: An error was returned from the VMS: No recordings available within the provided time range.",
+    "label": "FAILED",
+    "hafnia_s": 0.4
+   },
+   {
+    "camera": "highway_traffic_overcast_weather",
+    "start": "2026-10-19T14:28:04+00:00",
+    "end": "2026-10-19T14:28:10+00:00",
+    "progress": "Completed",
+    "answer": "NONE",
+    "error": "",
+    "label": "NONE",
+    "hafnia_s": 3.3
+   },
+   {
+    "camera": "highway_traffic_overcast_weather",
+    "start": "2026-10-19T14:28:10+00:00",
+    "end": "2026-10-19T14:28:16+00:00",
+    "progress": "Completed",
+    "answer": "NONE",
+    "error": "",
+    "label": "NONE",
+    "hafnia_s": 5.3
+   }
+  ]
+ },
+ "tiered": {
+  "summary": {
+   "requests": 5,
+   "impacts_found": "3/14",
+   "accident_cameras_found": "3/5",
+   "false_alarms": 0,
+   "alarms": 3,
+   "median_impact_to_verdict_s": 7.8
+  },
+  "rows": [
+   {
+    "camera": "test_02",
+    "t": "2026-10-19T14:27:52.921000+00:00",
+    "kind": "collision",
+    "score": 1.0,
+    "send": true,
+    "reason": "ask Hafnia",
+    "label": "ACCIDENT",
+    "answer": "ACCIDENT",
+    "hafnia_s": 6.2,
+    "impact": "2026-10-19T14:27:55.821000+00:00",
+    "error": ""
+   },
+   {
+    "camera": "test_02",
+    "t": "2026-10-19T14:27:52.921000+00:00",
+    "kind": "sudden_stop",
+    "score": 0.594,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_02",
+    "t": "2026-10-19T14:28:07.821000+00:00",
+    "kind": "collision",
+    "score": 1.0,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_02",
+    "t": "2026-10-19T14:28:07.821000+00:00",
+    "kind": "sudden_stop",
+    "score": 0.594,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:27:45.694000+00:00",
+    "kind": "collision",
+    "score": 0.585,
+    "send": true,
+    "reason": "ask Hafnia",
+    "label": "NONE",
+    "answer": "NONE",
+    "hafnia_s": 5.2,
+    "impact": null,
+    "error": ""
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:27:45.694000+00:00",
+    "kind": "collision",
+    "score": 1.0,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:27:46.694000+00:00",
+    "kind": "collision",
+    "score": 0.568,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:27:46.694000+00:00",
+    "kind": "collision",
+    "score": 0.959,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:27:46.694000+00:00",
+    "kind": "collision",
+    "score": 0.978,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:27:51.194000+00:00",
+    "kind": "collision",
+    "score": 1.0,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:27:51.194000+00:00",
+    "kind": "collision",
+    "score": 0.958,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:27:51.194000+00:00",
+    "kind": "sudden_stop",
+    "score": 0.79,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:27:51.294000+00:00",
+    "kind": "collision",
+    "score": 0.875,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:27:51.294000+00:00",
+    "kind": "collision",
+    "score": 0.913,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:27:51.294000+00:00",
+    "kind": "sudden_stop",
+    "score": 1.0,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:27:51.394000+00:00",
+    "kind": "collision",
+    "score": 1.0,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:27:51.394000+00:00",
+    "kind": "sudden_stop",
+    "score": 0.674,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:27:51.494000+00:00",
+    "kind": "collision",
+    "score": 0.869,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:27:58.394000+00:00",
+    "kind": "collision",
+    "score": 0.585,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:27:58.394000+00:00",
+    "kind": "collision",
+    "score": 1.0,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:27:59.394000+00:00",
+    "kind": "collision",
+    "score": 0.568,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:27:59.394000+00:00",
+    "kind": "collision",
+    "score": 0.959,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:27:59.394000+00:00",
+    "kind": "collision",
+    "score": 0.978,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:28:03.894000+00:00",
+    "kind": "collision",
+    "score": 1.0,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:28:03.894000+00:00",
+    "kind": "collision",
+    "score": 0.958,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:28:03.894000+00:00",
+    "kind": "sudden_stop",
+    "score": 0.79,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:28:03.994000+00:00",
+    "kind": "collision",
+    "score": 0.875,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:28:03.994000+00:00",
+    "kind": "collision",
+    "score": 0.913,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:28:03.994000+00:00",
+    "kind": "sudden_stop",
+    "score": 1.0,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:28:04.094000+00:00",
+    "kind": "collision",
+    "score": 1.0,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:28:04.094000+00:00",
+    "kind": "sudden_stop",
+    "score": 0.674,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:28:04.194000+00:00",
+    "kind": "collision",
+    "score": 0.869,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:28:11.094000+00:00",
+    "kind": "collision",
+    "score": 0.585,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:28:11.094000+00:00",
+    "kind": "collision",
+    "score": 1.0,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:28:12.094000+00:00",
+    "kind": "collision",
+    "score": 0.568,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:28:12.094000+00:00",
+    "kind": "collision",
+    "score": 0.959,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_03",
+    "t": "2026-10-19T14:28:12.094000+00:00",
+    "kind": "collision",
+    "score": 0.978,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:40.022000+00:00",
+    "kind": "collision",
+    "score": 0.797,
+    "send": true,
+    "reason": "ask Hafnia",
+    "label": "ACCIDENT",
+    "answer": "ACCIDENT",
+    "hafnia_s": 5.2,
+    "impact": "2026-10-19T14:27:40.422000+00:00",
+    "error": ""
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:40.122000+00:00",
+    "kind": "collision",
+    "score": 0.797,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:41.022000+00:00",
+    "kind": "collision",
+    "score": 1.0,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:41.022000+00:00",
+    "kind": "collision",
+    "score": 0.98,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:41.022000+00:00",
+    "kind": "sudden_stop",
+    "score": 0.728,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:41.622000+00:00",
+    "kind": "collision",
+    "score": 0.636,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:41.722000+00:00",
+    "kind": "collision",
+    "score": 1.0,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:41.722000+00:00",
+    "kind": "collision",
+    "score": 0.671,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:41.822000+00:00",
+    "kind": "collision",
+    "score": 0.606,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:44.122000+00:00",
+    "kind": "collision",
+    "score": 0.49,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:44.122000+00:00",
+    "kind": "collision",
+    "score": 0.563,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:44.322000+00:00",
+    "kind": "collision",
+    "score": 0.563,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:46.522000+00:00",
+    "kind": "collision",
+    "score": 0.546,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:52.122000+00:00",
+    "kind": "collision",
+    "score": 0.934,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:52.122000+00:00",
+    "kind": "collision",
+    "score": 0.934,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:52.122000+00:00",
+    "kind": "collision",
+    "score": 0.934,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:52.822000+00:00",
+    "kind": "collision",
+    "score": 0.797,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:52.922000+00:00",
+    "kind": "collision",
+    "score": 0.797,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:53.022000+00:00",
+    "kind": "collision",
+    "score": 0.954,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:53.322000+00:00",
+    "kind": "collision",
+    "score": 0.797,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:53.422000+00:00",
+    "kind": "collision",
+    "score": 0.797,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:54.322000+00:00",
+    "kind": "collision",
+    "score": 1.0,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:54.322000+00:00",
+    "kind": "collision",
+    "score": 0.98,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:54.322000+00:00",
+    "kind": "sudden_stop",
+    "score": 0.728,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:54.922000+00:00",
+    "kind": "collision",
+    "score": 0.636,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:55.022000+00:00",
+    "kind": "collision",
+    "score": 1.0,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:55.022000+00:00",
+    "kind": "collision",
+    "score": 0.671,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:55.122000+00:00",
+    "kind": "collision",
+    "score": 0.606,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:57.422000+00:00",
+    "kind": "collision",
+    "score": 0.49,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:57.422000+00:00",
+    "kind": "collision",
+    "score": 0.563,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:57.622000+00:00",
+    "kind": "collision",
+    "score": 0.563,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:27:59.822000+00:00",
+    "kind": "collision",
+    "score": 0.546,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:28:05.422000+00:00",
+    "kind": "collision",
+    "score": 0.934,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:28:05.422000+00:00",
+    "kind": "collision",
+    "score": 0.934,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:28:05.422000+00:00",
+    "kind": "collision",
+    "score": 0.934,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:28:06.122000+00:00",
+    "kind": "collision",
+    "score": 0.797,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:28:06.222000+00:00",
+    "kind": "collision",
+    "score": 0.797,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:28:06.322000+00:00",
+    "kind": "collision",
+    "score": 0.954,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:28:06.622000+00:00",
+    "kind": "collision",
+    "score": 0.797,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:28:06.722000+00:00",
+    "kind": "collision",
+    "score": 0.797,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:28:07.622000+00:00",
+    "kind": "collision",
+    "score": 1.0,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:28:07.622000+00:00",
+    "kind": "collision",
+    "score": 0.98,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:28:07.622000+00:00",
+    "kind": "sudden_stop",
+    "score": 0.728,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:28:08.222000+00:00",
+    "kind": "collision",
+    "score": 0.636,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:28:08.322000+00:00",
+    "kind": "collision",
+    "score": 1.0,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:28:08.322000+00:00",
+    "kind": "collision",
+    "score": 0.671,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:28:08.422000+00:00",
+    "kind": "collision",
+    "score": 0.606,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:28:10.722000+00:00",
+    "kind": "collision",
+    "score": 0.49,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:28:10.722000+00:00",
+    "kind": "collision",
+    "score": 0.563,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_04",
+    "t": "2026-10-19T14:28:10.922000+00:00",
+    "kind": "collision",
+    "score": 0.563,
+    "send": false,
+    "reason": "incident already open on this camera"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:41.198000+00:00",
+    "kind": "collision",
+    "score": 0.605,
+    "send": true,
+    "reason": "ask Hafnia",
+    "label": "NONE",
+    "answer": "NONE",
+    "hafnia_s": 5.2,
+    "impact": null,
+    "error": ""
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:41.198000+00:00",
+    "kind": "collision",
+    "score": 0.534,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:41.198000+00:00",
+    "kind": "collision",
+    "score": 0.605,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:45.998000+00:00",
+    "kind": "collision",
+    "score": 0.641,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:45.998000+00:00",
+    "kind": "collision",
+    "score": 0.56,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:45.998000+00:00",
+    "kind": "collision",
+    "score": 0.616,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:45.998000+00:00",
+    "kind": "collision",
+    "score": 0.687,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:45.998000+00:00",
+    "kind": "collision",
+    "score": 0.641,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:46.098000+00:00",
+    "kind": "collision",
+    "score": 0.796,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:46.098000+00:00",
+    "kind": "collision",
+    "score": 0.799,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:46.098000+00:00",
+    "kind": "collision",
+    "score": 0.517,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:46.598000+00:00",
+    "kind": "collision",
+    "score": 0.694,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:47.598000+00:00",
+    "kind": "collision",
+    "score": 0.672,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:48.898000+00:00",
+    "kind": "collision",
+    "score": 0.932,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:51.698000+00:00",
+    "kind": "collision",
+    "score": 0.471,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:51.698000+00:00",
+    "kind": "collision",
+    "score": 0.458,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:51.698000+00:00",
+    "kind": "collision",
+    "score": 0.641,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:51.698000+00:00",
+    "kind": "collision",
+    "score": 0.501,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:53.098000+00:00",
+    "kind": "collision",
+    "score": 0.605,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:53.098000+00:00",
+    "kind": "collision",
+    "score": 0.534,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:57.898000+00:00",
+    "kind": "collision",
+    "score": 0.641,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:57.898000+00:00",
+    "kind": "collision",
+    "score": 0.56,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:57.898000+00:00",
+    "kind": "collision",
+    "score": 0.616,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:57.898000+00:00",
+    "kind": "collision",
+    "score": 0.687,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:57.898000+00:00",
+    "kind": "collision",
+    "score": 0.641,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:57.998000+00:00",
+    "kind": "collision",
+    "score": 0.798,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:57.998000+00:00",
+    "kind": "collision",
+    "score": 0.517,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:27:58.498000+00:00",
+    "kind": "collision",
+    "score": 0.694,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:28:00.798000+00:00",
+    "kind": "collision",
+    "score": 0.932,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:28:03.598000+00:00",
+    "kind": "collision",
+    "score": 0.471,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:28:03.598000+00:00",
+    "kind": "collision",
+    "score": 0.458,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:28:03.598000+00:00",
+    "kind": "collision",
+    "score": 0.641,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:28:03.598000+00:00",
+    "kind": "collision",
+    "score": 0.501,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:28:04.998000+00:00",
+    "kind": "collision",
+    "score": 0.605,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:28:04.998000+00:00",
+    "kind": "collision",
+    "score": 0.534,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:28:09.798000+00:00",
+    "kind": "collision",
+    "score": 0.641,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:28:09.798000+00:00",
+    "kind": "collision",
+    "score": 0.56,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:28:09.798000+00:00",
+    "kind": "collision",
+    "score": 0.616,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:28:09.798000+00:00",
+    "kind": "collision",
+    "score": 0.687,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:28:09.798000+00:00",
+    "kind": "collision",
+    "score": 0.641,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:28:09.898000+00:00",
+    "kind": "collision",
+    "score": 0.798,
+    "send": false,
+    "reason": "camera cooldown"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:28:09.898000+00:00",
+    "kind": "collision",
+    "score": 0.517,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:28:10.398000+00:00",
+    "kind": "collision",
+    "score": 0.694,
+    "send": false,
+    "reason": "spot recently rejected by Hafnia"
+   },
+   {
+    "camera": "test_05",
+    "t": "2026-10-19T14:28:12.698000+00:00",
+    "kind": "collision",
+    "score": 0.932,
+    "send": true,
+    "reason": "ask Hafnia",
+    "label": "ACCIDENT",
+    "answer": "ACCIDENT",
+    "hafnia_s": 4.1,
+    "impact": "2026-10-19T14:28:08.198000+00:00",
+    "error": ""
+   }
+  ],
+  "candidates": 131
+ }
+}
