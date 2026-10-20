@@ -1,6 +1,6 @@
 # Plan
 
-Solo entry, 2026-10-18 â†’ submission about 2026-10-30. Deliverable: this repository (a demo video is optional).
+Solo entry, 2026-10-18 → submission about 2026-10-30. Deliverable: this repository (a demo video is optional).
 Judging weighs **creativity and validity** most; reproducibility counts, but a best-effort setup is enough.
 
 **Scope (decided 2026-10-18): traffic incidents, analysed from what happens in the scene.** No camera-status checks
@@ -16,11 +16,11 @@ its type and describes it, and the type decides who gets the alarm and how urgen
 incident record also touches "video summaries".
 
 ```
-frames â”€â–º Tier 0 (machine, GPU) â”€â”€â”€â”€â”€â”€â–º Router â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–º Hafnia (keyword prompt) â”€â”€â–º XProtect alarm
-          detection + tracking;         dedupe, severity,       verify, classify,          unverified â†’ verified
+frames ─► Tier 0 (machine, GPU) ──────► Router ──────────────► Hafnia (keyword prompt) ──► XProtect alarm
+          detection + tracking;         dedupe, severity,       verify, classify,          unverified → verified
           candidate + event time        budget, learned trust   describe                   priority + owner + bookmark
-                                              â–²                        â”‚
-                                              â””â”€ verdict = free label for tier 0 â—„â”˜
+                                              ▲                        │
+                                              └─ verdict = free label for tier 0 ◄┘
 ```
 
 Why this split: tier 0 is fast and free but only sees boxes and tracks; Hafnia understands the scene but costs a
@@ -29,8 +29,8 @@ missed the throw because of where the window fell). Tier 0 knows when the event 
 
 ### Creative hooks
 
-1. **Detect â†’ verify â†’ classify â†’ route.** Accident or collision â†’ traffic operations, urgent. Stopped vehicle â†’ traffic
-   operations, high. Person on the road â†’ traffic operations, urgent. Vandalism â†’ security, high. Not confirmed â†’
+1. **Detect → verify → classify → route.** Accident or collision → traffic operations, urgent. Stopped vehicle → traffic
+   operations, high. Person on the road → traffic operations, urgent. Vandalism → security, high. Not confirmed →
    alarm closed as a false alarm, kept for statistics.
 2. **Event-centred clip windows.** Tier 0 sends the clip around the moment it detected the event instead of "the last
    N seconds". Measured against fixed windows on the same events.
@@ -46,7 +46,7 @@ missed the throw because of where the window fell). Tier 0 knows when the event 
 | 2 | Tier 0, incidents (GPU, CPU fallback) | Object detection and tracking. Rules: sudden stop or collision, stopped vehicle, person on the road, throw or loitering at a building. Each candidate carries a confidence and the event time. Check the detector's licence (Ultralytics YOLO is AGPL-3.0). |
 | 3 | Router | Dedupe per camera and event type (clips loop), severity and confidence, daily budget from `DailySummaryCount`, learned trust per camera and event type, event-centred clip window. |
 | 4 | Hafnia prompts | One saved prompt per event type, sent with `PromptId` so gateway rules apply, e.g. `ACCIDENT_CONFIRMED` / `NO_ACCIDENT`, `STOPPED_VEHICLE` / `TRAFFIC_NORMAL`, `PERSON_ON_ROAD` / `ROAD_CLEAR`, `VANDALISM_CONFIRMED` / `NO_VANDALISM`. Day 4 decides between one prompt (keyword + short description) and two requests (verify, then describe). |
-| 5 | XProtect plumbing | Tier 0 â†’ analytics event â†’ **unverified** alarm at low priority. Hafnia answer â†’ alarm raised in priority, or closed as a false alarm (Alarms REST). We write a bookmark with the answer ourselves (Bookmarks REST): only webhook requests get one automatically. |
+| 5 | XProtect plumbing | Tier 0 → analytics event → **unverified** alarm at low priority. Hafnia answer → alarm raised in priority, or closed as a false alarm (Alarms REST). We write a bookmark with the answer ourselves (Bookmarks REST): only webhook requests get one automatically. |
 | 6 | Dashboard (served from the machine) | Incident timeline with each tier's time, verified vs suppressed alarms, budget gauge, learned-trust table, incident records with Hafnia's description. Maybe embedded in Smart Client (web-page view item: to verify on 2026 R1). |
 | 7 | Evaluation harness | Ground truth per clip (labelled offline, Opus as judge). Ablations: tier 0 only, Hafnia on everything, tiered, tiered with event-centred windows, tiered with learned trust. Metrics: alarm precision and recall, false alarms suppressed, requests per day, time to alarm. |
 
@@ -68,7 +68,7 @@ All new clips go in with **one** Recording Server restart; afterwards a "test be
 | 1 | Oct 18 | Push to GitHub. Hung-service fallback and batch support in `add_test_camera.ps1`. Find accident and incident clips, check licences, convert. One restart for the batch. Measure the `JpegGetLive` frame rate. | 0 | clips play as cameras; frame rate known |
 | 2 | Oct 19 | GPU decision (driver install: ask first, may need a reboot); detection and tracking running offline on the clips | 0 | detector and tracker at a known frame rate |
 | 3 | Oct 20 | Tier 0 incident rules and the labelled clip set; offline evaluation | 0 | precision and recall per event type recorded |
-| 4 | Oct 21 | Hafnia prompt tuning (verify and classify), Opus as judge; fixed vs event-centred window experiment | ~80 | â‰¥ 90% correct keyword on the labelled clips, window effect measured |
+| 4 | Oct 21 | Hafnia prompt tuning (verify and classify), Opus as judge; fixed vs event-centred window experiment | ~80 | ≥ 90% correct keyword on the labelled clips, window effect measured |
 | 5 | Oct 22 | XProtect plumbing: basic user, analytics events, alarm definitions with priorities, Python helpers (events, alarms, bookmarks) | 0 | an alarm raised, re-prioritized and closed from Python |
 | 6–7 | Oct 23–24 | **End-to-end slice, live:** tier 0 → router → Hafnia → alarm and bookmark; first ablation numbers | ~60 | an incident on a camera gives a verified, prioritized alarm on its own |
 | 8 | Oct 25 | Learned trust in the router, measured over a replayed day | ~40 | requests fall while recall holds |

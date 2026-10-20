@@ -7,6 +7,9 @@ and Hafnia VLM (a vision-language model reached through the Hafnia gateway on th
 **Judging weighs creativity and validity most** (organizer Q&A). Reproducibility counts too, but a best-effort
 setup script plus documented manual steps is enough. Deliverable: this repository; a demo video is optional.
 The detailed plan and schedule are in `docs/PLAN.md`: keep it current.
+An alternative, proposed 2026-10-20 and not yet decided, is `docs/PLAN-near-miss.md`: a near-miss observatory where
+Hafnia audits a random sample of tier 0's near-miss candidates, with the research behind it (Hafnia's trained
+prompt formats, what Milestone already sells), footage sources with licence notes, and two-day gates.
 
 ## Project direction (decided 2026-10-16, refined 2026-10-18)
 
