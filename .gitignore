@@ -21,6 +21,9 @@ run/*/frames/
 data/*.mp4
 data/clips/
 
+# AI City Challenge 2021 Track 4 files: its data licence agreement forbids redistribution
+data/aicity21/
+
 # Model weights (downloaded by Ultralytics on first use)
 models/
 *.pt
