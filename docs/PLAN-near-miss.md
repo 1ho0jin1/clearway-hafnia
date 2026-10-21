@@ -1,4 +1,4 @@
-# Plan B: near-miss observatory (proposal, 2026-10-20)
+# Plan B: near-miss observatory (proposal, 2026-10-20; revised 2026-10-21)
 
 Status: **proposal, not decided.** `docs/PLAN.md` (verified, prioritized accident alarms) stays the current plan until
 the participant chooses. Submission about 2026-10-30. Judging weighs creativity and validity most.
@@ -7,22 +7,44 @@ the participant chooses. Submission about 2026-10-30. Judging weighs creativity 
 users for free. Hafnia checks a random sample of the near misses tier 0 flags, so the dashboard shows near-miss
 counts with confidence intervals instead of raw detector output. The accident pipeline we already have stays as the
 real-time top layer. The 500-a-day allowance stops being something to work around and becomes the design: we do not
-need Hafnia to check every event, only enough of them to make the counts trustworthy.
+need Hafnia to check every event, only enough of them to make the counts trustworthy. A **lens camera** makes the
+checks better: Hafnia only sees what XProtect records, so we render what it should look at (the candidate's region,
+enlarged, in slow motion, with the road users marked) and play that back as a camera of its own.
 
-## Why consider a change (research, 2026-10-19)
+## Why consider a change (research, 2026-10-19 and 10-21)
 
 - **Our current concept is Milestone's own pitch.** Hafnia was fine-tuned for "alert validation" (an upstream alert
   goes in, confirm or discard comes out) and Milestone advertises "+4.4% alert-verification accuracy". NVIDIA's VSS
   blueprint ships an alert-verification service. Judges from Milestone and NVIDIA know "detector → VLM verifies".
 - **Search and Q&A are taken.** Milestone announced AI Search in March 2026. The 2025 hackathon was won by "Ask The
-  City" (questions about a camera picked on a map); second was an emergency-response tool, third Citilog's incident,
-  traffic and weather map.
+  City" (questions about a camera picked on a map).
 - **Hafnia's trained formats** (Milestone's technical article): clips of about 30 s at 2 fps; three JSON tasks:
   AlertValidation (alert type and confidence in; `confirm`/`discard`, reason, evidence frames out), MonitoringSummary
   (weather, light, visibility, road state, event counts) and IncidentReport (type, parties, key moments, cause).
   None of our prompts use them yet.
 - **No product or paper found that audits near-miss counts with a VLM.** A Kansas DOT study notes that the accuracy of
   commercial near-miss tools has not been independently checked.
+
+### What earlier and current entries did (reviewed 2026-10-21)
+
+The 2025 hackathon gave API access to the base Cosmos-Reason1-7B (no traffic fine-tune, no XProtect machine). Only
+one finalist's code is public. Everything public is application work: web apps around the API, prompts and UI; no
+model training, no input processing beyond a frame-rate change.
+
+| Entry | What it did | Overlap |
+|---|---|---|
+| Ask The City (1st) | Pick a camera on a map, ask a question in plain language; answers from the last few seconds | None |
+| VLM for Emergency Response (Blaize, 2nd) | Edge devices raise events; the VLM triages them and drafts response plans | **Plan A** (detector → VLM triage) |
+| SmartMap (Citilog, 3rd) | Incident detection, traffic levels and weather on live map overlays with operator actions | **Plan A**; plan B only in dashboard form |
+| RevoFlow (audience award) | No-code builder for VLM video-analytics workflows | None |
+| Clipnotes ([public repo](https://github.com/magnusgp/clipnotes)) | FastAPI + React app: clip in, structured recap out, follow-up chat, usage metrics | None |
+| Hafnia Video Event Analyzer | Metadata, search, summaries and event detection | None |
+| Two public non-finalists | Intent before vehicle theft (prompts plus a frame-rate change); voice guide for vision-impaired users | None |
+| 2026: Scene Contracts ([public repo](https://github.com/magnusgp/hafnia-hackathon-2026), the Clipnotes author, machine p022) | Fixed-template "contracts" per camera (property damage, roadway visibility), operator console, evidence cases, native alarm round trip; "learned CV models" and "training" deferred | None |
+
+Reading: plan A sits next to the 2025 second and third places and Milestone's product; plan B has no public overlap.
+The field is application-first, so a measured ML contribution (the lens) sets the entry apart, if it is shown as a
+product capability ("verdicts stay right at night and for small road users"), not as a benchmark score.
 
 ## What a near miss is, and who needs it
 
@@ -50,8 +72,8 @@ jitter, boxes that overlap only in perspective). Hafnia answers whether someone 
 ```
                  crash       Tier 0 candidate → Hafnia check (every one) → XProtect alarm      real time
                  ─────       (the existing pipeline in incident/, scripts/run_live.py)
-            near miss        Tier 0 candidate → Hafnia checks a random sample → estimated     hourly
-           ───────────       count ± 95% interval per camera, type, hour; bookmarks
+            near miss        Tier 0 candidate → lens clip → Hafnia checks a random sample →    hourly
+           ───────────       estimated count ± 95% interval per camera, type, hour; bookmarks
       every interaction      Tier 0 only (tracks, PET, TTC): exposure, conflict-rate base      free
    ───────────────────────
 ```
@@ -71,6 +93,28 @@ goes unused at midnight. A reserve stays for the demo day.
 - **What the number means:** near misses *as Hafnia judges them*. Hafnia's agreement with reference labels is measured
   separately (E1) and reported next to every estimate.
 
+## The lens: control what Hafnia sees
+
+The gateway only accepts `xprotect://` clips, so Hafnia can only judge pixels XProtect recorded. The lens is one extra
+XProtect camera whose video we render at run time:
+
+```
+source camera frames (FrameBridge, 10 fps) ─► lens renderer (T4) ─► ffmpeg ─► MediaMTX rtsp://127.0.0.1:8554/lens1
+                                                                                          │
+Hafnia ◄─ xprotect://…/lens_1?StartTime…EndTime (the span the clip played) ◄─ XProtect records lens_1 (Universal driver)
+```
+
+- **Transformations, most promising first:** crop and enlarge the candidate's region (Hafnia samples about 2 fps from
+  clips like ours, and small road users lose pixels: our `test_01` miss); slow motion around the event (more sampled
+  frames during the impact; the event-centred window result points the same way); boxes drawn on the involved road
+  users (Set-of-Mark-style visual prompting); low-light enhancement or denoising for night and fog (least certain:
+  Hafnia was trained on real CCTV including night, and restoration can add artefacts it never saw).
+- **Cost:** a clip plays in real time, so a lens verdict comes about 10–16 s after the clip is rendered (estimate).
+  That suits audits and second looks (tier 0 confident, plain check says NONE), not every real-time crash check.
+- **How it is measured:** E6 below, the same windows with and without each transformation.
+- **Setup:** MediaMTX (one exe, bound to 127.0.0.1, so no firewall change), the Universal 1-channel driver already
+  installed on the Recording Server (no restart needed to add hardware), a setup script in `scripts/`.
+
 ## Components
 
 | # | Component | Reuse | New work |
@@ -78,11 +122,12 @@ goes unused at midnight. A reserve stays for the demo day.
 | 1 | Footage: long intersection video played as cameras | `scripts/add_test_camera.ps1`, `scripts/annexb_normalize.py` | Find, licence-check, convert. One Recording Server restart (ask first). StableFPS keeps all clips in RAM, 1.7 GB in total. |
 | 2 | Conflict measures | `tier0/` (YOLO11m + ByteTrack, 22 frames/s on the T4) | Image-plane PET: the bottom centre of each box as the ground point, a grid of cells, two road users in one cell ≤ 1.5 s apart with headings ≥ 30° apart (so lane-following does not count). Severity higher with a sharp deceleration (`sharp_decel` exists). Optional: a homography from 4 clicked points per camera for metres and TTC. Thresholds to tune. |
 | 3 | Candidate store | – | One JSONL row per candidate: camera, time, type, PET, tracks, boxes, stratum, audit state, Hafnia answer. |
-| 4 | Auditor | `hafnia/gateway.py`, `incident/verify.ask` | Budget-aware random sampler per stratum. 6 s window centred on the conflict (event-centred windows measured best, `run/bench-20261018b`). |
+| 4 | Auditor | `hafnia/gateway.py`, `incident/verify.ask` | Budget-aware random sampler per stratum. 6 s window centred on the conflict (event-centred windows measured best, `run/bench-20261018b`), sent plain or through the lens. |
 | 5 | Estimator | – | Per-stratum estimates and intervals, recomputed hourly. |
 | 6 | Dashboard (served from the machine) | the pipeline page in `scripts/viz_pipeline.py` | Conflict heatmap on the camera image, hourly counts with error bars, tier 0 raw count vs estimate, a list of checked near misses with frames and Hafnia's answer, budget gauge. |
 | 7 | XProtect | `hafnia/xprotect_rest.py` (bookmarks, alarms) | A bookmark per confirmed near miss, findable in Smart Client Search. Crash alarms unchanged. |
 | 8 | Crash layer | `incident/`, `scripts/run_live.py` | Prompt upgrade (below) and the router fix from `docs/PLAN.md`; daily cap shared with the auditor. |
+| 9 | Lens camera | FrameBridge frames, `tier0/` boxes | MediaMTX setup, the lens publisher (renders and streams clips, logs each clip's UTC span), the `lens_1` camera, recording for it. |
 
 ### Prompts to test
 
@@ -112,7 +157,7 @@ Near misses need long normal traffic with many interactions, not crashes, which 
 | NGSIM I-80 / US-101 | Freeway, 3 × 15 min, 7 cameras | as above | Rear-end and lane-change conflicts; negatives |
 | Bellevue Traffic Video Dataset | 101 h, 5 intersections, 1280×720, 30 fps | "For research purposes", no licence named | Best footage; licence risk for a prize entry |
 | Belt Parkway bridge webcam (YouTube) | 8–12 h archives, fixed | CC BY | Negatives (false candidates per hour) |
-| AI City Challenge 2021, Track 4 | Iowa DOT highway cameras, 100 training videos of about 15 min (28–98 MB each), 800×410; 18 labelled anomalies in 17 videos (crashes *and* stalled vehicles, split not published); 15 GB zip on Google Drive, single files readable by HTTP range requests. Labels, ReadMe and licence files fetched to `data/aicity21/` (git-ignored). | **Not cleared.** The zip's `license.txt` says CC BY 4.0, but its Data License Agreement allows only challenge use, then "non-commercial, academic purposes only", no redistribution "in whole or in part", no unredacted faces or plates | **The only long footage with a real crash we found.** Reviewed by eye (2026-10-20, `data/aicity21/review.md`): 2 crashes happen on screen (video 91 at about 602 s, clear; video 95 at about 40 s, night, likely), 1 possible, 4 aftermath only, 10 stalled vehicles, 1 not found. Do not use in the entry until AI City (aicitychallenges@gmail.com) or the organizers clear it. |
+| AI City Challenge 2021, Track 4 | Iowa DOT highway cameras, 100 training videos of about 15 min (28–98 MB each), 800×410; 18 labelled anomalies in 17 videos (crashes *and* stalled vehicles, split not published); 15 GB zip on Google Drive, single files readable by HTTP range requests. Labels, ReadMe and licence files fetched to `data/aicity21/` (git-ignored). | **Not cleared.** The zip's `license.txt` says CC BY 4.0, but its Data License Agreement allows only challenge use, then "non-commercial, academic purposes only", no redistribution "in whole or in part", no unredacted faces or plates | **The only long footage with a real crash we found.** Reviewed by eye (2026-10-20, `data/aicity21/review.md`): 2 crashes happen on screen (video 91 at about 602 s, clear; video 95 at about 40 s, night, likely), 1 possible, 4 aftermath only, 10 stalled vehicles, 1 not found. Video 91 plays as camera `test_11` (port 116, since 2026-10-21) for internal tests only. Do not use in the entry until AI City (aicitychallenges@gmail.com) or the organizers clear it. |
 | ACCIDENT (CVPRW 2026) | 2,027 real roadside and CCTV crash clips, 1–114 s (median 27 s), impact frame labelled | Annotations CC BY 4.0; clips kept only where source licences allow redistribution | Crash-layer recall on dozens of clips instead of 5 |
 | dnepronet (YouTube), Kamianske | Fixed street webcam, 9:10 with a crash; many 1-min crash clips from the same cameras | CC BY (uploader's claim) | Closest openly licensed long crash clip |
 
@@ -120,12 +165,13 @@ Caveats: a YouTube CC licence is whatever the uploader claims, and downloading w
 YouTube's terms even when reuse is licensed. Non-commercial terms (AI City's agreement, TSBOW, TUM A9, Bellevue's research
 clause) are a risk for a cash-prize entry: ask the organizers. The sources and licences of our current clips in `data/` are still TODO.
 
-## Gates (first two days)
+## Gates
 
 | Gate | Test | Requests | Pass | If it fails |
 |---|---|---|---|---|
+| G0 Lens works | `lens_1` records a rendered clip of `test_11`'s crash; Hafnia answers on it | 2–3 | clip recorded at the logged span; a completed answer | Fix the stream or recording; without a lens the plan still stands on plain clips |
 | G1 Footage | At least 20–30 min of intersection video with frequent vehicle–pedestrian or vehicle–cyclist interactions, licence we can cite | 0 | footage plays as a camera | Bellevue after asking the organizers, or fall back |
-| G2 Hafnia judges near misses | About 15 near-miss and 15 normal-interaction windows from G1, both prompt variants; reference labels by Opus from 2 fps frames | 30–40 | ≥ ~75% agreement with the reference (NYU's SeeUnsafe reached 76.7% on normal / near miss / collision) | Fall back to `docs/PLAN.md` with the improvements from this plan's crash layer |
+| G2 Hafnia judges near misses | About 15 near-miss and 15 normal-interaction windows from G1, both prompt variants, plain and through the lens; reference labels by Opus from 2 fps frames | 40–60 | ≥ ~75% agreement with the reference (NYU's SeeUnsafe reached 76.7% on normal / near miss / collision) | Fall back to `docs/PLAN.md` with the improvements from this plan's crash layer and the lens |
 | G3 Enough candidates | Tier 0 conflict candidates offline on G1 | 0 | ≥ ~20 candidates per camera-hour, so sampling is meaningful | Loosen thresholds or pick busier footage |
 
 ## Evaluation (validity)
@@ -140,33 +186,39 @@ clause) are a risk for a cash-prize entry: ask the organizers. The sources and l
 - **E4 Cost.** Requests per camera-day for a target interval width; cameras one 500-a-day allowance covers.
 - **E5 Crash layer.** Recall on ACCIDENT clips (40 clips ≈ 40–80 requests) and false candidates per camera-hour on
   long normal footage, each with a 95% interval. Today's 5 looped clips cannot separate tiered from polling.
+- **E6 Lens.** The same candidate windows plain and through each lens transformation (crop, slow motion, marks,
+  low-light), scored against the reference labels: agreement per variant with 95% intervals, split by day/night and
+  by road-user size. About 20 windows × 3 variants ≈ 60 requests.
 
-## Schedule
+## Schedule (revised 2026-10-21)
 
-The allowance resets at 00:00 UTC (the machine's clock). Each day stays under the scripts' `--stop-at` cap.
+The allowance resets at 00:00 UTC (the machine's clock). Each day stays under the scripts' `--stop-at` cap. Oct 20 went
+to the footage search and the AI City review instead of G1, so everything moves one day and the dashboard shrinks.
 
 | Day | Date | Work | Hafnia requests |
 |---|---|---|---|
-| 1 | Oct 20 | G1: find, licence-check, download and convert footage. Conflict measures in `tier0/`, run offline (G3). | 0 |
-| 2 | Oct 21 | Inject the footage (Recording Server restart: ask first). G2 pilot, both prompts. **Decide: plan B or plan A.** | 40 |
-| 3 | Oct 22 | Candidate store, auditor, estimator. E2 labelling, part 1. | 200 |
-| 4 | Oct 23 | E2 labelling, part 2. Opus reference labels (E1). | 150 |
-| 5 | Oct 24 | E2–E4 offline. Crash-layer prompt A/B. | 30 |
-| 6–7 | Oct 25–26 | Dashboard; bookmarks for confirmed near misses; shared budget pacing with the crash layer. | 50 |
-| 8 | Oct 27 | Live run: both layers on several cameras for some hours. | 250 |
-| 9 | Oct 28 | E5 and the final report with charts. | 150 |
-| 10 | Oct 29 | Best-effort `setup.ps1`, README, optional demo video. | 50 |
+| 2 | Oct 21 | Plan revision. Lens camera: MediaMTX, publisher, `lens_1`, recording (G0 on `test_11`). | 3 |
+| 3 | Oct 22 | G1: near-miss footage, licence check, convert. Conflict measures in `tier0/`, run offline (G3). | 0 |
+| 4 | Oct 23 | Inject the footage (Recording Server restart: ask first). G2 pilot, plain and lens. **Decide: plan B or plan A.** | 60 |
+| 5 | Oct 24 | Candidate store, auditor, estimator. E2 labelling, part 1. | 200 |
+| 6 | Oct 25 | E2 labelling, part 2. Opus reference labels (E1). | 150 |
+| 7 | Oct 26 | E2–E4 offline. E6 lens comparison. Crash-layer prompt A/B. | 90 |
+| 8 | Oct 27 | Dashboard; bookmarks for confirmed near misses; shared budget pacing with the crash layer. | 30 |
+| 9 | Oct 28 | Live run: both layers on several cameras for some hours. E5. | 300 |
+| 10 | Oct 29 | Final report with charts. Best-effort `setup.ps1`, README, optional demo video. | 50 |
 | 11 | Oct 30 | Spare; submission. | |
 
 ## Risks
 
 | Risk | Fallback |
 |---|---|
-| Hafnia cannot tell a near miss from a normal interaction (G2) | Back to plan A, keeping the prompt and router improvements |
+| Hafnia cannot tell a near miss from a normal interaction (G2) | Back to plan A, keeping the prompt and router improvements and the lens |
 | No licensable intersection footage | Ask the organizers about Bellevue or NGSIM terms; worst case report on NGSIM only |
 | Image-plane PET too noisy (perspective, occlusion) | Homography from 4 clicked points; higher thresholds; let Hafnia's audit absorb it (that is its job) |
 | Too few confirmed near misses for tight intervals | Report wider intervals honestly; pool strata; more audit budget |
 | Near misses look less dramatic than crashes in a demo | The crash layer stays in the demo, on the same cameras and dashboard |
+| Lens stream drops, or `lens_1` records nothing (record-on-motion) | Keep the stream running with idle frames; our own recording rule for `lens_1`; plain clips still work |
+| Lens transformations do not help, or hurt (E6) | Report it as measured; keep only what helps |
 
 ## What carries over from plan A
 
@@ -178,7 +230,10 @@ router, clip injection, the evaluation and report scripts, and every measured fi
 
 - Milestone, Hafnia training and output formats: https://www.milestonesys.com/resources/content/articles/smart-city-video-intelligence/
 - Milestone, AI Search and alert verification: https://www.milestonesys.com/company/news/press-releases/ai-built-for-security-operations/
-- 2025 hackathon winners: https://www.milestonesys.com/company/news/press-releases/developers-innovate-safer-video-intelligence/
+- 2025 hackathon finalists: https://www.milestonesys.com/company/news/press-releases/developers-innovate-safer-video-intelligence/,
+  https://internationalsecurityjournal.com/milestone-developer-summit-2025/
+- Public entries: https://github.com/magnusgp/clipnotes, https://github.com/magnusgp/hafnia-hackathon-2026,
+  https://github.com/HugoGR-7/ProjectHafnia-IntentDetector, https://github.com/osquera/Loriens-Guide
 - NVIDIA VSS alert verification: https://docs.nvidia.com/vss/3.2.0/alert-verification-service.html
 - FHWA SSAM thresholds and conflict definition: https://www.fhwa.dot.gov/publications/research/safety/08051/03a.cfm,
   https://www.fhwa.dot.gov/publications/research/safety/08051/06.cfm
@@ -187,6 +242,8 @@ router, clip injection, the evaluation and report scripts, and every measured fi
 - Ann Arbor: https://engage.a2gov.org/safe-streets-all-project
 - Fremont: https://www.roadsbridges.com/city-fremont-calif-deploy-intersection-analytics-systems-along-smart-corridor
 - SeeUnsafe: https://arxiv.org/abs/2501.10604
+- Set-of-Mark visual prompting: https://arxiv.org/abs/2310.11441
+- Universal driver settings: https://doc.milestonesys.com/xprotect/universal-drivers/v1.67/en/supported-features
 - AI City Challenge dataset access: https://www.aicitychallenge.org/ai-city-challenge-dataset-access/
 - ACCIDENT dataset: https://www.kaggle.com/datasets/picekl/accident, https://accidentbench.github.io
 - dnepronet crash video: https://www.youtube.com/watch?v=BH9nEpAjrp4
