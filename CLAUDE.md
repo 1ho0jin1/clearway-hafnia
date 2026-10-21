@@ -141,6 +141,9 @@ Python 3.12 (installed from python.org, `py` launcher), standard library only so
 | `hafnia/xprotect_rest.py` | XProtect REST client (Windows-auth token via PowerShell): cameras, JpegGetLive, alarms (trigger, update, snapshot), bookmarks |
 | `incident/` | Live pipeline: `bridge.py` (read FrameBridge), `router.py` (cooldown, open incident, rejected spots, budget), `verify.py` (Hafnia check + description) |
 | `scripts/run_live.py` | The end-to-end pipeline on live cameras; logs to `run/live-<UTC>/events.jsonl` |
+| `lens/` | The lens camera: `publisher.py` (one RTSP stream through ffmpeg to MediaMTX: idle frames, then each queued clip in real time; logs the UTC span each clip played), `client.py` (queue a clip; crop, slow motion, marks), `mediamtx.yml` (RTSP on 127.0.0.1:8554 only, TCP only) |
+| `scripts/setup_lens.ps1`, `scripts/start_lens.ps1` | Install MediaMTX (pinned, SHA-256 checked) and camera `lens_1` (Universal 1 channel driver, our rule "Lens: record lens_1 always"); start MediaMTX and the publisher detached (logs in `run/lens/`) |
+| `scripts/lens_compare.py` | One looped event asked about plainly and through the lens (crop, crop in slow motion): finds the event live by frame matching; 3 Hafnia requests |
 | `data/clips.json` | Incident clips: neutral camera name, source file, length, label, ground truth; organizer cameras as controls |
 | `run/<name>/` | Model run results, committed: `results.jsonl` (Hafnia rows, with answers), `report.html`; for comparisons `opus_results.jsonl`, `scores.json`, `compare.html` |
 | `data/` | Source videos (`*.mp4`) and converted clips (`data/clips/`), both git-ignored: too large, and judges must download them from their source |
@@ -233,6 +236,11 @@ event-centred 6 s windows and 8 of 9 with longer ones; unaligned polling windows
 False alarms reaching the operator: none seen tiered. Tiered gives an unverified alarm in under 1 s and a verdict in
 6–9 s; polling gives no early alarm and a verdict about window length plus 5–9 s after the event.
 
+**Lens camera, first test** (`run/lens-test_11-20261021T144445Z/README.md`, 6 requests): on `test_11`'s distant crash
+(the SUV is about 30 px long), the plain 6 s window got NONE twice; the same window cropped and enlarged on `lens_1`
+got ACCIDENT twice, in slow motion too. One event: an anecdote that motivates E6 in `docs/PLAN-near-miss.md`. Lens
+recordings match send times within about 10 ms; after a publisher restart XProtect resumes recording about 10 s later.
+
 **Clip windows:** cameras record on motion, so a window can have no recording ("Fetch Video: ... No recordings
 available within the provided time range"). Such a failure costs nothing; pick recorded spans or retry slightly earlier.
 
@@ -261,7 +269,13 @@ gateway: off limits (house rules); ask the organizers if ever needed.
 code = 5" and the camera stays black. Always run `scripts/annexb_normalize.py` after ffmpeg: SPS/PPS once, no SEI,
 4-byte start codes, like the organizer clips. Replacing a clip's content needs another Recording Server restart.
 
-**Current state (2026-10-18):** cameras `test_01`–`test_10` (ports 106–115, device group Hackathon) play the
+**Current state (2026-10-21):** camera `test_11` (port 116) plays AI City 2021 Track 4 training video 91 (15 min,
+800×410; a crash at about 602 s; licence not cleared for the entry: internal tests only; source in `data/aicity21/`,
+git-ignored). Camera `lens_1` (Universal driver, `rtsp://127.0.0.1:8554/lens1`) shows lens clips; it needs MediaMTX and
+`lens.publisher` running (`scripts/start_lens.ps1`); both run detached and do not survive a reboot. MediaMTX v1.21.2
+is in `C:\tools\mediamtx\v1.21.2`.
+
+**Earlier state (2026-10-18):** cameras `test_01`–`test_10` (ports 106–115, device group Hackathon) play the
 incident clips listed in `data/clips.json`; the Recording Server was restarted twice today. The construction clip is
 in the driver folder (normalized) but has no camera.
 

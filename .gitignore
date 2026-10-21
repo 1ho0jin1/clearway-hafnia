@@ -30,3 +30,6 @@ models/
 
 # Pipeline pages embed video frames (footage licences not yet recorded)
 run/*/pipeline.html
+
+# Lens camera: process logs and the spool of rendered clips (video)
+run/lens/

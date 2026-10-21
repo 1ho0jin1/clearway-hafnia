@@ -169,7 +169,7 @@ clause) are a risk for a cash-prize entry: ask the organizers. The sources and l
 
 | Gate | Test | Requests | Pass | If it fails |
 |---|---|---|---|---|
-| G0 Lens works | `lens_1` records a rendered clip of `test_11`'s crash; Hafnia answers on it | 2–3 | clip recorded at the logged span; a completed answer | Fix the stream or recording; without a lens the plan still stands on plain clips |
+| G0 Lens works | `lens_1` records a rendered clip of `test_11`'s crash; Hafnia answers on it | 2–3 | clip recorded at the logged span; a completed answer | **Passed 2026-10-21** (`run/lens-test_11-20261021T144445Z`): plain NONE twice, crop and crop in slow motion ACCIDENT twice each, on the same crash |
 | G1 Footage | At least 20–30 min of intersection video with frequent vehicle–pedestrian or vehicle–cyclist interactions, licence we can cite | 0 | footage plays as a camera | Bellevue after asking the organizers, or fall back |
 | G2 Hafnia judges near misses | About 15 near-miss and 15 normal-interaction windows from G1, both prompt variants, plain and through the lens; reference labels by Opus from 2 fps frames | 40–60 | ≥ ~75% agreement with the reference (NYU's SeeUnsafe reached 76.7% on normal / near miss / collision) | Fall back to `docs/PLAN.md` with the improvements from this plan's crash layer and the lens |
 | G3 Enough candidates | Tier 0 conflict candidates offline on G1 | 0 | ≥ ~20 candidates per camera-hour, so sampling is meaningful | Loosen thresholds or pick busier footage |
