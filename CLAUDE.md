@@ -6,36 +6,28 @@ and Hafnia VLM (a vision-language model reached through the Hafnia gateway on th
 
 **Judging weighs creativity and validity most** (organizer Q&A). Reproducibility counts too, but a best-effort
 setup script plus documented manual steps is enough. Deliverable: this repository; a demo video is optional.
-The detailed plan and schedule are in `docs/PLAN.md`: keep it current.
-An alternative, proposed 2026-10-20 and not yet decided, is `docs/PLAN-near-miss.md`: a near-miss observatory where
-Hafnia audits a random sample of tier 0's near-miss candidates, with the research behind it (Hafnia's trained
-prompt formats, what Milestone already sells), footage sources with licence notes, and two-day gates.
+The current plan and schedule are in `docs/PLAN-C.md` (decided 2026-10-22): keep it current. Earlier plans, kept for
+reference: `docs/PLAN.md` (verified accident alarms) and `docs/PLAN-near-miss.md` (near-miss observatory; also the
+research on Hafnia's trained formats, earlier and competing entries, and footage sources with licence notes).
 
-## Project direction (decided 2026-10-16, refined 2026-10-18)
+## Project direction (decided 2026-10-22: plan C, right-of-way incidents)
 
-- Solo entry, submission around 2026-10-30. Theme restricted to **traffic**.
-- **Scope: traffic incidents, analysed from what happens in the scene** (decided 2026-10-18). No camera-status
-  checks (fog, condensation, blocked, moved, tampered or looped feeds). No crime or security incidents (robbery,
-  shooting, arson, vandalism): every Hafnia model is a traffic model and scored 0 of 8 on crime
-  (`run/bench-20261018`). Cameras `test_06`–`test_10` (crime clips) stay installed but are out of scope.
-- Concept: **verified, prioritized incidents.** Tier 0 proposes candidate incidents with their event time, Hafnia
-  verifies, classifies and describes them, and the type decides the alarm's owner and priority. The router sends
-  event-centred clip windows and learns per camera how far to trust tier 0 from Hafnia's verdicts.
-  Every slice ships with measured ablations (validity).
-- Architecture: **tiered routing**, Hafnia used where it is strong and gated by cheaper checks.
-  - **Tier 0, on the machine** (T4 GPU, every frame, < 1 s): detection and tracking (sudden stop or collision,
-    stopped vehicle, wrong way, person on the road, throw or loitering at a building).
-  - **Router**: deduplication, cooldown, severity and confidence, today's remaining Hafnia allowance.
-  - **Tier 1, Hafnia** (about 5 s, 500 a day): keyword prompt per event type, sent with `PromptId`; gateway rule →
-    XProtect analytics event → alarm and bookmark.
-  - **Top tier is the human operator**, who gets the XProtect alarm with evidence.
+- Solo entry, submission around 2026-10-30.
+- **Scope: right-of-way incidents**, things that block or endanger a public way, for city and transit operators: a
+  person on the tracks, a vehicle stalled in a lane, an object lying across a pavement, damage to transit. Security
+  (break-ins) is a footnote: Hafnia scored 0 of 8 on real crime CCTV (`run/bench-20261018`), although it reads the
+  organizers' synthetic scenes (`run/probe-20261022T054342Z`). Camera-status checks stay out of scope.
+- Concept: tier 0 notices that **something changed and stayed changed** (dual background model, no object classes, no
+  per-scenario rules), plus stalled vehicles and a person in a danger zone. The **lens** shows Hafnia the change:
+  centred on the moment, cropped to the spot, with BEFORE and AFTER views. Hafnia names it in JSON; a ledger item and
+  an XProtect alarm go to the owner; tier 0 closes the item, without a request, when the spot is restored.
 - **No frontier model in the product**, and no local VLM tier (nothing performant fits a T4). Opus (Claude Code) is
-  used **offline only**, as a judge: scoring tests, tuning prompts, measured comparisons.
-- Demo stories: an accident (our own clips; tier 0 under 1 s, Hafnia confirms), and false alarms that Hafnia
-  suppresses on normal traffic.
-- Differentiator: measured results. Tiered pipeline vs "Hafnia on every event": requests per day, time to alarm,
-  accuracy.
+  used **offline only**, as a judge: scoring tests, tuning prompts, auditing answers claim by claim.
+- Differentiators: no per-scenario rules; the lens, measured against Hafnia's time-order and prior errors; results on
+  real footage as well as the synthetic loops; claim-level audits.
 - Own clips are allowed (participant confirmed).
+- Superseded: verified traffic-incident alarms (plan A, 2026-10-16 to 10-21) and the near-miss observatory (plan B,
+  2026-10-20 to 10-21). Their measured findings below still hold.
 
 ## Where things run
 
@@ -104,9 +96,12 @@ an API; never write XProtect or gateway paths and fields from memory.
 
 ## Machine facts
 
-- Cameras (device group `Hackathon`; loops at 10 fps; record on motion; 24 h retention): `busy_street`,
+- Organizer cameras (device group `Hackathon`; loops at 10 fps; record on motion; 24 h retention): `busy_street`,
   `highway_traffic_overcast_weather`, `city_street_7_condensation_inside_housing`, `vandalism`,
-  `traffic_flows_in_the_open_lanes`.
+  `traffic_flows_in_the_open_lanes`; and since 2026-10-21 six synthetic 832×480 clips of 15–17 s, on every machine:
+  `vehicle_breakdown_traffic_queue`, `bin_pushed_over_onto_sidewalk`, `escooter_left_across_sidewalk`,
+  `school_gate_break_in_night`, `person_on_railway_tracks`, `graffiti_on_standing_train` (scenes described in
+  `C:\HackathonKit\xprotect-hackathon\SKILL.md`, "Your cameras"). The bin and e-scooter clips show the same street.
 - Starting state: one prompt (*Road conditions analysis*); no gateway rules, analytics events, user-defined events,
   webhooks, alarm definitions or basic users. Analytics events are disabled.
 - Installed: Git, Python 3.12.10 (we installed it: python.org, all users, with the `py` launcher), the .NET 8
