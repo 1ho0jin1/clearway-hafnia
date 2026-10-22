@@ -33,3 +33,6 @@ run/*/pipeline.html
 
 # Lens camera: process logs and the spool of rendered clips (video)
 run/lens/
+
+# Candidate footage downloaded for evaluation (licences per source in docs/PLAN-near-miss.md)
+data/footage/
