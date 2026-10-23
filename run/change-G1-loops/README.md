@@ -14,7 +14,7 @@ People standing in a change are held back (YOLO11m person boxes). Boxes drawn on
 | `vehicle_breakdown_traffic_queue` | **6/6** | 1.9–3.9 | 1 (35) |
 | `bin_pushed_over_onto_sidewalk` | **6/6** | 0.1–0.6 | 12 (480): at 8.8–9.7 s of the loop, while the man grips and tips the bin, just before the span starts |
 | `escooter_left_across_sidewalk` | **6/6** | 1.5 | 1 (40) |
-| `school_gate_break_in_night` | **6/6** | 4.2 | 26 (1040): the lit pavement as the person walks in |
+| `school_gate_break_in_night` | 6/6, **but not the tampering** (see below) | 4.2 | 26 (1040): the lit pavement as the person walks in |
 | `graffiti_on_standing_train` | **6/6** | 1.7 | 0 |
 | `person_on_railway_tracks` | 0/6 | – | 0: by design (a person is held back); needs the danger-zone trigger |
 | `vandalism` (organizers' original) | 0/5 | – | 0: the cracked window changes too few pixels (caught only at difference 12 and 0.2%, which floods every other camera) |
@@ -40,8 +40,14 @@ How the real setting was chosen (all at 15 s, the same detector): 320 px and 0.5
 
 ## Verdict
 
-**Passed for the incidents:** 5 of 6 new incident cameras caught in every loop (the sixth, the tracks, is a person and
-goes to the danger-zone trigger). Roadworks and highway: nothing. Not passed: `busy_street` at the loops setting (10 in
+**Passed for the object incidents:** the breakdown, bin, e-scooter and graffiti are caught in every loop.
+
+**Correction (2026-10-23, found while preparing the lens pilot):** the gate's "catches" are not the tampering. Its
+reports inside the incident span are strips of lit pavement along the bottom edge and one larger region of light and
+shadow beside the crouching person; the person at the lock is held back by design, as on the tracks. So the gate
+counts as caught only by a side effect. Both person incidents (tracks, gate) need person triggers (a danger zone, a
+person staying at one spot); in the lens pilot YOLO's person box stands in for them. Read the gate's row as 0 of 6
+for the tampering itself. Roadworks and highway: nothing. Not passed: `busy_street` at the loops setting (10 in
 93 s; 0 at the real setting) and the fogging camera (out of scope). Known misses: thin damage like a cracked window.
 
 What changed on the way (development runs not kept): a median warm-up removed ghosts (a car's starting place reported

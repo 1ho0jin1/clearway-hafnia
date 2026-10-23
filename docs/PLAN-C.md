@@ -104,8 +104,8 @@ as a scene reset; each loop is one more trial of the same incident, and the ledg
 
 | Gate | Test | Requests | Pass | If it fails |
 |---|---|---|---|---|
-| G1 Detector | M2 on all clips | 0 | the incident caught on ≥ 5 of 6 incident cameras in every loop; nothing on `traffic_flows`, `highway`, `busy_street` | **Passed for the incidents 2026-10-23** (`run/change-G1-loops`): 5 of 6 in every loop, the tracks need the danger-zone trigger; nothing on roadworks or highway; `busy_street` 10 false reports in 93 s at the loops setting, 0 at the real-camera setting. The verdict memory then cuts requests by 45% with no incident skipped (`run/memory-compare`) |
-| G2 Lens | M1 pilot (1 repeat first, about 24 requests) | 24 | centred or before/after beats the full-loop baseline on category accuracy | Use the variant that does best; report the null result |
+| G1 Detector | M2 on all clips | 0 | the incident caught on ≥ 5 of 6 incident cameras in every loop; nothing on `traffic_flows`, `highway`, `busy_street` | **Passed for the object incidents 2026-10-23** (`run/change-G1-loops`): breakdown, bin, e-scooter, graffiti in every loop; the two person incidents (tracks, gate) need person triggers (the gate's apparent catches were lit pavement and shadow beside the person); nothing on roadworks or highway; `busy_street` 10 false reports in 93 s at the loops setting, 0 at the real-camera setting. The verdict memory then cuts requests by 45% with no incident skipped (`run/memory-compare`) |
+| G2 Lens | M1 pilot (1 repeat first, about 24 requests) | 24 | centred or before/after beats the full-loop baseline on category accuracy | **Not decidable 2026-10-23** (`run/pilot-20261023T162040Z`, 29 requests): with the JSON prompt every category was right in every view (29/29). Summaries: the full loop again reverses the gate across the loop cut; super-resolution no different from bicubic on these large synthetic objects; BEFORE/AFTER stills one regression. Default: event window + JSON prompt; SR to be tested on small, distant objects |
 
 ## Schedule
 

@@ -46,6 +46,28 @@ def zoom(frames: list[np.ndarray], box: Sequence[float], sr=None, **crop_kw) -> 
     return sr.upscale_all(crops) if sr is not None else crops
 
 
+def caption(img: np.ndarray, text: str) -> np.ndarray:
+    """A black bar across the top with white text, sized to the image."""
+    out = img.copy()
+    h, w = out.shape[:2]
+    bar = max(18, h // 9)
+    scale = bar / 30
+    cv2.rectangle(out, (0, 0), (w, bar), (0, 0, 0), -1)
+    cv2.putText(out, text, (max(4, w // 60), int(bar * 0.75)), cv2.FONT_HERSHEY_SIMPLEX, scale, (255, 255, 255),
+                max(1, round(scale * 2)), cv2.LINE_AA)
+    return out
+
+
+def before_after(frames: list[np.ndarray], box: Sequence[float], sr=None, still_s: float = 2.0, fps: int = 10,
+                 **crop_kw) -> list[np.ndarray]:
+    """The spot BEFORE (first frame, held still_s, captioned), the event as it happened, and the spot AFTER (last
+    frame, held, captioned). Made against the probe's time-order errors (run/probe-20261022T054342Z/audit.md): the
+    model is shown which state came first instead of having to infer it."""
+    z = zoom(frames, box, sr, **crop_kw)
+    n = round(still_s * fps)
+    return [caption(z[0], "BEFORE")] * n + z + [caption(z[-1], "AFTER")] * n
+
+
 def slow(frames: list[np.ndarray], factor: int) -> list[np.ndarray]:
     """Slow motion by repeating each frame: factor 2 plays a 6 s window in 12 s."""
     return [f for f in frames for _ in range(factor)]
