@@ -1,0 +1,440 @@
+{
+  "params": {
+    "work_width": 640,
+    "warmup_s": 10.0,
+    "fast_tau_s": 0.5,
+    "slow_tau_s": 600.0,
+    "diff": 25.0,
+    "persist_s": 15.0,
+    "min_area": 0.0015,
+    "max_area": 0.3,
+    "global_area": 0.15,
+    "global_diff": 0.3,
+    "jump_frac": 0.6,
+    "merge_iou": 0.3,
+    "restored_diff": 12.0,
+    "close_s": 1.0,
+    "person_cover": 0.5
+  },
+  "cases": [
+    {
+      "case": "test_11",
+      "role": "real",
+      "loops": 1,
+      "seconds": 890.3,
+      "loops_caught": 1,
+      "first_delay_s": [
+        43.4
+      ],
+      "false_reports": 16,
+      "false_per_hour": 64.7,
+      "false_at_loop_s": [
+        25.5,
+        91.9,
+        219.9,
+        233.9,
+        239.9,
+        246.2,
+        295.8,
+        300.0,
+        349.0,
+        351.9,
+        429.3,
+        447.1,
+        481.2,
+        521.8,
+        528.2,
+        530.5
+      ],
+      "scene_jumps": 0,
+      "reports": [
+        {
+          "t_detect": 25.5,
+          "t_start": 10.5,
+          "box": [
+            76,
+            54,
+            117,
+            82
+          ],
+          "area": 0.0016,
+          "closed": ""
+        },
+        {
+          "t_detect": 91.9,
+          "t_start": 74.3,
+          "box": [
+            94,
+            64,
+            113,
+            99
+          ],
+          "area": 0.0015,
+          "closed": ""
+        },
+        {
+          "t_detect": 219.9,
+          "t_start": 201.9,
+          "box": [
+            15,
+            0,
+            77,
+            9
+          ],
+          "area": 0.0015,
+          "closed": ""
+        },
+        {
+          "t_detect": 233.9,
+          "t_start": 216.1,
+          "box": [
+            126,
+            51,
+            159,
+            76
+          ],
+          "area": 0.0015,
+          "closed": ""
+        },
+        {
+          "t_detect": 239.9,
+          "t_start": 220.8,
+          "box": [
+            109,
+            54,
+            148,
+            87
+          ],
+          "area": 0.0027,
+          "closed": ""
+        },
+        {
+          "t_detect": 246.2,
+          "t_start": 226.4,
+          "box": [
+            116,
+            67,
+            143,
+            107
+          ],
+          "area": 0.0024,
+          "closed": ""
+        },
+        {
+          "t_detect": 295.8,
+          "t_start": 278.7,
+          "box": [
+            309,
+            0,
+            426,
+            8
+          ],
+          "area": 0.0023,
+          "closed": ""
+        },
+        {
+          "t_detect": 300.0,
+          "t_start": 276.8,
+          "box": [
+            90,
+            0,
+            146,
+            7
+          ],
+          "area": 0.0015,
+          "closed": ""
+        },
+        {
+          "t_detect": 349.0,
+          "t_start": 330.2,
+          "box": [
+            443,
+            0,
+            503,
+            11
+          ],
+          "area": 0.0016,
+          "closed": ""
+        },
+        {
+          "t_detect": 351.9,
+          "t_start": 325.5,
+          "box": [
+            231,
+            0,
+            503,
+            12
+          ],
+          "area": 0.0084,
+          "closed": ""
+        },
+        {
+          "t_detect": 429.3,
+          "t_start": 278.7,
+          "box": [
+            263,
+            0,
+            378,
+            5
+          ],
+          "area": 0.0019,
+          "closed": ""
+        },
+        {
+          "t_detect": 447.1,
+          "t_start": 431.0,
+          "box": [
+            576,
+            0,
+            640,
+            17
+          ],
+          "area": 0.0023,
+          "closed": ""
+        },
+        {
+          "t_detect": 481.2,
+          "t_start": 430.0,
+          "box": [
+            0,
+            0,
+            124,
+            16
+          ],
+          "area": 0.0051,
+          "closed": ""
+        },
+        {
+          "t_detect": 521.8,
+          "t_start": 505.7,
+          "box": [
+            140,
+            0,
+            206,
+            9
+          ],
+          "area": 0.0016,
+          "closed": ""
+        },
+        {
+          "t_detect": 528.2,
+          "t_start": 506.2,
+          "box": [
+            444,
+            0,
+            640,
+            23
+          ],
+          "area": 0.0089,
+          "closed": ""
+        },
+        {
+          "t_detect": 530.5,
+          "t_start": 505.7,
+          "box": [
+            0,
+            0,
+            554,
+            26
+          ],
+          "area": 0.0226,
+          "closed": ""
+        },
+        {
+          "t_detect": 645.4,
+          "t_start": 624.2,
+          "box": [
+            96,
+            55,
+            130,
+            112
+          ],
+          "area": 0.0037,
+          "closed": ""
+        },
+        {
+          "t_detect": 649.5,
+          "t_start": 633.5,
+          "box": [
+            0,
+            115,
+            19,
+            142
+          ],
+          "area": 0.0015,
+          "closed": ""
+        },
+        {
+          "t_detect": 704.8,
+          "t_start": 679.3,
+          "box": [
+            0,
+            97,
+            35,
+            147
+          ],
+          "area": 0.0046,
+          "closed": ""
+        },
+        {
+          "t_detect": 709.9,
+          "t_start": 504.7,
+          "box": [
+            465,
+            0,
+            557,
+            9
+          ],
+          "area": 0.0023,
+          "closed": ""
+        },
+        {
+          "t_detect": 771.1,
+          "t_start": 750.0,
+          "box": [
+            13,
+            101,
+            51,
+            131
+          ],
+          "area": 0.0027,
+          "closed": ""
+        }
+      ]
+    },
+    {
+      "case": "mumbai02",
+      "role": "real",
+      "loops": 1,
+      "seconds": 173.2,
+      "loops_caught": null,
+      "first_delay_s": null,
+      "false_reports": 6,
+      "false_per_hour": 124.7,
+      "false_at_loop_s": [
+        42.7,
+        43.4,
+        135.7,
+        135.7,
+        135.7,
+        135.7
+      ],
+      "scene_jumps": 0,
+      "reports": [
+        {
+          "t_detect": 42.7,
+          "t_start": 24.4,
+          "box": [
+            249,
+            230,
+            277,
+            260
+          ],
+          "area": 0.0015,
+          "closed": ""
+        },
+        {
+          "t_detect": 43.4,
+          "t_start": 27.3,
+          "box": [
+            47,
+            30,
+            89,
+            57
+          ],
+          "area": 0.0017,
+          "closed": ""
+        },
+        {
+          "t_detect": 135.7,
+          "t_start": 114.1,
+          "box": [
+            502,
+            110,
+            631,
+            192
+          ],
+          "area": 0.0062,
+          "closed": ""
+        },
+        {
+          "t_detect": 135.7,
+          "t_start": 108.9,
+          "box": [
+            347,
+            189,
+            381,
+            223
+          ],
+          "area": 0.0017,
+          "closed": ""
+        },
+        {
+          "t_detect": 135.7,
+          "t_start": 95.9,
+          "box": [
+            383,
+            253,
+            469,
+            310
+          ],
+          "area": 0.0085,
+          "closed": ""
+        },
+        {
+          "t_detect": 135.7,
+          "t_start": 114.2,
+          "box": [
+            319,
+            270,
+            379,
+            319
+          ],
+          "area": 0.0052,
+          "closed": ""
+        }
+      ]
+    },
+    {
+      "case": "duesseldorf",
+      "role": "real",
+      "loops": 1,
+      "seconds": 264.7,
+      "loops_caught": null,
+      "first_delay_s": null,
+      "false_reports": 1,
+      "false_per_hour": 13.6,
+      "false_at_loop_s": [
+        29.9
+      ],
+      "scene_jumps": 21,
+      "reports": [
+        {
+          "t_detect": 29.9,
+          "t_start": 12.2,
+          "box": [
+            359,
+            207,
+            419,
+            227
+          ],
+          "area": 0.0031,
+          "closed": "scene_jump"
+        }
+      ]
+    },
+    {
+      "case": "busy_street",
+      "role": "negative",
+      "loops": 5,
+      "seconds": 77.5,
+      "loops_caught": null,
+      "first_delay_s": null,
+      "false_reports": 0,
+      "false_per_hour": 0.0,
+      "false_at_loop_s": [],
+      "scene_jumps": 0,
+      "reports": []
+    }
+  ]
+}

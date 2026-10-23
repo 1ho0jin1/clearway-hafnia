@@ -130,6 +130,8 @@ def main() -> int:
     ap.add_argument("--loops", type=int, default=6)
     ap.add_argument("--only", nargs="+", choices=list(CASES))
     ap.add_argument("--no-people", action="store_true", help="do not hold back changes that people stand in")
+    ap.add_argument("--profile", choices=["loops", "real"], default="loops",
+                    help="ChangeParams.loops() for the synthetic clips, .real() for real cameras")
     ap.add_argument("--persist", type=float, help="override ChangeParams.persist_s (seconds a change must last)")
     ap.add_argument("--work-width", type=int, help="override ChangeParams.work_width (pixels)")
     ap.add_argument("--min-area", type=float, help="override ChangeParams.min_area (share of the frame)")
@@ -138,7 +140,9 @@ def main() -> int:
     (args.out / "frames").mkdir(parents=True, exist_ok=True)
     overrides = {k: v for k, v in (("persist_s", args.persist), ("work_width", args.work_width),
                                    ("min_area", args.min_area)) if v is not None}
-    params = ChangeParams(**overrides)
+    params = getattr(ChangeParams, args.profile)()
+    for k, v in overrides.items():
+        setattr(params, k, v)
     model = None
     if not args.no_people:
         from ultralytics import YOLO

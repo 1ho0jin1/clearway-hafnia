@@ -1,0 +1,692 @@
+{
+  "persist_s": 1.5,
+  "prompts": [
+    "a vehicle broken down in a traffic lane with smoke",
+    "a crashed car stopped against a barrier",
+    "a car or bus stopped in traffic",
+    "a bus at a bus stop",
+    "a parked car",
+    "a wheelie bin lying on its side on a pavement",
+    "an e-scooter lying on a pavement",
+    "a person on railway tracks",
+    "graffiti sprayed on a train",
+    "a person crouching at a gate at night",
+    "a person standing on a pavement",
+    "an empty street"
+  ],
+  "totals": {
+    "0.75": {
+      "asked": 120,
+      "skipped": 103,
+      "missed_incidents": 0
+    },
+    "0.8": {
+      "asked": 122,
+      "skipped": 101,
+      "missed_incidents": 0
+    },
+    "0.85": {
+      "asked": 123,
+      "skipped": 100,
+      "missed_incidents": 0
+    },
+    "0.9": {
+      "asked": 130,
+      "skipped": 93,
+      "missed_incidents": 0
+    },
+    "0.95": {
+      "asked": 152,
+      "skipped": 71,
+      "missed_incidents": 0
+    }
+  },
+  "modes": {
+    "none": null,
+    "spot": [
+      0.1,
+      -1.0
+    ],
+    "appearance": [
+      0.0,
+      0.85
+    ],
+    "siglip": [
+      0.1,
+      0.85
+    ]
+  },
+  "mode_totals": {
+    "none": {
+      "asked": 223,
+      "skipped": 0,
+      "missed_incidents": 0
+    },
+    "spot": {
+      "asked": 119,
+      "skipped": 104,
+      "missed_incidents": 0
+    },
+    "appearance": {
+      "asked": 79,
+      "skipped": 144,
+      "missed_incidents": 12
+    },
+    "siglip": {
+      "asked": 123,
+      "skipped": 100,
+      "missed_incidents": 0
+    }
+  },
+  "cases": {
+    "vehicle_breakdown_traffic_queue": {
+      "changes": 11,
+      "incidents": 10,
+      "memory": {
+        "0.75": {
+          "asked": 11,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "0.8": {
+          "asked": 11,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "0.85": {
+          "asked": 11,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "0.9": {
+          "asked": 11,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "0.95": {
+          "asked": 11,
+          "skipped": 0,
+          "missed_incidents": 0
+        }
+      },
+      "modes": {
+        "none": {
+          "asked": 11,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "spot": {
+          "asked": 11,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "appearance": {
+          "asked": 11,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "siglip": {
+          "asked": 11,
+          "skipped": 0,
+          "missed_incidents": 0
+        }
+      },
+      "zero_shot_top_for_incidents": {
+        "a vehicle broken down in a traffic lane with smoke": 7,
+        "a car or bus stopped in traffic": 7
+      }
+    },
+    "bin_pushed_over_onto_sidewalk": {
+      "changes": 21,
+      "incidents": 9,
+      "memory": {
+        "0.75": {
+          "asked": 14,
+          "skipped": 7,
+          "missed_incidents": 0
+        },
+        "0.8": {
+          "asked": 14,
+          "skipped": 7,
+          "missed_incidents": 0
+        },
+        "0.85": {
+          "asked": 14,
+          "skipped": 7,
+          "missed_incidents": 0
+        },
+        "0.9": {
+          "asked": 14,
+          "skipped": 7,
+          "missed_incidents": 0
+        },
+        "0.95": {
+          "asked": 14,
+          "skipped": 7,
+          "missed_incidents": 0
+        }
+      },
+      "modes": {
+        "none": {
+          "asked": 21,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "spot": {
+          "asked": 14,
+          "skipped": 7,
+          "missed_incidents": 0
+        },
+        "appearance": {
+          "asked": 8,
+          "skipped": 13,
+          "missed_incidents": 6
+        },
+        "siglip": {
+          "asked": 14,
+          "skipped": 7,
+          "missed_incidents": 0
+        }
+      },
+      "zero_shot_top_for_incidents": {
+        "a wheelie bin lying on its side on a pavement": 11,
+        "a person standing on a pavement": 1
+      }
+    },
+    "escooter_left_across_sidewalk": {
+      "changes": 8,
+      "incidents": 7,
+      "memory": {
+        "0.75": {
+          "asked": 8,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "0.8": {
+          "asked": 8,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "0.85": {
+          "asked": 8,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "0.9": {
+          "asked": 8,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "0.95": {
+          "asked": 8,
+          "skipped": 0,
+          "missed_incidents": 0
+        }
+      },
+      "modes": {
+        "none": {
+          "asked": 8,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "spot": {
+          "asked": 8,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "appearance": {
+          "asked": 8,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "siglip": {
+          "asked": 8,
+          "skipped": 0,
+          "missed_incidents": 0
+        }
+      },
+      "zero_shot_top_for_incidents": {
+        "an e-scooter lying on a pavement": 8,
+        "an empty street": 1
+      }
+    },
+    "school_gate_break_in_night": {
+      "changes": 50,
+      "incidents": 24,
+      "memory": {
+        "0.75": {
+          "asked": 28,
+          "skipped": 22,
+          "missed_incidents": 0
+        },
+        "0.8": {
+          "asked": 28,
+          "skipped": 22,
+          "missed_incidents": 0
+        },
+        "0.85": {
+          "asked": 28,
+          "skipped": 22,
+          "missed_incidents": 0
+        },
+        "0.9": {
+          "asked": 28,
+          "skipped": 22,
+          "missed_incidents": 0
+        },
+        "0.95": {
+          "asked": 28,
+          "skipped": 22,
+          "missed_incidents": 0
+        }
+      },
+      "modes": {
+        "none": {
+          "asked": 50,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "spot": {
+          "asked": 28,
+          "skipped": 22,
+          "missed_incidents": 0
+        },
+        "appearance": {
+          "asked": 21,
+          "skipped": 29,
+          "missed_incidents": 6
+        },
+        "siglip": {
+          "asked": 28,
+          "skipped": 22,
+          "missed_incidents": 0
+        }
+      },
+      "zero_shot_top_for_incidents": {
+        "a person crouching at a gate at night": 27
+      }
+    },
+    "person_on_railway_tracks": {
+      "changes": 0,
+      "incidents": 0,
+      "memory": {
+        "0.75": {
+          "asked": 0,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "0.8": {
+          "asked": 0,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "0.85": {
+          "asked": 0,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "0.9": {
+          "asked": 0,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "0.95": {
+          "asked": 0,
+          "skipped": 0,
+          "missed_incidents": 0
+        }
+      },
+      "modes": {
+        "none": {
+          "asked": 0,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "spot": {
+          "asked": 0,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "appearance": {
+          "asked": 0,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "siglip": {
+          "asked": 0,
+          "skipped": 0,
+          "missed_incidents": 0
+        }
+      },
+      "zero_shot_top_for_incidents": {
+        "a person on railway tracks": 1
+      }
+    },
+    "graffiti_on_standing_train": {
+      "changes": 6,
+      "incidents": 6,
+      "memory": {
+        "0.75": {
+          "asked": 6,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "0.8": {
+          "asked": 6,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "0.85": {
+          "asked": 6,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "0.9": {
+          "asked": 6,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "0.95": {
+          "asked": 6,
+          "skipped": 0,
+          "missed_incidents": 0
+        }
+      },
+      "modes": {
+        "none": {
+          "asked": 6,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "spot": {
+          "asked": 6,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "appearance": {
+          "asked": 6,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "siglip": {
+          "asked": 6,
+          "skipped": 0,
+          "missed_incidents": 0
+        }
+      },
+      "zero_shot_top_for_incidents": {
+        "graffiti sprayed on a train": 7
+      }
+    },
+    "city_street_7_condensation_inside_housing": {
+      "changes": 25,
+      "incidents": 0,
+      "memory": {
+        "0.75": {
+          "asked": 4,
+          "skipped": 21,
+          "missed_incidents": 0
+        },
+        "0.8": {
+          "asked": 4,
+          "skipped": 21,
+          "missed_incidents": 0
+        },
+        "0.85": {
+          "asked": 4,
+          "skipped": 21,
+          "missed_incidents": 0
+        },
+        "0.9": {
+          "asked": 4,
+          "skipped": 21,
+          "missed_incidents": 0
+        },
+        "0.95": {
+          "asked": 5,
+          "skipped": 20,
+          "missed_incidents": 0
+        }
+      },
+      "modes": {
+        "none": {
+          "asked": 25,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "spot": {
+          "asked": 3,
+          "skipped": 22,
+          "missed_incidents": 0
+        },
+        "appearance": {
+          "asked": 3,
+          "skipped": 22,
+          "missed_incidents": 0
+        },
+        "siglip": {
+          "asked": 4,
+          "skipped": 21,
+          "missed_incidents": 0
+        }
+      },
+      "zero_shot_top_for_incidents": {}
+    },
+    "busy_street": {
+      "changes": 10,
+      "incidents": 0,
+      "memory": {
+        "0.75": {
+          "asked": 5,
+          "skipped": 5,
+          "missed_incidents": 0
+        },
+        "0.8": {
+          "asked": 5,
+          "skipped": 5,
+          "missed_incidents": 0
+        },
+        "0.85": {
+          "asked": 5,
+          "skipped": 5,
+          "missed_incidents": 0
+        },
+        "0.9": {
+          "asked": 5,
+          "skipped": 5,
+          "missed_incidents": 0
+        },
+        "0.95": {
+          "asked": 5,
+          "skipped": 5,
+          "missed_incidents": 0
+        }
+      },
+      "modes": {
+        "none": {
+          "asked": 10,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "spot": {
+          "asked": 5,
+          "skipped": 5,
+          "missed_incidents": 0
+        },
+        "appearance": {
+          "asked": 2,
+          "skipped": 8,
+          "missed_incidents": 0
+        },
+        "siglip": {
+          "asked": 5,
+          "skipped": 5,
+          "missed_incidents": 0
+        }
+      },
+      "zero_shot_top_for_incidents": {}
+    },
+    "test_11": {
+      "changes": 17,
+      "incidents": 0,
+      "memory": {
+        "0.75": {
+          "asked": 8,
+          "skipped": 9,
+          "missed_incidents": 0
+        },
+        "0.8": {
+          "asked": 8,
+          "skipped": 9,
+          "missed_incidents": 0
+        },
+        "0.85": {
+          "asked": 8,
+          "skipped": 9,
+          "missed_incidents": 0
+        },
+        "0.9": {
+          "asked": 9,
+          "skipped": 8,
+          "missed_incidents": 0
+        },
+        "0.95": {
+          "asked": 10,
+          "skipped": 7,
+          "missed_incidents": 0
+        }
+      },
+      "modes": {
+        "none": {
+          "asked": 17,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "spot": {
+          "asked": 8,
+          "skipped": 9,
+          "missed_incidents": 0
+        },
+        "appearance": {
+          "asked": 2,
+          "skipped": 15,
+          "missed_incidents": 0
+        },
+        "siglip": {
+          "asked": 8,
+          "skipped": 9,
+          "missed_incidents": 0
+        }
+      },
+      "zero_shot_top_for_incidents": {}
+    },
+    "mumbai02": {
+      "changes": 43,
+      "incidents": 0,
+      "memory": {
+        "0.75": {
+          "asked": 21,
+          "skipped": 22,
+          "missed_incidents": 0
+        },
+        "0.8": {
+          "asked": 22,
+          "skipped": 21,
+          "missed_incidents": 0
+        },
+        "0.85": {
+          "asked": 22,
+          "skipped": 21,
+          "missed_incidents": 0
+        },
+        "0.9": {
+          "asked": 26,
+          "skipped": 17,
+          "missed_incidents": 0
+        },
+        "0.95": {
+          "asked": 37,
+          "skipped": 6,
+          "missed_incidents": 0
+        }
+      },
+      "modes": {
+        "none": {
+          "asked": 43,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "spot": {
+          "asked": 21,
+          "skipped": 22,
+          "missed_incidents": 0
+        },
+        "appearance": {
+          "asked": 8,
+          "skipped": 35,
+          "missed_incidents": 0
+        },
+        "siglip": {
+          "asked": 22,
+          "skipped": 21,
+          "missed_incidents": 0
+        }
+      },
+      "zero_shot_top_for_incidents": {}
+    },
+    "duesseldorf": {
+      "changes": 32,
+      "incidents": 0,
+      "memory": {
+        "0.75": {
+          "asked": 15,
+          "skipped": 17,
+          "missed_incidents": 0
+        },
+        "0.8": {
+          "asked": 16,
+          "skipped": 16,
+          "missed_incidents": 0
+        },
+        "0.85": {
+          "asked": 17,
+          "skipped": 15,
+          "missed_incidents": 0
+        },
+        "0.9": {
+          "asked": 19,
+          "skipped": 13,
+          "missed_incidents": 0
+        },
+        "0.95": {
+          "asked": 28,
+          "skipped": 4,
+          "missed_incidents": 0
+        }
+      },
+      "modes": {
+        "none": {
+          "asked": 32,
+          "skipped": 0,
+          "missed_incidents": 0
+        },
+        "spot": {
+          "asked": 15,
+          "skipped": 17,
+          "missed_incidents": 0
+        },
+        "appearance": {
+          "asked": 10,
+          "skipped": 22,
+          "missed_incidents": 0
+        },
+        "siglip": {
+          "asked": 17,
+          "skipped": 15,
+          "missed_incidents": 0
+        }
+      },
+      "zero_shot_top_for_incidents": {}
+    }
+  }
+}

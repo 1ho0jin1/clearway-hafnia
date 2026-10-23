@@ -104,7 +104,7 @@ as a scene reset; each loop is one more trial of the same incident, and the ledg
 
 | Gate | Test | Requests | Pass | If it fails |
 |---|---|---|---|---|
-| G1 Detector | M2 on all clips | 0 | the incident caught on ≥ 5 of 6 incident cameras in every loop; nothing on `traffic_flows`, `highway`, `busy_street` | Tune thresholds; add YOLO-track triggers for what it misses |
+| G1 Detector | M2 on all clips | 0 | the incident caught on ≥ 5 of 6 incident cameras in every loop; nothing on `traffic_flows`, `highway`, `busy_street` | **Passed for the incidents 2026-10-23** (`run/change-G1-loops`): 5 of 6 in every loop, the tracks need the danger-zone trigger; nothing on roadworks or highway; `busy_street` 10 false reports in 93 s at the loops setting, 0 at the real-camera setting. The verdict memory then cuts requests by 45% with no incident skipped (`run/memory-compare`) |
 | G2 Lens | M1 pilot (1 repeat first, about 24 requests) | 24 | centred or before/after beats the full-loop baseline on category accuracy | Use the variant that does best; report the null result |
 
 ## Schedule

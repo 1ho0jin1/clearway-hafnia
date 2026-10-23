@@ -231,6 +231,14 @@ event-centred 6 s windows and 8 of 9 with longer ones; unaligned polling windows
 False alarms reaching the operator: none seen tiered. Tiered gives an unverified alarm in under 1 s and a verdict in
 6–9 s; polling gives no early alarm and a verdict about window length plus 5–9 s after the event.
 
+**Plan C tier 0, offline** (`run/change-G1-loops/README.md`, `run/memory-compare/README.md`, no requests): the change
+detector (`tier0/change.py`) catches the breakdown, bin, e-scooter, gate and graffiti in every loop (0.1–4.2 s after
+the object comes to rest); a person on the tracks is held back by design (danger-zone trigger needed); a cracked window
+is too subtle. Two settings: `ChangeParams.loops()` for the synthetic clips, `.real()` (640 px, 0.15%, 15 s) for real
+cameras: the crashed SUV in `test_11` after 43 s, 14–125 false reports per hour on real streets. The SigLIP 2 verdict
+memory (`tier0/memory.py`) cuts requests by 45% with no incident skipped against a stand-in for Hafnia; plan A's
+spot muting would have skipped 20 of 56 incidents.
+
 **Lens camera, first test** (`run/lens-test_11-20261021T144445Z/README.md`, 6 requests): on `test_11`'s distant crash
 (the SUV is about 30 px long), the plain 6 s window got NONE twice; the same window cropped and enlarged on `lens_1`
 got ACCIDENT twice, in slow motion too. One event: an anecdote that motivates E6 in `docs/PLAN-near-miss.md`. Lens

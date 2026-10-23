@@ -47,6 +47,18 @@ class ChangeParams:
     close_s: float = 1.0             # restored this long: closed
     person_cover: float = 0.5        # a blob this much inside a person's box is held until they leave
 
+    @classmethod
+    def loops(cls) -> "ChangeParams":
+        """The organizers' synthetic clips: an incident's state lasts only 5-8 s before the clip restarts."""
+        return cls()
+
+    @classmethod
+    def real(cls) -> "ChangeParams":
+        """Real cameras: obstructions last minutes; small distant objects need the larger working image (test_11,
+        2026-10-23: the crashed SUV, about 0.1% of the frame, was found after 43 s at 640 px and 0.15%, after 101 s
+        at 320 px and 0.5%)."""
+        return cls(work_width=640, min_area=0.0015, persist_s=15.0)
+
 
 @dataclass
 class Change:
