@@ -4,8 +4,8 @@
     done = wait(job)                 # after the clip has played
     start, end = span(done)          # ask Hafnia about lens_1 over this span
 
-Rendering is plain image work here (crop, slow motion by repeating frames, boxes drawn on frames); the publisher scales
-each clip to the stream size. Clips are stored as near-lossless MJPEG so the lens adds no compression of its own before
+Rendering is plain image work here (crop, slow motion by repeating frames, boxes drawn on frames), plus optional
+super-resolution of the crop (zoom(..., sr=lens.enhance.SuperRes())); the publisher scales each clip to the stream size. Clips are stored as near-lossless MJPEG so the lens adds no compression of its own before
 the stream's H.264.
 """
 from __future__ import annotations
@@ -37,6 +37,13 @@ def crop(frame: np.ndarray, box: Sequence[float], aspect: float = 16 / 9, pad: f
     left = int(round(min(max(0, cx - bw / 2), fw - bw)))
     top = int(round(min(max(0, cy - bh / 2), fh - bh)))
     return frame[top:top + int(bh), left:left + int(bw)].copy()
+
+
+def zoom(frames: list[np.ndarray], box: Sequence[float], sr=None, **crop_kw) -> list[np.ndarray]:
+    """crop() of every frame, enlarged by a super-resolution model (lens.enhance.SuperRes) when sr is given; without
+    it the publisher enlarges with bicubic interpolation when it fits the clip to the stream."""
+    crops = [crop(f, box, **crop_kw) for f in frames]
+    return sr.upscale_all(crops) if sr is not None else crops
 
 
 def slow(frames: list[np.ndarray], factor: int) -> list[np.ndarray]:

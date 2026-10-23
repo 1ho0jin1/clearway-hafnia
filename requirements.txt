@@ -12,5 +12,8 @@ pillow>=11       # scripts/locate_event.py: matching recorded frames to a source
 # Plan C's verdict memory (tier0/memory.py): SigLIP 2 image and text embeddings (google/siglip2-base-patch16-224,
 # Apache-2.0, downloaded to the Hugging Face cache on first use).
 transformers==5.20.2
+# Lens super-resolution (lens/enhance.py): Real-ESRGAN weights (BSD-3-Clause, downloaded to models/realesrgan on first
+# use, SHA-256 checked) loaded with spandrel (MIT).
+spandrel==0.4.2
 sentencepiece==0.2.2
 protobuf==7.36.2

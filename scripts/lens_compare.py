@@ -8,7 +8,8 @@ by matching each frame (the region around --box) against the clip's frame at --a
   plain       Hafnia on the camera's own recording, the window centred on the event (as the live pipeline asks);
   crop        the same window cropped around --box and enlarged, played on lens_1;
   crop_slow2  the crop at half speed (each frame twice), so Hafnia's frame sampling sees twice as many moments.
-Each is one Hafnia request (3 in total) with the live pipeline's one-word incident prompt. Needs lens.publisher
+Each is one Hafnia request (1 + the number of --variants) with the live pipeline's one-word incident prompt.
+--variants crop_sr adds the crop enlarged by super-resolution (lens/enhance.py) instead of bicubic. Needs lens.publisher
 running (scripts\start_lens.ps1). Writes run\lens-<camera>-<UTC>\results.json; the frames sent go to frames\
 (git-ignored: footage licences).
 """
@@ -34,6 +35,7 @@ from hafnia.xprotect_rest import XProtect  # noqa: E402
 from incident.bridge import FrameBridge  # noqa: E402
 from incident.verify import CLASSIFY, ask, parse  # noqa: E402
 from lens.client import crop, slow, span, submit, wait  # noqa: E402
+from lens.enhance import SuperRes  # noqa: E402
 from locate_event import FFMPEG  # noqa: E402
 
 
@@ -123,6 +125,8 @@ def main() -> int:
                          "best elsewhere 0.46)")
     ap.add_argument("--timeout", type=float, default=1200, help="seconds to wait for the event to come round")
     ap.add_argument("--stop-at", type=int, default=450, help="do not ask when today's count has reached this")
+    ap.add_argument("--variants", nargs="+", default=["crop", "crop_slow2"], choices=["crop", "crop_slow2", "crop_sr"],
+                    help="lens variants besides plain; crop_sr enlarges the crop with Real-ESRGAN (lens/enhance.py)")
     args = ap.parse_args()
 
     out = REPO / "run" / f"lens-{args.camera}-{dt.datetime.now(dt.timezone.utc):%Y%m%dT%H%M%SZ}"
@@ -131,8 +135,9 @@ def main() -> int:
     gw = Gateway()
     gw.login(gateway_password())
     q = gw.quota()
-    if q and q["DailySummaryCount"] + 3 > args.stop_at:
-        sys.exit(f"today's count is {q['DailySummaryCount']}: 3 more would pass --stop-at {args.stop_at}")
+    n = 1 + len(args.variants)
+    if q and q["DailySummaryCount"] + n > args.stop_at:
+        sys.exit(f"today's count is {q['DailySummaryCount']}: {n} more would pass --stop-at {args.stop_at}")
     cams = XProtect().cameras()
 
     print(f"watching {args.camera} for the event (the clip loops; up to {args.timeout:.0f} s)", flush=True)
@@ -142,7 +147,9 @@ def main() -> int:
     print(f"event at {t_event:%H:%M:%S.%f} UTC; {len(window)} frames in the window", flush=True)
 
     crops = [crop(f, args.box) for f in window]
-    variants = {"crop": crops, "crop_slow2": slow(crops, 2)}
+    available = {"crop": lambda: crops, "crop_slow2": lambda: slow(crops, 2),
+                 "crop_sr": lambda: SuperRes("general").upscale_all(crops)}
+    variants = {v: available[v]() for v in args.variants}
     jobs = {name: submit(fr, f"{args.camera}-{name}", fps=args.fps, meta={"camera": args.camera, "variant": name})
             for name, fr in variants.items()}
     sheet(window, out / "frames" / "plain.jpg")
