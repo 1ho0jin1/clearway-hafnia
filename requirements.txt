@@ -9,3 +9,8 @@ opencv-python==5.0.0.93
 numpy==2.5.2
 lap              # ByteTrack's assignment solver; Ultralytics would otherwise install it at run time
 pillow>=11       # scripts/locate_event.py: matching recorded frames to a source frame
+# Plan C's verdict memory (tier0/memory.py): SigLIP 2 image and text embeddings (google/siglip2-base-patch16-224,
+# Apache-2.0, downloaded to the Hugging Face cache on first use).
+transformers==5.20.2
+sentencepiece==0.2.2
+protobuf==7.36.2
