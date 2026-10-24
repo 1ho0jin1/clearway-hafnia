@@ -34,10 +34,9 @@ the difference.
 | **Total** | **83** | **242** | **130** | **38** | **43** | **7** | | **0 of 191** | |
 
 ¹ Memory only: skip look-alikes of rejections, and group pieces of one occurrence; no recurrences.
-² From the earlier run (`run/ledger-F1-real`, before the escalation and merge changes): its one change was asked, not
-skipped, and nothing changed since that affects an asked change on a camera with no incident. The final full replay
-was stopped twice by Claude Code for low machine memory; the other 14 clips' event streams are saved here
-(`events-*.pkl`; `test_11`'s is not committed: AI City licence).
+² Düsseldorf was replayed separately (a detached process, `run/ledger-F1-duesseldorf`) after the full replay had been
+stopped twice by Claude Code for low machine memory; all 15 clips' event streams are saved here (`events-*.pkl`;
+`test_11`'s is not committed: AI City licence) and the table is one replay of the final ledger over all of them.
 
 ## Reading
 

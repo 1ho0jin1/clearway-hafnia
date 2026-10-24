@@ -407,6 +407,65 @@
       }
     },
     {
+      "clip": "duesseldorf",
+      "seconds": 274.7,
+      "policies": {
+        "ask_all": {
+          "requests": 1,
+          "cards": null,
+          "alarms": null,
+          "incident_changes": 0,
+          "incident_changes_uncarded": 0,
+          "to_card_s": []
+        },
+        "memory": {
+          "requests": 1,
+          "recurrences": 0,
+          "fragments": 0,
+          "skipped": 0,
+          "escalated": 0,
+          "cards": 0,
+          "merged": 0,
+          "occurrences_on_cards": 0,
+          "dismissed": 1,
+          "alarms": 0,
+          "incident_changes": 0,
+          "incident_changes_uncarded": 0,
+          "to_card_s": []
+        },
+        "ledger": {
+          "requests": 1,
+          "recurrences": 0,
+          "fragments": 0,
+          "skipped": 0,
+          "escalated": 0,
+          "cards": 0,
+          "merged": 0,
+          "occurrences_on_cards": 0,
+          "dismissed": 1,
+          "alarms": 0,
+          "incident_changes": 0,
+          "incident_changes_uncarded": 0,
+          "to_card_s": []
+        },
+        "ledger_no_guard": {
+          "requests": 1,
+          "recurrences": 0,
+          "fragments": 0,
+          "skipped": 0,
+          "escalated": 0,
+          "cards": 0,
+          "merged": 0,
+          "occurrences_on_cards": 0,
+          "dismissed": 1,
+          "alarms": 0,
+          "incident_changes": 0,
+          "incident_changes_uncarded": 0,
+          "to_card_s": []
+        }
+      }
+    },
+    {
       "clip": "escooter_left_across_sidewalk",
       "seconds": 300.0,
       "policies": {
