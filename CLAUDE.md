@@ -295,8 +295,10 @@ gateway: off limits (house rules); ask the organizers if ever needed.
   `...\NativeDrivers\resources\StableFPS.xml` bumped and the Recording Server restarted.
 - **Which clip a camera plays** is a hardware setting (`VideoH264Files`, `FileName`) that applies live, without a
   restart. Plan: convert a batch of clips, restart once, then test by swapping the clip on a "test bench" camera.
-- Each camera is one StableFPS hardware on its own port: organizer cameras use `http://127.0.0.1:100`–`104`, ours
-  start at `105`. The record-on-motion rule covers All Cameras, so new cameras record automatically.
+- Each camera is one StableFPS hardware on its own port: organizer cameras use `http://127.0.0.1:100`–`110` (since
+  their update of 2026-10-21, which put six new cameras on 105–110 and removed our `test_01`–`test_05` there); ours
+  use `111` and up: pick the next free port, and expect organizer updates to claim ports. The record-on-motion rule
+  covers All Cameras, so new cameras record automatically.
 - **Recording Server restart** = stop and start the Windows service `Milestone XProtect Recording Server` only (not a
   reboot). For 2–3 minutes all cameras have no live video and no recording, and Hafnia exports fail (free). Stored
   recordings, the Management and Event Servers, the gateway, RDP and Tailscale are unaffected. Never stop it within
@@ -307,14 +309,21 @@ gateway: off limits (house rules); ask the organizers if ever needed.
 code = 5" and the camera stays black. Always run `scripts/annexb_normalize.py` after ffmpeg: SPS/PPS once, no SEI,
 4-byte start codes, like the organizer clips. Replacing a clip's content needs another Recording Server restart.
 
-**Current state (2026-10-21):** camera `test_11` (port 116) plays AI City 2021 Track 4 training video 91 (15 min,
+**Disk and memory (2026-10-24):** XProtect's recordings (`C:\MediaDatabase`, 24 h, size limit 1,000 GB: more than the
+300 GB disk; house rules: do not change storage) held 198 GB and left 5 GB free on C:; our `test_06`–`test_10` (crime
+clips, out of scope) were 75 GB of it and are now **disabled** (hardware disabled; re-enable with `Set-VmsHardware
+-Enabled $true`). Long offline replays were stopped twice by Claude Code for low RAM while the session was idle (XProtect
+about 4.9 GB, VS Code, Edge and Claude Code about 4 GB, plus YOLO, SigLIP and decoding): run long jobs detached
+(`Start-Process`) and check free memory.
+
+**Current state (2026-10-24):** our cameras: `test_06`–`test_10` (ports 111–115) disabled; `test_11` (port 116) plays AI City 2021 Track 4 training video 91 (15 min,
 800×410; a crash at about 602 s; licence not cleared for the entry: internal tests only; source in `data/aicity21/`,
 git-ignored). Camera `lens_1` (Universal driver, `rtsp://127.0.0.1:8554/lens1`) shows lens clips; it needs MediaMTX and
 `lens.publisher` running (`scripts/start_lens.ps1`); both run detached and do not survive a reboot. MediaMTX v1.21.2
 is in `C:\tools\mediamtx\v1.21.2`.
 
-**Earlier state (2026-10-18):** cameras `test_01`–`test_10` (ports 106–115, device group Hackathon) play the
-incident clips listed in `data/clips.json`; the Recording Server was restarted twice today. The construction clip is
+**Earlier state (2026-10-18):** cameras `test_01`–`test_10` (ports 106–115, device group Hackathon) played the
+incident clips listed in `data/clips.json` (`test_01`–`test_05` removed by the organizers' update of 2026-10-21); the Recording Server was restarted twice today. The construction clip is
 in the driver folder (normalized) but has no camera.
 
 **Earlier state (2026-10-17):** `data/construction_aeria_footage.mp4` (27.8 s drone footage of a construction site;
