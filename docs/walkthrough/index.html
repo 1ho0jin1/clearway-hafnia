@@ -1,0 +1,379 @@
+<title>Right-of-Way Pipeline</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column of numbered pipeline steps; each step = claim, real camera figure, measured numbers. */
+:root {
+  --bg: #f3f5f7;          /* overcast asphalt, light */
+  --surface: #ffffff;
+  --ink: #1b232c;
+  --muted: #5a6673;
+  --rule: #d5dbe1;
+  --signal: #b86e00;      /* amber: traffic signal, the accent */
+  --signal-soft: #fff1d6;
+  --stop: #b3261e;        /* incident red */
+  --stop-soft: #fde4e1;
+  --go: #2e7d32;          /* built */
+  --go-soft: #dff1e0;
+  --code-bg: #eef1f4;
+  --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12171c; --surface: #1a2128; --ink: #e6ebf0; --muted: #9aa7b4; --rule: #2c3640;
+    --signal: #f0a530; --signal-soft: #3a2b10; --stop: #f07068; --stop-soft: #3d1b19;
+    --go: #6cc070; --go-soft: #1c3320; --code-bg: #10161b; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12171c; --surface: #1a2128; --ink: #e6ebf0; --muted: #9aa7b4; --rule: #2c3640;
+  --signal: #f0a530; --signal-soft: #3a2b10; --stop: #f07068; --stop-soft: #3d1b19;
+  --go: #6cc070; --go-soft: #1c3320; --code-bg: #10161b; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; }
+.page { max-width: 980px; margin: 0 auto; padding-block: 40px 72px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; line-height: 1.1; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2.4rem, 6vw, 3.6rem); letter-spacing: 0.01em; }
+h2 { font-size: clamp(1.6rem, 3.6vw, 2.1rem); }
+h3 { font-size: 1.25rem; }
+p { margin: 0; max-width: 68ch; }
+a { color: var(--signal); }
+header { display: grid; gap: 16px; }
+.eyebrow { font-family: var(--display); text-transform: uppercase; letter-spacing: 0.12em; color: var(--signal); font-weight: 600; font-size: 0.95rem; }
+.lede { font-size: 1.15rem; color: var(--ink); }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 24px; color: var(--muted); font-size: 0.92rem; }
+.facts b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 0.85rem; color: var(--muted); }
+.chip { display: inline-block; font-family: var(--display); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  font-size: 0.78rem; padding: 2px 8px; border-radius: 3px; border: 1px solid currentColor; white-space: nowrap; }
+.chip.built { color: var(--go); background: var(--go-soft); }
+.chip.todo { color: var(--signal); background: var(--signal-soft); }
+.chip.out { color: var(--muted); background: transparent; }
+.flow { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 16px; overflow-x: auto; }
+.flow pre { margin: 0; }
+section.step { display: grid; gap: 16px; grid-template-columns: 64px minmax(0, 1fr); align-items: start; }
+.num { font-family: var(--display); font-weight: 700; font-size: 2.6rem; line-height: 1; color: var(--signal);
+  font-variant-numeric: tabular-nums; border-top: 4px solid var(--signal); padding-top: 6px; }
+.body { display: grid; gap: 14px; min-width: 0; }
+.title-row { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: baseline; }
+figure { margin: 0; display: grid; gap: 8px; }
+figure img { width: 100%; height: auto; display: block; border-radius: 3px; border: 1px solid var(--rule); background: var(--surface); }
+figcaption { font-size: 0.88rem; color: var(--muted); max-width: 80ch; }
+.numbers { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1px; background: var(--rule);
+  border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
+.numbers div { background: var(--surface); padding: 10px 14px; display: grid; gap: 2px; min-width: 0; }
+.numbers b { font-family: var(--display); font-size: 1.6rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.numbers span { font-size: 0.84rem; color: var(--muted); }
+.json { font-family: var(--mono); font-size: 0.86rem; background: var(--code-bg); border: 1px solid var(--rule); border-radius: 3px;
+  padding: 14px 16px; overflow-x: auto; white-space: pre; line-height: 1.5; }
+.json .k { color: var(--muted); }
+.json .v { color: var(--ink); font-weight: 500; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 3px; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; background: var(--surface); }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-family: var(--display); font-weight: 600; letter-spacing: 0.04em; font-size: 0.95rem; color: var(--muted); }
+tr:last-child td { border-bottom: none; }
+td code, p code { font-family: var(--mono); font-size: 0.86em; background: var(--code-bg); padding: 1px 4px; border-radius: 2px; }
+.pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.answer { border: 1px solid var(--rule); border-left: 4px solid var(--go); background: var(--surface); padding: 12px 14px; border-radius: 3px;
+  display: grid; gap: 6px; min-width: 0; }
+.answer.bad { border-left-color: var(--stop); }
+.answer .who { font-family: var(--display); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; font-size: 0.85rem; color: var(--muted); }
+.note { font-size: 0.9rem; color: var(--muted); }
+footer { border-top: 1px solid var(--rule); padding-top: 20px; display: grid; gap: 8px; font-size: 0.88rem; color: var(--muted); }
+@media (max-width: 560px) {
+  section.step { grid-template-columns: minmax(0, 1fr); }
+  .num { font-size: 2rem; width: 56px; }
+}
+</style>
+
+<div class="page">
+  <header>
+    <div class="eyebrow">Hafnia Hackathon 2026 · plan C</div>
+    <h1>Right-of-Way Pipeline</h1>
+    <p class="lede">When something blocks or endangers a public way, the team that owns it gets an alarm, and the alarm
+      closes itself when the way is clear again. Every camera is watched for free; Hafnia is asked only about changes
+      worth a request, and shown them the way it reads best.</p>
+    <div class="facts">
+      <span>Shown on the organizers' cameras (on every hackathon machine) and a CC0 street clip</span>
+      <span>Hafnia requests behind these results: <b>57</b> of the 500-a-day allowance</span>
+    </div>
+    <div class="legend">
+      <span class="chip built">built</span> built and measured
+      <span class="chip todo">to build</span> designed, not wired yet
+      <span class="chip out">left out</span> measured, no gain
+    </div>
+  </header>
+
+  <div class="flow" aria-label="Pipeline flow diagram">
+<pre class="mermaid">
+flowchart TD
+    CAM["XProtect cameras"] --> FB["FrameBridge: live frames, 10 fps"]
+    FB --> CD["Change detector: changed and stayed changed"]
+    FB --> PT["Person and stalled-vehicle triggers"]
+    CD --> MEM{"Verdict memory (SigLIP 2): looks like a change Hafnia already rejected here?"}
+    PT --> MEM
+    MEM -- "yes" --> DROP(["skipped, no request"])
+    MEM -- "no" --> RT["Router: daily budget, urgent first"]
+    RT --> LENS["Lens: event window, cropped to the spot, played on camera lens_1"]
+    LENS --> GW["Hafnia: one request, JSON answer"]
+    GW -- "NONE" --> REJ["remember the rejection"]
+    REJ -.-> MEM
+    GW -- "an incident category" --> ITEM["Item + XProtect alarm for the owner + bookmark"]
+    ITEM --> WATCH["Tier 0 watches the spot"]
+    WATCH -- "looks as before" --> CLOSE(["closed, no request"])
+    classDef built fill:#d8f0d8,stroke:#2e7d32,color:#000
+    classDef planned fill:#fff3cd,stroke:#b38600,color:#000
+    class CAM,FB,CD,MEM,DROP,LENS,GW,REJ built
+    class PT,RT,ITEM,WATCH,CLOSE planned
+</pre>
+  </div>
+
+  <section class="step" id="cameras">
+    <div class="num">1</div>
+    <div class="body">
+      <div class="title-row"><h2>The cameras</h2><span class="chip built">built</span></div>
+      <p>Eleven XProtect cameras play the organizers' clips on a loop at 10 frames per second. Six of them, added on
+        21 October, show incidents in public ways: a breakdown, a tipped bin, an e-scooter left on the pavement, a person
+        on the tracks, graffiti on a train and a break-in at a school gate. The last tile is <code>lens_1</code>, a camera
+        of our own whose video we render: it is how Hafnia gets to see a close-up.</p>
+      <figure>
+        <img src="01_cameras.jpg" alt="Grid of eleven camera frames, one per organizer camera, plus a frame from lens_1 showing an enlarged e-scooter on a pavement.">
+        <figcaption>One frame per camera, taken from the clip each camera plays. Our real-crash camera (AI City video 91)
+          is not shown: its licence does not allow redistribution.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="step" id="detector">
+    <div class="num">2</div>
+    <div class="body">
+      <div class="title-row"><h2>Tier 0 notices that something changed and stayed changed</h2><span class="chip built">built</span></div>
+      <p>Two background models run on every frame. A slow one remembers how the scene looked minutes ago; a fast one
+        follows it within half a second. A pixel that differs from the slow model but not from the fast one belongs to
+        something that arrived and stopped, or to something that left. When a region stays that way for 1.5 seconds and
+        no person stands in it, it is reported with the time it started changing. There are no object classes and no
+        per-camera rules: the detector has never been told what a bin is.</p>
+      <figure>
+        <img src="02_detector_bin.jpg" alt="Four rows for four moments of the bin clip; columns: live frame, slow background, pixels different from it in yellow, static change in red.">
+        <figcaption>The bin camera, second loop. Columns: the live frame; the slow background (the bin still standing);
+          pixels that differ from it (yellow); pixels that have been static and different for 1.5 s (red). The first
+          box reported, at 10.2 s, is the empty place where the bin stood; the lying bin turns red a moment later.</figcaption>
+      </figure>
+      <div class="numbers">
+        <div><b>4 of 4</b><span>object incidents caught in every loop: breakdown, bin, e-scooter, graffiti</span></div>
+        <div><b>0.1–3.9 s</b><span>from the object coming to rest to the report</span></div>
+        <div><b>0</b><span>reports on the roadworks camera and on 13 min of foggy highway</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" id="people">
+    <div class="num">3</div>
+    <div class="body">
+      <div class="title-row"><h2>A person is not an obstruction</h2><span class="chip built">held back</span><span class="chip todo">person triggers</span></div>
+      <p>A change that a person stands in is held back until they leave: someone pausing on the pavement is not an
+        obstacle, the scooter they leave behind is. The two incidents that are people (on the tracks, at the gate) are
+        therefore not the change detector's job. They get their own triggers: a danger zone drawn once over the
+        tracks, and a person staying at one spot.</p>
+      <figure>
+        <img src="03_people_held.jpg" alt="Railway platform with a seated person boxed in green, and a person crouching at a school gate boxed in green; small red static-change areas around them.">
+        <figcaption>Green: YOLO person boxes. Red: static change. Both are held back. In the lens tests below, YOLO's
+          person box stands in for the person triggers.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="step" id="negatives">
+    <div class="num">4</div>
+    <div class="body">
+      <div class="title-row"><h2>What it must not report</h2><span class="chip built">measured</span></div>
+      <p>Roadworks that are there all the time belong to the background. A camera fogging up changes most of the view
+        at once, which the detector ignores as a whole-view change, though its edges still slip through. A dense crowd
+        moves all the time, but people standing still for a moment cause false reports at the short setting used for
+        the 15-second loops. On real cameras, where an obstruction lasts minutes, the detector waits 15 seconds instead.</p>
+      <figure>
+        <img src="04_negatives.jpg" alt="Three rows: roadworks camera, a camera fogging up, a night crowd; left column different pixels in yellow, right column static change in red with the false-report count.">
+        <figcaption>Left: pixels different from the slow background. Right: static change, with the false reports
+          counted in the offline check (gate G1).</figcaption>
+      </figure>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Camera</th><th>Short-loop setting (1.5 s)</th><th>Real-camera setting (15 s)</th></tr></thead>
+          <tbody>
+            <tr><td>Roadworks</td><td>0 in 40 s</td><td>–</td></tr>
+            <tr><td>Camera fogging up</td><td>25 in 40 s</td><td>out of scope: camera status</td></tr>
+            <tr><td>Dense crowd</td><td>10 in 93 s</td><td>0</td></tr>
+            <tr><td>Real busy streets (Mumbai, Düsseldorf)</td><td>–</td><td>14 to 125 per hour</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" id="memory">
+    <div class="num">5</div>
+    <div class="body">
+      <div class="title-row"><h2>A memory of Hafnia's verdicts</h2><span class="chip built">built, offline</span></div>
+      <p>Every answer is kept. The changed spot is embedded with SigLIP 2, an image model that runs on the machine's
+        GPU in milliseconds, and stored with Hafnia's verdict. A new change at a spot Hafnia already rejected is not sent
+        if it also looks like what was rejected there. Spot alone is not enough: an incident often comes to rest where
+        something harmless was before.</p>
+      <figure>
+        <img src="05_memory.jpg" alt="Top row: two crops of a busy Mumbai junction, similarity 0.92, the second skipped. Bottom row: empty pavement then a person with an e-scooter at the same spot, similarity 0.63, asked.">
+        <figcaption>Top: a busy Mumbai junction. The change at 34 s looks like the one rejected at 26 s (similarity 0.92)
+          and is skipped. Bottom: the e-scooter camera. At 24 s the rider stops with the scooter where an empty-pavement
+          change was rejected at 16 s; it looks different (0.63), so it is asked. Verdicts here come from a stand-in for
+          Hafnia (the known ground truth), not from real requests.</figcaption>
+      </figure>
+      <div class="numbers">
+        <div><b>223 → 123</b><span>requests for 223 changes, with the memory (45% fewer)</span></div>
+        <div><b>0 of 56</b><span>incidents skipped by the memory</span></div>
+        <div><b>20 of 56</b><span>incidents a spot-only rule would have skipped</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" id="lens">
+    <div class="num">6</div>
+    <div class="body">
+      <div class="title-row"><h2>The lens shows Hafnia the moment and the spot</h2><span class="chip built">built</span></div>
+      <p>Hafnia can only read video that XProtect recorded. So the lens renders a short clip, plays it on our own camera
+        <code>lens_1</code> through a local video stream, and Hafnia is asked about that recording. The clip runs from
+        2 seconds before the change started to 3 seconds after it was reported, so the outcome is in it, and it is
+        cropped to the spot.</p>
+      <figure>
+        <img src="06_lens_graffiti.jpg" alt="Top row: five full frames of a person spraying graffiti on a red train, the changed spot boxed. Bottom row: the same five moments cropped and enlarged.">
+        <figcaption>Graffiti camera, 6.3 to 12.7 s of the loop. Top: the camera's view with the reported spot. Bottom:
+          what <code>lens_1</code> plays. For things close to the camera, such as the bin, the crop is nearly the whole
+          frame; for small, distant things it is a real close-up.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="step" id="answer">
+    <div class="num">7</div>
+    <div class="body">
+      <div class="title-row"><h2>Hafnia answers in a fixed format</h2><span class="chip built">built</span><span class="chip todo">COLLISION category</span></div>
+      <p>One request per change. The prompt asks for JSON and defines each category in a few words; Hafnia was trained
+        to answer in JSON. Code parses the answer and uses the category and whether the thing is still there. The
+        object's details are not trusted: Hafnia invents some, such as tool types.</p>
+      <div class="json" aria-label="Hafnia's answer for the graffiti clip"><span class="k">{"category":</span> <span class="v">"DAMAGE"</span>,
+ <span class="k">"object":</span> <span class="v">"spray-painted graffiti"</span>,
+ <span class="k">"where":</span> <span class="v">"pavement"</span>,
+ <span class="k">"still_present":</span> <span class="v">true</span>,
+ <span class="k">"summary":</span> <span class="v">"A person sprays colorful graffiti onto the side of a stationary train at the platform, then steps back and observes the completed artwork."</span>}</div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Camera</th><th>Category</th><th>Still there</th><th>Summary (crop view)</th></tr></thead>
+          <tbody>
+            <tr><td>Breakdown</td><td>STALLED_VEHICLE</td><td>yes</td><td>A silver pickup truck stalls in the middle of the lane with its driver-side door open and smoke rising from the engine, blocking traffic as nearby vehicles slow and stop.</td></tr>
+            <tr><td>Bin</td><td>OBSTRUCTION</td><td>yes</td><td>A person tips a green wheeled bin onto its side on the pavement, leaving it lying there as they walk away.</td></tr>
+            <tr><td>E-scooter</td><td>OBSTRUCTION</td><td>yes</td><td>The electric scooter tips over onto the pavement and remains lying there as the rider dismounts and walks away.</td></tr>
+            <tr><td>Tracks</td><td>PERSON_ON_TRACKS</td><td>yes</td><td>A person in a red jacket crawls along the edge of the railway tracks, moving slowly forward while remaining on the tracks.</td></tr>
+            <tr><td>Graffiti</td><td>DAMAGE</td><td>yes</td><td>A person sprays colorful graffiti onto the side of a stationary train at the platform, then steps back and observes the completed artwork.</td></tr>
+            <tr><td>Gate</td><td>TAMPERING</td><td>yes</td><td>A hooded person crouches at a metal gate at night, using a tool to pry or force the latch, then pauses and resumes working on the lock.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="numbers">
+        <div><b>30 of 30</b><span>categories right: six incidents, five ways of showing each</span></div>
+        <div><b>7 of 9</b><span>with the earlier one-word question and unaligned windows</span></div>
+      </div>
+      <p class="note">The category list steers the whole answer. On a real highway crash, with no crash category in the
+        list, Hafnia answered STALLED_VEHICLE nine times and never mentioned the impact. A COLLISION category is next
+        (gate G3, three requests).</p>
+    </div>
+  </section>
+
+  <section class="step" id="window">
+    <div class="num">8</div>
+    <div class="body">
+      <div class="title-row"><h2>Why the clip is centred on the event</h2><span class="chip built">measured</span></div>
+      <p>A clip that is not aligned with the event can start in the aftermath and end in the run-up. Hafnia then tells
+        the story in the order of the frames, backwards. The gate camera over one full loop shows it.</p>
+      <figure>
+        <img src="08_loopcut_gate.jpg" alt="Eight frames of the gate clip: the person works at the lock, the loop restarts with an empty gate, then the person walks in from the right with bolt cutters.">
+        <figcaption>One loop of the gate camera: working at the lock, then the loop restarts and he walks in from the
+          right with bolt cutters.</figcaption>
+      </figure>
+      <div class="pair">
+        <div class="answer bad"><div class="who">Full loop</div>
+          <div>"A person approaches a locked metal gate at night, crouches to inspect the lock, then walks away without
+            cutting the gate." Object: "person with chainsaw". Still there: no.</div></div>
+        <div class="answer"><div class="who">Event window</div>
+          <div>"A hooded person crouches at the gate, working on the lock with tools, and remains there at the end of
+            the video." Still there: yes.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" id="left-out">
+    <div class="num">9</div>
+    <div class="body">
+      <div class="title-row"><h2>Tested and left out</h2><span class="chip out">left out</span></div>
+      <p>Two ideas for showing Hafnia more were measured and gave nothing. A super-resolution model (Real-ESRGAN)
+        sharpens the crop, but Hafnia's answers stayed the same word for word, also on a 30-pixel car in a real crash.
+        Holding the spot's first and last frames as captioned BEFORE and AFTER stills made one answer worse: the lying
+        scooter became "parked". Both stay in the code as options.</p>
+      <figure>
+        <img src="07_lens_options.jpg" alt="Top: the gate crop enlarged with bicubic interpolation and with Real-ESRGAN. Bottom: BEFORE and AFTER stills of the e-scooter spot.">
+        <figcaption>Top: bicubic (the default) and Real-ESRGAN. Bottom: the BEFORE and AFTER stills.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="step" id="alarm">
+    <div class="num">10</div>
+    <div class="body">
+      <div class="title-row"><h2>An alarm for the team that owns it</h2><span class="chip todo">to build</span></div>
+      <p>A confirmed change opens an item in a ledger and an XProtect alarm. The category decides who gets it and how
+        urgent it is; the lens clip is bookmarked so the operator sees the moment. The alarm and bookmark calls exist
+        from earlier work; the ledger and the routing by owner are next.</p>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Category</th><th>Owner</th><th>Priority</th></tr></thead>
+          <tbody>
+            <tr><td>PERSON_ON_TRACKS</td><td>Rail control: stop trains</td><td>High, urgent</td></tr>
+            <tr><td>COLLISION (to add)</td><td>Traffic operations, emergency services</td><td>High, urgent</td></tr>
+            <tr><td>STALLED_VEHICLE</td><td>Traffic operations, towing</td><td>High</td></tr>
+            <tr><td>OBSTRUCTION</td><td>Scooter operator, sanitation, street maintenance</td><td>Medium</td></tr>
+            <tr><td>DAMAGE</td><td>Asset owner</td><td>Low</td></tr>
+            <tr><td>TAMPERING</td><td>Security</td><td>Low</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" id="close">
+    <div class="num">11</div>
+    <div class="body">
+      <div class="title-row"><h2>The alarm closes itself</h2><span class="chip built">in the detector</span><span class="chip todo">alarm closing</span></div>
+      <p>Each change keeps a snapshot of how its spot looked before. Tier 0 compares the spot with it on every frame,
+        and when they match for a second the item is closed, without another request. In the looped clip that happens
+        when the loop restarts and the bin stands again; on a real street, when someone sets the bin back up.</p>
+      <figure>
+        <img src="09_auto_close.jpg" alt="Four crops of the bin spot: the BEFORE snapshot, the spot at 14 s with mean difference 92, after the loop restart with difference 7, then closed.">
+        <figcaption>The bin's spot: BEFORE; at 14.0 s (mean difference 92, open); 0.5 s after the loop restarts
+          (difference 7, under the threshold of 12); 1.5 s after, closed. Reported at 10.2 s, closed 1.0 s into the
+          next loop.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <footer>
+    <p>Results from the repository's run folders: change detector <code>run/change-G1-loops</code>, verdict memory
+      <code>run/memory-compare</code>, lens pilot <code>run/pilot-20261023T162040Z</code>, small-object test
+      <code>run/lens-test_11-20261023T165151Z</code>, probe and audit <code>run/probe-20261022T054342Z</code>. Figures:
+      <code>scripts/viz_walkthrough.py</code>.</p>
+    <p>Footage: the organizers' hackathon cameras; "Street in Mumbai (video) 02" by Nicolas Vigier, Wikimedia Commons,
+      CC0.</p>
+  </footer>
+</div>

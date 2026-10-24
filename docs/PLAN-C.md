@@ -1,6 +1,7 @@
 # Plan C: right-of-way incidents (decided 2026-10-22, updated 2026-10-24)
 
-Status: **current plan.** Supersedes `docs/PLAN.md` (verified accident alarms) and `docs/PLAN-near-miss.md` (near-miss
+Status: **technical plan.** The product built on it, with the current scope and schedule, is in `docs/PRODUCT.md`
+(2026-10-24); where they differ, `docs/PRODUCT.md` wins. Supersedes `docs/PLAN.md` (verified accident alarms) and `docs/PLAN-near-miss.md` (near-miss
 observatory); both stay as reference, and their parts are reused below. Submission about 2026-10-30. Judging weighs
 creativity and validity most; reproducibility counts.
 
@@ -146,7 +147,7 @@ as a scene reset; each loop is one more trial of the same incident, and the ledg
 | G2 Lens | M1 pilot (1 repeat first, about 24 requests) | 24 | centred or before/after beats the full-loop baseline on category accuracy | **Not decidable 2026-10-23** (`run/pilot-20261023T162040Z`, 30 answers): with the JSON prompt every category was right in every view (30/30). Summaries: the full loop again reverses the gate across the loop cut; BEFORE/AFTER one regression. On test_11's small crash (`run/lens-test_11-20261023T165151Z`, 9 requests) super-resolution gave the bicubic answer word for word, and the crash was called STALLED_VEHICLE for lack of a crash category. **Decided:** event window + crop + JSON prompt; add COLLISION |
 | G3 Crash category | test_11's crash, full frame / crop / crop with SR, with COLLISION in the prompt | 3 | the crash is named (COLLISION, or the summary mentions the impact) | Keep STALLED_VEHICLE for crash aftermaths; report it |
 
-## Schedule (revised 2026-10-24)
+## Schedule (revised 2026-10-24; superseded from Oct 24 by `docs/PRODUCT.md`)
 
 The allowance resets at 00:00 UTC (the machine's clock); stay under `--stop-at` each day.
 

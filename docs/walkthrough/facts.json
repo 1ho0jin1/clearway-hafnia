@@ -1,0 +1,152 @@
+{
+  "cameras": [
+    "vehicle_breakdown_traffic_queue",
+    "bin_pushed_over_onto_sidewalk",
+    "escooter_left_across_sidewalk",
+    "person_on_railway_tracks",
+    "graffiti_on_standing_train",
+    "school_gate_break_in_night",
+    "vandalism",
+    "traffic_flows_in_the_open_lanes",
+    "busy_street",
+    "city_street_7_condensation_inside_housing",
+    "highway_traffic_overcast_weather"
+  ],
+  "bin_reports": [
+    {
+      "t_detect_in_loop": 10.2,
+      "box": [
+        26,
+        229,
+        216,
+        455
+      ],
+      "area": 0.0387
+    },
+    {
+      "t_detect_in_loop": 10.6,
+      "box": [
+        250,
+        411,
+        390,
+        442
+      ],
+      "area": 0.0053
+    }
+  ],
+  "negatives": {
+    "traffic_flows_in_the_open_lanes": {
+      "false_reports": 0,
+      "seconds": 40.0
+    },
+    "city_street_7_condensation_inside_housing": {
+      "false_reports": 25,
+      "seconds": 40.0
+    },
+    "busy_street": {
+      "false_reports": 10,
+      "seconds": 93.0
+    }
+  },
+  "mumbai_skip": {
+    "asked_t": 26.2,
+    "skipped_t": 33.5,
+    "sim": 0.924
+  },
+  "escooter_asked": {
+    "rejected_t": 16.0,
+    "incident_t": 23.5,
+    "sim": 0.627
+  },
+  "graffiti_window": [
+    6.3,
+    12.7
+  ],
+  "graffiti_box": [
+    364,
+    304,
+    458,
+    390
+  ],
+  "graffiti_answer": {
+    "category": "DAMAGE",
+    "object": "spray-painted graffiti",
+    "where": "pavement",
+    "still_present": true,
+    "summary": "A person sprays colorful graffiti onto the side of a stationary train at the platform, then steps back and observes the completed artwork.",
+    "json_ok": true
+  },
+  "graffiti_answer_raw": "{\"category\": \"DAMAGE\", \"object\": \"spray-painted graffiti\", \"where\": \"pavement\", \"still_present\": true, \"summary\": \"A person sprays colorful graffiti onto the side of a stationary train at the platform, then steps back and observes the completed artwork.\"}",
+  "answers_by_camera": {
+    "vehicle_breakdown_traffic_queue": {
+      "category": "STALLED_VEHICLE",
+      "object": "silver pickup truck",
+      "where": "lane",
+      "still_present": true,
+      "summary": "A silver pickup truck stalls in the middle of the lane with its driver-side door open and smoke rising from the engine, blocking traffic as nearby vehicles slow and stop.",
+      "json_ok": true
+    },
+    "bin_pushed_over_onto_sidewalk": {
+      "category": "OBSTRUCTION",
+      "object": "green wheeled bin",
+      "where": "pavement",
+      "still_present": true,
+      "summary": "A person tips a green wheeled bin onto its side on the pavement, leaving it lying there as they walk away.",
+      "json_ok": true
+    },
+    "escooter_left_across_sidewalk": {
+      "category": "OBSTRUCTION",
+      "object": "electric scooter",
+      "where": "pavement",
+      "still_present": true,
+      "summary": "The electric scooter tips over onto the pavement and remains lying there as the rider dismounts and walks away.",
+      "json_ok": true
+    },
+    "school_gate_break_in_night": {
+      "category": "TAMPERING",
+      "object": "person with tool",
+      "where": "pavement",
+      "still_present": true,
+      "summary": "A hooded person crouches at a metal gate at night, using a tool to pry or force the latch, then pauses and resumes working on the lock.",
+      "json_ok": true
+    },
+    "person_on_railway_tracks": {
+      "category": "PERSON_ON_TRACKS",
+      "object": "person in red jacket",
+      "where": "track",
+      "still_present": true,
+      "summary": "A person in a red jacket crawls along the edge of the railway tracks, moving slowly forward while remaining on the tracks.",
+      "json_ok": true
+    },
+    "graffiti_on_standing_train": {
+      "category": "DAMAGE",
+      "object": "spray-painted graffiti",
+      "where": "pavement",
+      "still_present": true,
+      "summary": "A person sprays colorful graffiti onto the side of a stationary train at the platform, then steps back and observes the completed artwork.",
+      "json_ok": true
+    }
+  },
+  "gate_full_loop": {
+    "category": "TAMPERING",
+    "object": "person with chainsaw",
+    "where": "pavement",
+    "still_present": false,
+    "summary": "A person approaches a locked metal gate at night, crouches to inspect the lock, then walks away without cutting the gate.",
+    "json_ok": true
+  },
+  "gate_centred": {
+    "category": "TAMPERING",
+    "object": "hooded person",
+    "where": "pavement",
+    "still_present": true,
+    "summary": "A hooded person crouches at the gate, working on the lock with tools, and remains there at the end of the video.",
+    "json_ok": true
+  },
+  "close": {
+    "reported_at": 10.2,
+    "closed_at_abs": 31.00000000000017,
+    "closed_by": "restored",
+    "threshold": 12.0
+  }
+}

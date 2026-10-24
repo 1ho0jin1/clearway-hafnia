@@ -6,7 +6,8 @@ and Hafnia VLM (a vision-language model reached through the Hafnia gateway on th
 
 **Judging weighs creativity and validity most** (organizer Q&A). Reproducibility counts too, but a best-effort
 setup script plus documented manual steps is enough. Deliverable: this repository; a demo video is optional.
-The current plan and schedule are in `docs/PLAN-C.md` (decided 2026-10-22): keep it current. Earlier plans, kept for
+The product, its scope and the schedule are in `docs/PRODUCT.md` (2026-10-24: Clearway, an owner board for
+right-of-way incidents); the pipeline and its measurements in `docs/PLAN-C.md`. Keep both current. Earlier plans, kept for
 reference: `docs/PLAN.md` (verified accident alarms) and `docs/PLAN-near-miss.md` (near-miss observatory; also the
 research on Hafnia's trained formats, earlier and competing entries, and footage sources with licence notes).
 
