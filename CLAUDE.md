@@ -143,6 +143,8 @@ diagram (Mermaid): `docs/PLAN-C.md`, "Pipeline".
 | `scripts/setup_lens.ps1`, `scripts/start_lens.ps1` | Install MediaMTX (pinned, SHA-256 checked) and camera `lens_1` (Universal 1 channel driver, our rule "Lens: record lens_1 always"); start MediaMTX and the publisher detached (logs in `run/lens/`) |
 | `scripts/lens_compare.py` | One looped event asked about plainly and through the lens (`--variants crop crop_slow2 crop_sr`, `--prompt classify|json`, `--asks N`): finds the event live by frame matching; (1 + variants) × asks requests |
 | `scripts/lens_pilot.py` | Plan C's lens pilot (M1): each synthetic incident camera, five views (full loop, event window, crop, crop + SR, BEFORE/AFTER), one JSON prompt (`PROMPT`, `parse`); 5 requests per camera |
+| `clearway/ledger.py` | The ledger (product F1): incidents, pieces, recurrences (no request), provisional skips with escalation, same-category merge, alarms with a quiet period, clearing; returns actions, logs events (JSONL), `Ledger.replay()` |
+| `scripts/eval_ledger.py` | The ledger replayed offline against a stand-in for Hafnia: requests, cards, occurrences, alarms, misses; saves each clip's event stream, `--from-events` replays them without the detector |
 | `tier0/change.py`, `tier0/memory.py` | Plan C tier 0: the change detector (`ChangeParams.loops()` / `.real()`) and the SigLIP 2 verdict memory (`Embedder`, `VerdictMemory`) |
 | `scripts/eval_change.py`, `scripts/eval_memory.py` | Offline checks, no requests: the detector on every clip as its camera plays it (`--profile`, gate G1); the memory against a stand-in for Hafnia (`RULES`: none, spot, spot unless confirmed, appearance, SigLIP) |
 | `scripts/probe_cameras.py` | Neutral description and one-word class per camera over one loop (cameras × 2 requests) |
@@ -257,6 +259,13 @@ STALLED_VEHICLE nine times and never named in a summary (COLLISION to add, gate 
 ("chainsaw", "lockpicks" for bolt cutters). Asking again about the same span returns the same answer, word for
 word: repeats need different events or windows. Hafnia's cloud refused one specific clip twice ("Transfer Assets: …
 HTTP 403 Forbidden"); the same window shifted by 1 s worked; failures are not counted.
+
+**Ledger, offline** (`run/ledger-F1/README.md`, no requests; stand-in for Hafnia): six incident cameras over 5 min cost
+9 requests instead of 190, one card per incident, every later occurrence recognised (card in 1.4–2.6 s), no incident
+change lost. On real `test_11` the memory once skipped the crash as a look-alike of a harmless change at the same
+spot (similarity 0.947: the road dominates small crops); skips are now provisional (asked after 30 s if the change
+stays), so the crash is carded 60 s after it began and real footage saves little (18 of 21 requests). Long replays
+were stopped twice by Claude Code for low machine memory: event streams are saved per clip (`--from-events`).
 
 **Crash category (gate G3)** (`run/lens-test_11-20261024T110155Z`, 3 requests): with COLLISION in the JSON prompt the
 cropped view of test_11's crash says COLLISION ("loses control … veers sharply"), the full frame STALLED_VEHICLE; the
