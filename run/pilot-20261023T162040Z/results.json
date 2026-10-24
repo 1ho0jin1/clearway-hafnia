@@ -748,6 +748,48 @@
       "correct": true,
       "error": null,
       "summary_id": "4fe8eede-4392-41af-b2c6-6f2949616151"
+    },
+    {
+      "camera": "escooter_left_across_sidewalk",
+      "repeat": 0,
+      "variant": "centred",
+      "retry_of_failed": true,
+      "start": "2026-10-23T16:24:34.501000+00:00",
+      "end": "2026-10-23T16:24:41.800999+00:00",
+      "progress": "Failed",
+      "seconds": 3.3,
+      "answer": "",
+      "parsed": {
+        "category": "UNPARSED",
+        "json_ok": false
+      },
+      "truth": "OBSTRUCTION",
+      "correct": false,
+      "error": "Transfer Assets: An error was returned from Hafnia VLM: HTTP 403 Forbidden",
+      "summary_id": "81bd2cb5-d660-4418-a67d-15c97d04a371"
+    },
+    {
+      "camera": "escooter_left_across_sidewalk",
+      "repeat": 0,
+      "variant": "centred",
+      "retry_of_failed": "shifted +1 s",
+      "start": "2026-10-23T16:24:35.501000+00:00",
+      "end": "2026-10-23T16:24:42.800999+00:00",
+      "progress": "Completed",
+      "seconds": 5.1,
+      "answer": "{\"category\": \"OBSTRUCTION\", \"object\": \"electric scooter\", \"where\": \"pavement\", \"still_present\": true, \"summary\": \"The electric scooter tips over onto the pavement and remains lying there as the rider dismounts and walks away.\"}",
+      "parsed": {
+        "category": "OBSTRUCTION",
+        "object": "electric scooter",
+        "where": "pavement",
+        "still_present": true,
+        "summary": "The electric scooter tips over onto the pavement and remains lying there as the rider dismounts and walks away.",
+        "json_ok": true
+      },
+      "truth": "OBSTRUCTION",
+      "correct": true,
+      "error": null,
+      "summary_id": "d79a2bd6-4bfd-468b-8d37-c7271ba1a8d8"
     }
   ]
 }

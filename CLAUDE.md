@@ -116,7 +116,9 @@ an API; never write XProtect or gateway paths and fields from memory.
 
 ## Repository layout
 
-Python 3.12 (installed from python.org, `py` launcher), standard library only so far.
+Python 3.12 (installed from python.org, `py` launcher). The gateway and XProtect clients use only the standard
+library; tier 0, the lens and the verdict memory run in `.venv` (`requirements.txt`). The plan C pipeline as a flow
+diagram (Mermaid): `docs/PLAN-C.md`, "Pipeline".
 
 | Path | What |
 |---|---|
@@ -136,9 +138,14 @@ Python 3.12 (installed from python.org, `py` launcher), standard library only so
 | `hafnia/xprotect_rest.py` | XProtect REST client (Windows-auth token via PowerShell): cameras, JpegGetLive, alarms (trigger, update, snapshot), bookmarks |
 | `incident/` | Live pipeline: `bridge.py` (read FrameBridge), `router.py` (cooldown, open incident, rejected spots, budget), `verify.py` (Hafnia check + description) |
 | `scripts/run_live.py` | The end-to-end pipeline on live cameras; logs to `run/live-<UTC>/events.jsonl` |
-| `lens/` | The lens camera: `publisher.py` (one RTSP stream through ffmpeg to MediaMTX: idle frames, then each queued clip in real time; logs the UTC span each clip played), `client.py` (queue a clip; crop, slow motion, marks), `mediamtx.yml` (RTSP on 127.0.0.1:8554 only, TCP only) |
+| `lens/` | The lens camera: `publisher.py` (one RTSP stream through ffmpeg to MediaMTX: idle frames, then each queued clip in real time, starting on a whole second; logs the UTC span each clip played), `client.py` (queue a clip; `crop`, `zoom`, `slow`, `mark`, `before_after`, `span`), `enhance.py` (Real-ESRGAN super-resolution via spandrel; measured, not in the default), `mediamtx.yml` (RTSP on 127.0.0.1:8554 only, TCP only) |
 | `scripts/setup_lens.ps1`, `scripts/start_lens.ps1` | Install MediaMTX (pinned, SHA-256 checked) and camera `lens_1` (Universal 1 channel driver, our rule "Lens: record lens_1 always"); start MediaMTX and the publisher detached (logs in `run/lens/`) |
-| `scripts/lens_compare.py` | One looped event asked about plainly and through the lens (crop, crop in slow motion): finds the event live by frame matching; 3 Hafnia requests |
+| `scripts/lens_compare.py` | One looped event asked about plainly and through the lens (`--variants crop crop_slow2 crop_sr`, `--prompt classify|json`, `--asks N`): finds the event live by frame matching; (1 + variants) × asks requests |
+| `scripts/lens_pilot.py` | Plan C's lens pilot (M1): each synthetic incident camera, five views (full loop, event window, crop, crop + SR, BEFORE/AFTER), one JSON prompt (`PROMPT`, `parse`); 5 requests per camera |
+| `tier0/change.py`, `tier0/memory.py` | Plan C tier 0: the change detector (`ChangeParams.loops()` / `.real()`) and the SigLIP 2 verdict memory (`Embedder`, `VerdictMemory`) |
+| `scripts/eval_change.py`, `scripts/eval_memory.py` | Offline checks, no requests: the detector on every clip as its camera plays it (`--profile`, gate G1); the memory against a stand-in for Hafnia (`RULES`: none, spot, spot unless confirmed, appearance, SigLIP) |
+| `scripts/probe_cameras.py` | Neutral description and one-word class per camera over one loop (cameras × 2 requests) |
+| `scripts/inspect_footage.py`, `scripts/remote_zip.py` | Candidate footage: contact sheet and YOLO road-user counts; single files out of huge remote zips by HTTP range requests |
 | `data/clips.json` | Incident clips: neutral camera name, source file, length, label, ground truth; organizer cameras as controls |
 | `run/<name>/` | Model run results, committed: `results.jsonl` (Hafnia rows, with answers), `report.html`; for comparisons `opus_results.jsonl`, `scores.json`, `compare.html` |
 | `data/` | Source videos (`*.mp4`) and converted clips (`data/clips/`), both git-ignored: too large, and judges must download them from their source |
@@ -238,6 +245,17 @@ apparent catches were lit pavement and shadow beside the person); a cracked wind
 cameras: the crashed SUV in `test_11` after 43 s, 14–125 false reports per hour on real streets. The SigLIP 2 verdict
 memory (`tier0/memory.py`) cuts requests by 45% with no incident skipped against a stand-in for Hafnia; plan A's
 spot muting would have skipped 20 of 56 incidents.
+
+**Lens pilot (plan C, M1)** (`run/pilot-20261023T162040Z/README.md`, 30 answers; `run/lens-test_11-20261023T165151Z`, 9):
+with a JSON prompt that defines each category, Hafnia named all six synthetic incidents right in all five views
+(30/30), even over a full loop. Summaries checked against the frames: the full loop still tells the gate backwards
+across the loop cut; event windows do not. Real-ESRGAN super-resolution gave the bicubic answer word for word, on the
+large synthetic objects and on test_11's 30-px crash; BEFORE/AFTER stills turned a lying scooter into "parked". Both
+stay out of the default lens. The category list steers the whole answer: without a crash category the crash was
+STALLED_VEHICLE nine times and never named in a summary (COLLISION to add, gate G3). Tool types are invented
+("chainsaw", "lockpicks" for bolt cutters). Asking again about the same span returns the same answer, word for
+word: repeats need different events or windows. Hafnia's cloud refused one specific clip twice ("Transfer Assets: …
+HTTP 403 Forbidden"); the same window shifted by 1 s worked; failures are not counted.
 
 **Lens camera, first test** (`run/lens-test_11-20261021T144445Z/README.md`, 6 requests): on `test_11`'s distant crash
 (the SUV is about 30 px long), the plain 6 s window got NONE twice; the same window cropped and enlarged on `lens_1`

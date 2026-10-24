@@ -8,7 +8,8 @@ by matching each frame (the region around --box) against the clip's frame at --a
   plain       Hafnia on the camera's own recording, the window centred on the event (as the live pipeline asks);
   crop        the same window cropped around --box and enlarged, played on lens_1;
   crop_slow2  the crop at half speed (each frame twice), so Hafnia's frame sampling sees twice as many moments.
-Each is one Hafnia request (1 + the number of --variants) with the live pipeline's one-word incident prompt.
+Each is one Hafnia request ((1 + the number of --variants) x --asks) with the live pipeline's one-word
+incident prompt or, with --prompt json, plan C's JSON prompt.
 --variants crop_sr adds the crop enlarged by super-resolution (lens/enhance.py) instead of bicubic. Needs lens.publisher
 running (scripts\start_lens.ps1). Writes run\lens-<camera>-<UTC>\results.json; the frames sent go to frames\
 (git-ignored: footage licences).
@@ -127,6 +128,10 @@ def main() -> int:
     ap.add_argument("--stop-at", type=int, default=450, help="do not ask when today's count has reached this")
     ap.add_argument("--variants", nargs="+", default=["crop", "crop_slow2"], choices=["crop", "crop_slow2", "crop_sr"],
                     help="lens variants besides plain; crop_sr enlarges the crop with Real-ESRGAN (lens/enhance.py)")
+    ap.add_argument("--prompt", choices=["classify", "json"], default="classify",
+                    help="the live pipeline's one-word question, or plan C's JSON prompt (scripts/lens_pilot.py)")
+    ap.add_argument("--asks", type=int, default=1,
+                    help="ask about each view this many times (same recorded spans: measures answer consistency)")
     args = ap.parse_args()
 
     out = REPO / "run" / f"lens-{args.camera}-{dt.datetime.now(dt.timezone.utc):%Y%m%dT%H%M%SZ}"
@@ -135,7 +140,7 @@ def main() -> int:
     gw = Gateway()
     gw.login(gateway_password())
     q = gw.quota()
-    n = 1 + len(args.variants)
+    n = (1 + len(args.variants)) * args.asks
     if q and q["DailySummaryCount"] + n > args.stop_at:
         sys.exit(f"today's count is {q['DailySummaryCount']}: {n} more would pass --stop-at {args.stop_at}")
     cams = XProtect().cameras()
@@ -161,16 +166,24 @@ def main() -> int:
     asks = {"plain": (cams[args.camera], lo, hi)}
     for name, done in played.items():
         asks[name] = (cams["lens_1"], *span(done))
+    if args.prompt == "json":
+        from lens_pilot import PROMPT, parse as parse_json
+        prompt, label = PROMPT, lambda a: parse_json(a)["category"]
+    else:
+        prompt, label = CLASSIFY, parse
     results = {"camera": args.camera, "event_utc": t_event.isoformat(), "at": args.at, "box": args.box,
-               "half_s": args.half, "prompt": CLASSIFY, "played": played, "answers": {}}
-    for name, (cam_id, start, end) in asks.items():
-        summary, secs = ask(gw, cam_id, start, end, CLASSIFY)
-        answer = summary.get("Response") or ""
-        results["answers"][name] = {"start": start.isoformat(), "end": end.isoformat(), "seconds": round(secs, 1),
-                                    "progress": summary.get("Progress"), "label": parse(answer) if answer else None,
-                                    "answer": answer, "error": summary.get("LastError"), "summary_id": summary.get("Id")}
-        print(f"{name:11} {summary.get('Progress'):9} {parse(answer) if answer else '-':9} {secs:5.1f} s  "
-              f"{(answer or summary.get('LastError') or '')[:100]}", flush=True)
+               "half_s": args.half, "prompt": prompt, "played": played, "answers": {}}
+    for rep in range(args.asks):
+        for name, (cam_id, start, end) in asks.items():
+            summary, secs = ask(gw, cam_id, start, end, prompt)
+            answer = summary.get("Response") or ""
+            key = name if args.asks == 1 else f"{name}#{rep}"
+            results["answers"][key] = {"start": start.isoformat(), "end": end.isoformat(), "seconds": round(secs, 1),
+                                       "progress": summary.get("Progress"), "label": label(answer) if answer else None,
+                                       "answer": answer, "error": summary.get("LastError"),
+                                       "summary_id": summary.get("Id")}
+            print(f"{key:13} {summary.get('Progress'):9} {label(answer) if answer else '-':16} {secs:5.1f} s  "
+                  f"{(answer or summary.get('LastError') or '')[:160]}", flush=True)
     (out / "results.json").write_text(json.dumps(results, indent=2, default=str), encoding="utf-8")
     print(f"wrote {out}")
     return 0

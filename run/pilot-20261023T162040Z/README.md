@@ -37,6 +37,15 @@ Judged by Claude (Opus) from the frames of each window (`frames/*-centred.jpg`) 
 Other observations: tool types are invented (chainsaw, lockpicks; the bolt cutters are never named) in 3 views;
 `where` for the graffiti is `track` on the full frame and `pavement` on the crops (the person stands on a platform).
 
+### The failed request
+
+The e-scooter's `centred` request failed twice on exactly the same span (16:24:34.5–16:24:41.8 UTC): Hafnia VLM
+refused the upload ("Transfer Assets: … HTTP 403 Forbidden", gateway log, `VlmApiClient.CreateAssetAsync`), so it is
+tied to that clip, not to the allowance or the session. Shifted by 1 s it completed (appended to `results.json` with
+`retry_of_failed`): OBSTRUCTION, "The electric scooter tips over onto the pavement and remains lying there as the
+rider dismounts and walks away." (same wording as the `crop` answer). So all six cameras are right in every view: 30
+of 30. Failed requests are not counted.
+
 ## Reading
 
 1. **The structured prompt with definitions is today's largest effect:** every category right in every view, even
@@ -53,3 +62,7 @@ Other observations: tool types are invented (chainsaw, lockpicks; the bolt cutte
 category is at the ceiling. On the summaries the event-window views beat the full loop (no loop-cut reversal).
 Decisions: event window + JSON prompt as the default; crop where the spot is small; SR pending a small-object test;
 before/after dropped from the default.
+
+**Follow-up, same day** (`run/lens-test_11-20261023T165151Z`, 9 requests): on test_11's small, distant crash SR again
+gave the same answer as bicubic, word for word; SR is not in the default lens. The crash was called STALLED_VEHICLE
+and never named in nine summaries: the prompt needs a COLLISION category.
