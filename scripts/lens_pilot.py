@@ -53,10 +53,11 @@ TRUTH = {"vehicle_breakdown_traffic_queue": "STALLED_VEHICLE", "bin_pushed_over_
          "person_on_railway_tracks": "PERSON_ON_TRACKS", "graffiti_on_standing_train": "DAMAGE"}
 PERSON_AT = {"person_on_railway_tracks": 6.5,     # seconds into the loop: sitting on the edge, legs on the track
              "school_gate_break_in_night": 11.0}  # crouched at the padlock with the cutters
-CATEGORIES = ("PERSON_ON_TRACKS", "STALLED_VEHICLE", "OBSTRUCTION", "DAMAGE", "TAMPERING", "NONE")
+CATEGORIES = ("PERSON_ON_TRACKS", "COLLISION", "STALLED_VEHICLE", "OBSTRUCTION", "DAMAGE", "TAMPERING", "NONE")
 PROMPT = (
     'Reply with JSON only, no other text: {"category": "...", "object": "...", "where": "...", "still_present": '
     'true or false, "summary": "..."}. category is exactly one of: PERSON_ON_TRACKS (a person on railway tracks), '
+    'COLLISION (a vehicle hits another vehicle, a person, a barrier or an object, or spins out of control), '
     'STALLED_VEHICLE (a vehicle stopped or broken down in a traffic lane), OBSTRUCTION (an object left lying across a '
     'pavement, path or road), DAMAGE (property damaged or defaced, such as graffiti or broken glass), TAMPERING '
     '(someone forcing a lock, gate or door), NONE (none of these). object: the main object or person involved, at most '
@@ -124,8 +125,10 @@ def main() -> int:
     ap.add_argument("--repeat", type=int, default=1)
     ap.add_argument("--stop-at", type=int, default=450)
     ap.add_argument("--match-ratio", type=float, default=0.5)
+    ap.add_argument("--variants", nargs="+", default=VARIANTS, choices=VARIANTS,
+                    help="views to ask about (default all five), e.g. --variants crop for a prompt regression check")
     args = ap.parse_args()
-    n = len(args.cameras) * len(VARIANTS) * args.repeat
+    n = len(args.cameras) * len(args.variants) * args.repeat
     out = REPO / "run" / f"pilot-{dt.datetime.now(dt.timezone.utc):%Y%m%dT%H%M%SZ}"
     (out / "frames").mkdir(parents=True)
 
@@ -137,7 +140,7 @@ def main() -> int:
     cams = XProtect().cameras()
     from ultralytics import YOLO
     people = person_finder(YOLO(str(REPO / "models" / "yolo11m.pt")))
-    sr = SuperRes("general")
+    sr = SuperRes("general") if "crop_sr" in args.variants else None
     print(f"{n} requests planned", flush=True)
 
     jobs = []   # (camera, repeat, variant, camera id, start, end)
@@ -156,16 +159,19 @@ def main() -> int:
             w0, w1 = t_event - dt.timedelta(seconds=BEFORE_S), t_event + dt.timedelta(seconds=after)
             window = [f for t, f in fr if w0 <= t < w1]
             tag = f"{name}-r{rep}"
-            renders = {"crop": zoom(window, box), "crop_sr": zoom(window, box, sr=sr),
-                       "before_after": before_after(window, box)}
+            makers = {"crop": lambda: zoom(window, box), "crop_sr": lambda: zoom(window, box, sr=sr),
+                      "before_after": lambda: before_after(window, box)}
+            renders = {v: make() for v, make in makers.items() if v in args.variants}
             sheet(window, out / "frames" / f"{tag}-centred.jpg")
             for v, r in renders.items():
                 sheet(r, out / "frames" / f"{tag}-{v}.jpg")
             lens_jobs = {v: submit(r, f"{tag}-{v}", meta={"camera": name, "variant": v}) for v, r in renders.items()}
             mid = w0 + (w1 - w0) / 2
-            jobs.append((name, rep, "full_loop", cams[name], mid - dt.timedelta(seconds=loop_s / 2),
-                         mid + dt.timedelta(seconds=loop_s / 2)))
-            jobs.append((name, rep, "centred", cams[name], w0, w1))
+            if "full_loop" in args.variants:
+                jobs.append((name, rep, "full_loop", cams[name], mid - dt.timedelta(seconds=loop_s / 2),
+                             mid + dt.timedelta(seconds=loop_s / 2)))
+            if "centred" in args.variants:
+                jobs.append((name, rep, "centred", cams[name], w0, w1))
             for v, job in lens_jobs.items():
                 s, e = span(wait(job, timeout=180))
                 jobs.append((name, rep, v, cams["lens_1"], s, e))
@@ -191,15 +197,15 @@ def main() -> int:
         rows = list(pool.map(one, jobs))
     (out / "results.json").write_text(json.dumps({"prompt": PROMPT, "events": events, "rows": rows}, indent=2,
                                                  default=str), encoding="utf-8")
-    print(f"\n{'camera':34} " + " ".join(f"{v:>13}" for v in VARIANTS))
+    print(f"\n{'camera':34} " + " ".join(f"{v:>13}" for v in args.variants))
     for name in args.cameras:
         for rep in range(args.repeat):
             cells = []
-            for v in VARIANTS:
+            for v in args.variants:
                 r = next(x for x in rows if x["camera"] == name and x["repeat"] == rep and x["variant"] == v)
                 cells.append(("+" if r["correct"] else "-") + r["parsed"]["category"][:12])
             print(f"{name[:34]:34} " + " ".join(f"{c:>13}" for c in cells))
-    for v in VARIANTS:
+    for v in args.variants:
         rs = [r for r in rows if r["variant"] == v]
         print(f"{v:13} correct {sum(r['correct'] for r in rs)}/{len(rs)}, JSON ok {sum(r['parsed']['json_ok'] for r in rs)}/{len(rs)}")
     print(f"wrote {out}")

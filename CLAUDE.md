@@ -258,6 +258,13 @@ STALLED_VEHICLE nine times and never named in a summary (COLLISION to add, gate 
 word: repeats need different events or windows. Hafnia's cloud refused one specific clip twice ("Transfer Assets: …
 HTTP 403 Forbidden"); the same window shifted by 1 s worked; failures are not counted.
 
+**Crash category (gate G3)** (`run/lens-test_11-20261024T110155Z`, 3 requests): with COLLISION in the JSON prompt the
+cropped view of test_11's crash says COLLISION ("loses control … veers sharply"), the full frame STALLED_VEHICLE; the
+same split as on 2026-10-21 with the one-word list (crop ACCIDENT, full frame NONE). On a small, distant event the crop
+decides the answer; super-resolution adds nothing; the summary invents a second vehicle. Regression check
+(`run/pilot-20261024T111134Z`, 6 requests): the six synthetic incidents keep their categories with COLLISION in the
+list; summary details vary between loop occurrences (two wrong this time), categories do not.
+
 **Lens camera, first test** (`run/lens-test_11-20261021T144445Z/README.md`, 6 requests): on `test_11`'s distant crash
 (the SUV is about 30 px long), the plain 6 s window got NONE twice; the same window cropped and enlarged on `lens_1`
 got ACCIDENT twice, in slow motion too. One event: an anecdote that motivates E6 in `docs/PLAN-near-miss.md`. Lens

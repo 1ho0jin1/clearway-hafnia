@@ -1,0 +1,229 @@
+{
+  "prompt": "Reply with JSON only, no other text: {\"category\": \"...\", \"object\": \"...\", \"where\": \"...\", \"still_present\": true or false, \"summary\": \"...\"}. category is exactly one of: PERSON_ON_TRACKS (a person on railway tracks), COLLISION (a vehicle hits another vehicle, a person, a barrier or an object, or spins out of control), STALLED_VEHICLE (a vehicle stopped or broken down in a traffic lane), OBSTRUCTION (an object left lying across a pavement, path or road), DAMAGE (property damaged or defaced, such as graffiti or broken glass), TAMPERING (someone forcing a lock, gate or door), NONE (none of these). object: the main object or person involved, at most four words. where: one of track, lane, pavement, platform, other. still_present: whether that object or person is still there at the end of the video. summary: one sentence on what happens, in the order it happens.",
+  "events": {
+    "vehicle_breakdown_traffic_queue": {
+      "start_in_loop_s": 10.0,
+      "reported_in_loop_s": 13.1,
+      "box": [
+        387,
+        226,
+        562,
+        481
+      ],
+      "found_by": "change detector",
+      "window_s": 8.1,
+      "t_event_utc": [
+        "2026-10-24T11:12:15.020000+00:00"
+      ]
+    },
+    "bin_pushed_over_onto_sidewalk": {
+      "start_in_loop_s": 7.8,
+      "reported_in_loop_s": 10.2,
+      "box": [
+        26,
+        229,
+        216,
+        455
+      ],
+      "found_by": "change detector",
+      "window_s": 7.4,
+      "t_event_utc": [
+        "2026-10-24T11:13:08.732000+00:00"
+      ]
+    },
+    "escooter_left_across_sidewalk": {
+      "start_in_loop_s": 6.2,
+      "reported_in_loop_s": 8.5,
+      "box": [
+        299,
+        247,
+        484,
+        395
+      ],
+      "found_by": "change detector",
+      "window_s": 7.3,
+      "t_event_utc": [
+        "2026-10-24T11:13:51.501000+00:00"
+      ]
+    },
+    "school_gate_break_in_night": {
+      "start_in_loop_s": 11.0,
+      "reported_in_loop_s": 11.0,
+      "box": [
+        378,
+        253,
+        488,
+        431
+      ],
+      "found_by": "yolo person (person-trigger stand-in)",
+      "window_s": 5.0,
+      "t_event_utc": [
+        "2026-10-24T11:14:27.537000+00:00"
+      ]
+    },
+    "person_on_railway_tracks": {
+      "start_in_loop_s": 6.5,
+      "reported_in_loop_s": 6.5,
+      "box": [
+        334,
+        182,
+        503,
+        395
+      ],
+      "found_by": "yolo person (person-trigger stand-in)",
+      "window_s": 5.0,
+      "t_event_utc": [
+        "2026-10-24T11:14:52.590000+00:00"
+      ]
+    },
+    "graffiti_on_standing_train": {
+      "start_in_loop_s": 8.3,
+      "reported_in_loop_s": 9.7,
+      "box": [
+        364,
+        304,
+        458,
+        390
+      ],
+      "found_by": "change detector",
+      "window_s": 6.4,
+      "t_event_utc": [
+        "2026-10-24T11:15:40.884000+00:00"
+      ]
+    }
+  },
+  "rows": [
+    {
+      "camera": "vehicle_breakdown_traffic_queue",
+      "repeat": 0,
+      "variant": "crop",
+      "start": "2026-10-24T11:12:24+00:00",
+      "end": "2026-10-24T11:12:33+00:00",
+      "progress": "Completed",
+      "seconds": 10.5,
+      "answer": "```json\n{\n  \"category\": \"STALLED_VEHICLE\",\n  \"object\": \"silver pickup truck\",\n  \"where\": \"lane\",\n  \"still_present\": true,\n  \"summary\": \"A silver pickup truck stalls in the middle of the lane with its driver-side door open and smoke rising from the engine, blocking traffic as nearby vehicles slow and stop.\"\n}\n```",
+      "parsed": {
+        "category": "STALLED_VEHICLE",
+        "object": "silver pickup truck",
+        "where": "lane",
+        "still_present": true,
+        "summary": "A silver pickup truck stalls in the middle of the lane with its driver-side door open and smoke rising from the engine, blocking traffic as nearby vehicles slow and stop.",
+        "json_ok": true
+      },
+      "truth": "STALLED_VEHICLE",
+      "correct": true,
+      "error": null,
+      "summary_id": "ce230a37-b080-49bd-a6ff-20d7fe658da3"
+    },
+    {
+      "camera": "bin_pushed_over_onto_sidewalk",
+      "repeat": 0,
+      "variant": "crop",
+      "start": "2026-10-24T11:13:17+00:00",
+      "end": "2026-10-24T11:13:25+00:00",
+      "progress": "Completed",
+      "seconds": 13.0,
+      "answer": "```json\n{\n  \"category\": \"OBSTRUCTION\",\n  \"object\": \"green wheeled bin\",\n  \"where\": \"pavement\",\n  \"still_present\": true,\n  \"summary\": \"A person tips a green wheeled bin onto its side on the pavement, leaving it lying there as they walk away.\"\n}\n```",
+      "parsed": {
+        "category": "OBSTRUCTION",
+        "object": "green wheeled bin",
+        "where": "pavement",
+        "still_present": true,
+        "summary": "A person tips a green wheeled bin onto its side on the pavement, leaving it lying there as they walk away.",
+        "json_ok": true
+      },
+      "truth": "OBSTRUCTION",
+      "correct": true,
+      "error": null,
+      "summary_id": "585e0ac6-de38-4916-8e15-a715428c906f"
+    },
+    {
+      "camera": "escooter_left_across_sidewalk",
+      "repeat": 0,
+      "variant": "crop",
+      "start": "2026-10-24T11:14:00+00:00",
+      "end": "2026-10-24T11:14:08+00:00",
+      "progress": "Completed",
+      "seconds": 14.2,
+      "answer": "```json\n{\n  \"category\": \"OBSTRUCTION\",\n  \"object\": \"electric scooter\",\n  \"where\": \"pavement\",\n  \"still_present\": true,\n  \"summary\": \"The rider loses balance and falls, causing the electric scooter to tip over and lie across the pavement, partially blocking the bike lane.\"\n}\n```",
+      "parsed": {
+        "category": "OBSTRUCTION",
+        "object": "electric scooter",
+        "where": "pavement",
+        "still_present": true,
+        "summary": "The rider loses balance and falls, causing the electric scooter to tip over and lie across the pavement, partially blocking the bike lane.",
+        "json_ok": true
+      },
+      "truth": "OBSTRUCTION",
+      "correct": true,
+      "error": null,
+      "summary_id": "7c372bef-b72b-4f17-887c-6ce6c330872f"
+    },
+    {
+      "camera": "school_gate_break_in_night",
+      "repeat": 0,
+      "variant": "crop",
+      "start": "2026-10-24T11:14:33+00:00",
+      "end": "2026-10-24T11:14:39+00:00",
+      "progress": "Completed",
+      "seconds": 13.2,
+      "answer": "{\"category\": \"TAMPERING\", \"object\": \"metal gate\", \"where\": \"pavement\", \"still_present\": true, \"summary\": \"A person in a hoodie crouches and uses a tool to force open a metal gate at night, working steadily without success.\"}",
+      "parsed": {
+        "category": "TAMPERING",
+        "object": "metal gate",
+        "where": "pavement",
+        "still_present": true,
+        "summary": "A person in a hoodie crouches and uses a tool to force open a metal gate at night, working steadily without success.",
+        "json_ok": true
+      },
+      "truth": "TAMPERING",
+      "correct": true,
+      "error": null,
+      "summary_id": "b1f23ec6-e7f6-42dc-a592-a1d7c52ee388"
+    },
+    {
+      "camera": "person_on_railway_tracks",
+      "repeat": 0,
+      "variant": "crop",
+      "start": "2026-10-24T11:14:58+00:00",
+      "end": "2026-10-24T11:15:04+00:00",
+      "progress": "Completed",
+      "seconds": 10.3,
+      "answer": "```json\n{\n  \"category\": \"PERSON_ON_TRACKS\",\n  \"object\": \"person in red jacket\",\n  \"where\": \"track\",\n  \"still_present\": true,\n  \"summary\": \"A person in a red jacket sits on the railway tracks, then stands up and steps back onto the platform.\"\n}\n```",
+      "parsed": {
+        "category": "PERSON_ON_TRACKS",
+        "object": "person in red jacket",
+        "where": "track",
+        "still_present": true,
+        "summary": "A person in a red jacket sits on the railway tracks, then stands up and steps back onto the platform.",
+        "json_ok": true
+      },
+      "truth": "PERSON_ON_TRACKS",
+      "correct": true,
+      "error": null,
+      "summary_id": "fc5c69aa-b043-47eb-aed2-9b74a7805d79"
+    },
+    {
+      "camera": "graffiti_on_standing_train",
+      "repeat": 0,
+      "variant": "crop",
+      "start": "2026-10-24T11:15:48+00:00",
+      "end": "2026-10-24T11:15:55+00:00",
+      "progress": "Completed",
+      "seconds": 13.3,
+      "answer": "{\"category\": \"DAMAGE\", \"object\": \"spray-painted graffiti\", \"where\": \"pavement\", \"still_present\": true, \"summary\": \"A person uses a spray can to paint colorful graffiti on the side of a stationary train at a platform, leaving the artwork visible on the train's exterior.\"}",
+      "parsed": {
+        "category": "DAMAGE",
+        "object": "spray-painted graffiti",
+        "where": "pavement",
+        "still_present": true,
+        "summary": "A person uses a spray can to paint colorful graffiti on the side of a stationary train at a platform, leaving the artwork visible on the train's exterior.",
+        "json_ok": true
+      },
+      "truth": "DAMAGE",
+      "correct": true,
+      "error": null,
+      "summary_id": "4ca96ea9-bb29-463a-a110-191da1e96cd5"
+    }
+  ]
+}
