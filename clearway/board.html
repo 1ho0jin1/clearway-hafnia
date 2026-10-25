@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clearway board</title>
+<style>
+  :root {
+    --bg: #0d1015; --panel: #141920; --card: #1b2129; --card-hi: #212833; --line: #29313c;
+    --text: #e7eaef; --muted: #939ca8; --faint: #5e6773;
+    --high: #ef4d55; --medium: #f0a33b; --low: #4b9ef3; --ok: #39c98a;
+    --radius: 10px;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  .engine-warn { padding: 12px 16px; background: #5a1d1d; color: #fff; font-size: 14px; line-height: 1.5; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); }
+  body { display: flex; flex-direction: column; overflow: hidden; font-size: 14px; }
+
+  .top { display: flex; align-items: center; gap: 24px; padding: 10px 16px; border-bottom: 1px solid var(--line);
+         background: var(--panel); flex: none; }
+  .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .mark { width: 26px; height: 26px; border-radius: 7px; flex: none;
+          background: linear-gradient(135deg, var(--ok), #1f8f61); position: relative; }
+  .mark::after { content: ""; position: absolute; left: 6px; right: 6px; top: 11px; height: 4px; border-radius: 2px;
+                 background: var(--panel); }
+  .name { font-weight: 650; font-size: 17px; letter-spacing: .2px; }
+  .sub { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .stats { display: flex; gap: 22px; margin-left: auto; }
+  .stat { display: flex; align-items: baseline; gap: 6px; }
+  .stat .v { font-size: 22px; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .stat .k { color: var(--muted); font-size: 12px; }
+  .stat.alert .v { color: var(--high); }
+  .right { display: flex; align-items: center; gap: 16px; }
+  .cams { display: flex; gap: 5px; }
+  .cam-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--faint); }
+  .cam-dot.ok { background: var(--ok); } .cam-dot.slow { background: var(--medium); }
+  .clock { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; min-width: 92px; text-align: right; }
+
+  .notice { padding: 6px 16px; font-size: 12px; color: var(--muted); background: #11161c; border-bottom: 1px solid var(--line); }
+  .notice b { color: var(--text); font-weight: 600; }
+  .checking { display: flex; gap: 8px; padding: 8px 16px; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+  .chip { display: inline-flex; align-items: center; gap: 8px; padding: 4px 10px; border-radius: 999px;
+          background: var(--card); border: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+  .chip b { color: var(--text); font-weight: 600; }
+  .spin { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--faint); border-top-color: var(--text);
+          animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .board { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(5, minmax(230px, 1fr)); gap: 12px;
+           padding: 12px 16px 16px; overflow-x: auto; }
+  .col { display: flex; flex-direction: column; min-height: 0; background: var(--panel); border: 1px solid var(--line);
+         border-radius: var(--radius); }
+  .col-head { padding: 10px 12px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 8px; }
+  .col-head .bar { width: 4px; height: 18px; border-radius: 2px; }
+  .col-head .owner { font-weight: 600; }
+  .col-head .count { margin-left: auto; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .col-head .count b { color: var(--text); }
+  .cards { flex: 1; min-height: 0; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+  .empty { color: var(--faint); font-size: 12px; text-align: center; padding: 18px 6px; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--faint);
+          border-radius: var(--radius); overflow: hidden; flex: none; }
+  .card.p-High { border-left-color: var(--high); } .card.p-Medium { border-left-color: var(--medium); }
+  .card.p-Low { border-left-color: var(--low); }
+  .card.s-cleared, .card.s-rejected { opacity: .55; }
+  .card.new { animation: arrive 2.5s ease-out; }
+  @keyframes arrive { from { background: #2c3a4a; box-shadow: 0 0 0 2px var(--ok) inset; } to { background: var(--card); } }
+  .c-head { display: flex; align-items: baseline; gap: 8px; padding: 9px 10px 2px; }
+  .cat { font-weight: 650; font-size: 15px; }
+  .state { margin-left: auto; font-size: 12px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .s-open .state { color: var(--text); }
+  .s-open .state::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+                           background: var(--high); margin-right: 6px; vertical-align: 1px; animation: pulse 1.6s infinite; }
+  @keyframes pulse { 50% { opacity: .3; } }
+  .c-cam { padding: 0 10px 8px; color: var(--muted); font-size: 12px; }
+  .media { position: relative; aspect-ratio: 16 / 9; background: #000; }
+  .media video, .media .poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .media .ctx { position: absolute; right: 6px; bottom: 6px; width: 34%; border: 1px solid rgba(255,255,255,.55);
+                border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,.6); }
+  .summary { margin: 0; padding: 8px 10px 4px; line-height: 1.4; font-size: 13px; }
+  .ai { display: inline-block; font-size: 10px; letter-spacing: .4px; text-transform: uppercase; color: var(--muted);
+        border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; margin-right: 6px; vertical-align: 1px; }
+  .c-foot { display: flex; gap: 10px; align-items: center; padding: 4px 10px 9px; font-size: 12px; color: var(--muted); }
+  .c-foot .id { margin-left: auto; color: var(--faint); }
+  .alarm-on { color: var(--text); }
+  .stale .top { background: #2a1d10; }
+</style>
+</head>
+<body>
+<noscript><div class="engine-warn">Scripts are blocked, so the board cannot update. Open it in its own window
+  instead: scripts\open_board.ps1 (Microsoft Edge), or http://127.0.0.1:8765/ in a browser.</div></noscript>
+<div class="engine-warn" id="engine-warn" style="display:none"></div>
+<script>
+  // Old syntax on purpose: it must run in Internet Explorer too (Smart Client's compatibility display mode), where the
+  // board's own script cannot; it says why the board does not update.
+  (function () {
+    var ua = navigator.userAgent;
+    if (/Trident|MSIE/.test(ua)) {
+      var d = document.getElementById("engine-warn");
+      d.style.display = "block";
+      d.appendChild(document.createTextNode("This shows the board with Internet Explorer (Smart Client's " +
+        "compatibility display mode), which cannot run it. Open it in its own window instead: scripts\\open_board.ps1 " +
+        "(Microsoft Edge), or http://127.0.0.1:8765/ in a browser. Engine: " + ua));
+    }
+  })();
+</script>
+<header class="top">
+  <div class="brand">
+    <span class="mark" aria-hidden="true"></span>
+    <div><div class="name">Clearway</div><div class="sub">What is blocking a public way, and whose job is it</div></div>
+  </div>
+  <div class="stats">
+    <div class="stat" id="st-open"><span class="v">0</span><span class="k">open</span></div>
+    <div class="stat"><span class="v" id="st-checking">0</span><span class="k">being checked</span></div>
+    <div class="stat"><span class="v" id="st-requests">0</span><span class="k" id="st-requests-k">Hafnia requests</span></div>
+  </div>
+  <div class="right">
+    <div class="cams" id="cams" title="cameras"></div>
+    <div class="clock" id="clock"></div>
+  </div>
+</header>
+<div class="notice" id="notice" hidden></div>
+<div class="checking" id="checking" hidden></div>
+<main class="board" id="board"></main>
+
+<script>
+"use strict";
+const CATEGORY = { PERSON_ON_TRACKS: "Person on the tracks", COLLISION: "Collision", STALLED_VEHICLE: "Stalled vehicle",
+                   OBSTRUCTION: "Obstruction", DAMAGE: "Damage", TAMPERING: "Tampering" };
+let offset = 0;            // server clock minus browser clock, seconds
+let firstRender = true;
+const columns = new Map(); // owner -> {el, list, count}
+const cards = new Map();   // incident id -> {el, refs}
+
+const $ = (id) => document.getElementById(id);
+const now = () => Date.now() / 1000 + offset;
+const human = (s) => s.replace(/_/g, " ");
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function dur(s) {
+  s = Math.max(0, Math.round(s));
+  const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), sec = s % 60;
+  return h ? `${h}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}` : `${m}:${String(sec).padStart(2, "0")}`;
+}
+function hms(t) { return new Date(t * 1000).toISOString().slice(11, 19); }
+function ordinal(n) { const s = ["th", "st", "nd", "rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
+
+function column(owner, priority) {
+  if (columns.has(owner)) return columns.get(owner);
+  const col = el("section", "col"), head = el("div", "col-head"), bar = el("span", "bar");
+  bar.style.background = `var(--${priority.toLowerCase()})`;
+  const count = el("span", "count");
+  head.append(bar, el("span", "owner", owner), count);
+  const list = el("div", "cards");
+  col.append(head, list);
+  $("board").append(col);
+  const c = { el: col, list, count };
+  columns.set(owner, c);
+  return c;
+}
+
+function makeCard(c) {
+  const e = el("article", "card"), refs = {};
+  const head = el("div", "c-head");
+  refs.cat = el("span", "cat"); refs.state = el("span", "state");
+  head.append(refs.cat, refs.state);
+  refs.cam = el("div", "c-cam");
+  const media = el("div", "media");
+  if (c.clip) {
+    refs.video = el("video");
+    Object.assign(refs.video, { muted: true, autoplay: true, loop: true, playsInline: true, preload: "auto" });
+    refs.video.src = c.clip;
+    refs.video.addEventListener("error", () => { refs.video.remove(); if (c.snap) media.prepend(posterImg(c.snap)); });
+    media.append(refs.video);
+  } else if (c.snap) {
+    media.append(posterImg(c.snap));
+  }
+  if (c.snap && c.clip) {
+    const ctx = el("img", "ctx"); ctx.src = c.snap; ctx.alt = "where on the camera"; ctx.title = "the camera's view, the spot boxed";
+    media.append(ctx);
+  }
+  refs.summary = el("p", "summary");
+  const foot = el("div", "c-foot");
+  refs.rec = el("span", "rec"); refs.alarm = el("span", "alarm"); refs.id = el("span", "id", c.id);
+  foot.append(refs.rec, refs.alarm, refs.id);
+  e.append(head, refs.cam, media, refs.summary, foot);
+  if (!firstRender) e.classList.add("new");
+  return { el: e, refs, data: c };
+}
+function posterImg(src) { const i = el("img", "poster"); i.src = src; i.alt = ""; return i; }
+
+function updateCard(card, c) {
+  card.data = c;
+  const r = card.refs;
+  card.el.className = `card p-${c.priority} s-${c.state}` + (card.el.classList.contains("new") ? " new" : "");
+  r.cat.textContent = CATEGORY[c.category] || human(c.category);
+  r.cam.textContent = human(c.camera);
+  r.summary.replaceChildren();
+  if (c.summary) { r.summary.append(el("span", "ai", "AI · Hafnia"), document.createTextNode(c.summary)); }
+  else { r.summary.append(el("span", "ai", c.standin ? "dry run" : "no summary"),
+                         document.createTextNode(c.standin ? "Answered by the test stand-in, not by Hafnia." : "")); }
+  r.rec.textContent = c.occurrences > 1 ? `${ordinal(c.occurrences)} time at this spot` : "first time at this spot";
+  r.alarm.textContent = c.state === "rejected" ? "rejected" : (c.alarm_open ? "alarm open" : "alarm closed");
+  r.alarm.className = c.alarm_open ? "alarm alarm-on" : "alarm";
+  tickCard(card);
+}
+function tickCard(card) {
+  const c = card.data, r = card.refs;
+  if (c.state === "open") r.state.textContent = `Open ${dur(now() - c.t_occurrence)}`;
+  else if (c.state === "cleared") r.state.textContent = c.t_cleared ? `Cleared ${hms(c.t_cleared)}` : "Cleared";
+  else r.state.textContent = c.state[0].toUpperCase() + c.state.slice(1);
+}
+
+function render(s) {
+  offset = s.ended ? s.ended - Date.now() / 1000 : s.now - Date.now() / 1000;
+  document.body.classList.remove("stale");
+  const openEl = $("st-open");
+  openEl.querySelector(".v").textContent = s.counts.open;
+  openEl.classList.toggle("alert", s.counts.open > 0);
+  $("st-checking").textContent = s.counts.checking;
+  if (s.mode === "dry") { $("st-requests").textContent = s.counts.questions; $("st-requests-k").textContent = "questions (dry run)"; }
+  else { $("st-requests").textContent = s.counts.requests; $("st-requests-k").textContent = "Hafnia requests"; }
+
+  const notes = [];
+  if (s.mode === "dry") notes.push(["Dry run: ", "answers come from the test stand-in, not from Hafnia."]);
+  if (s.ended) notes.push(["Run ended ", `${hms(s.ended)} UTC: the board shows its final state (${s.run}).`]);
+  const notice = $("notice");
+  notice.hidden = !notes.length;
+  notice.replaceChildren(...notes.flatMap(([b, t], i) => [...(i ? [document.createTextNode("  ·  ")] : []), el("b", null, b), document.createTextNode(t)]));
+
+  const cams = $("cams");
+  cams.replaceChildren(...Object.entries(s.cameras).map(([name, h]) => {
+    const d = el("span", "cam-dot" + (s.ended ? "" : h.fps >= 8 && h.lag_s < 2 ? " ok" : h.fps > 0 ? " slow" : ""));
+    d.title = `${human(name)}: ${h.fps ?? "?"} fps, ${h.lag_s ?? "?"} s behind`;
+    return d;
+  }));
+
+  const checking = $("checking");
+  checking.hidden = !s.checking.length;
+  const byCamera = new Map();   // camera -> [count, oldest report]
+  for (const q of s.checking) {
+    const [n, t] = byCamera.get(q.camera) || [0, Infinity];
+    byCamera.set(q.camera, [n + 1, Math.min(t, q.t_report)]);
+  }
+  checking.replaceChildren(...[...byCamera].map(([camera, [n, t]]) => {
+    const chip = el("span", "chip"); chip.append(el("span", "spin"), el("b", null, "Checking"),
+      document.createTextNode(` ${human(camera)}${n > 1 ? ` ×${n}` : ""} · ${dur(now() - t)}`));
+    return chip;
+  }));
+
+  const seen = new Set();
+  for (const o of s.owners) {
+    const col = column(o.owner, o.priority);
+    col.count.replaceChildren(el("b", null, String(o.open)), document.createTextNode(` open · ${o.cards.length}`));
+    const want = [];
+    for (const c of o.cards) {
+      seen.add(c.id);
+      let card = cards.get(c.id);
+      if (!card) { card = makeCard(c); cards.set(c.id, card); }
+      updateCard(card, c);
+      want.push(card.el);
+    }
+    const have = [...col.list.children].filter(x => x.classList.contains("card"));
+    if (want.length !== have.length || want.some((w, i) => w !== have[i])) {
+      col.list.replaceChildren(...want);
+      want.forEach(w => { const v = w.querySelector("video"); if (v) v.play().catch(() => {}); });
+    }
+    if (!want.length) col.list.replaceChildren(el("div", "empty", "Nothing for this owner"));
+  }
+  for (const [id, card] of cards) if (!seen.has(id)) { card.el.remove(); cards.delete(id); }
+  firstRender = false;
+}
+
+function tick() {
+  $("clock").textContent = `${hms(now())} UTC`;
+  for (const card of cards.values()) tickCard(card);
+}
+
+async function poll() {
+  try {
+    const r = await fetch("/api/board", { cache: "no-store" });
+    if (!r.ok) throw new Error(r.status);
+    render(await r.json());
+  } catch (e) {
+    document.body.classList.add("stale");
+  } finally {
+    setTimeout(poll, 2000);
+  }
+}
+setInterval(tick, 1000);
+poll();
+</script>
+</body>
+</html>

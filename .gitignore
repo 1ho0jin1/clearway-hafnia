@@ -16,6 +16,9 @@ obj/
 
 # Exported video frames (large; regenerate with scripts\export_frames.ps1)
 run/*/frames/
+# The board's clips and snapshots (footage; clips are rebuilt from the lens spool)
+run/*/clips/
+run/*/snaps/
 
 # Raw and converted video (large; see data\README for where each clip comes from)
 data/*.mp4
@@ -33,6 +36,7 @@ run/*/pipeline.html
 
 # Lens camera: process logs and the spool of rendered clips (video)
 run/lens/
+run/board/
 
 # Candidate footage downloaded for evaluation (licences per source in docs/PLAN-near-miss.md)
 data/footage/

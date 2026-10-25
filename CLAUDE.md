@@ -149,6 +149,9 @@ diagram (Mermaid): `docs/PLAN-C.md`, "Pipeline".
 | `scripts/run_clearway.py`, `scripts/report_clearway.py` | Run the service on live cameras: `--answers standin` (dry run, no requests; loop phase by frame matching; detectors start at a loop start) or `--answers hafnia --max-requests N`; summarise a run per camera beside the offline replay, scoring Hafnia against the stand-in |
 | `scripts/eval_ledger.py` | The ledger replayed offline against a stand-in for Hafnia: requests, cards, occurrences, alarms, misses; saves each clip's event stream, `--from-events` replays them without the detector |
 | `tier0/change.py`, `tier0/memory.py` | Plan C tier 0: the change detector (`ChangeParams.loops()` / `.real()`) and the SigLIP 2 verdict memory (`Embedder`, `VerdictMemory`) |
+| `clearway/board.py`, `clearway/board.html` | The owner board (F4): a standard-library web server on 127.0.0.1:8765 following a run folder (`--latest` by default): cards by owner with the lens clip (MP4 made from the spool on first view), snapshot, summary, time open, recurrences, alarm state; JSON at `/api/board` |
+| `scripts/start_board.ps1`, `scripts/open_board.ps1` | Start the board detached (logs in `run/board/`); open it as an Edge app window beside Smart Client |
+| `scripts/start_smartclient.ps1` | Start Smart Client not elevated (Medium integrity) from the built-in Administrator; did not make HTML page items use Edge here |
 | `tier0/zones.py`, `config/zones.json` | Person triggers (F5): a person's feet inside a camera's danger-zone polygon for 1 s, reported to the ledger like a change; the polygons, by camera name, in image shares (the only per-camera setting) |
 | `scripts/eval_change.py`, `scripts/eval_memory.py` | Offline checks, no requests: the detector on every clip as its camera plays it (`--profile`, gate G1); the memory against a stand-in for Hafnia (`RULES`: none, spot, spot unless confirmed, appearance, SigLIP) |
 | `scripts/probe_cameras.py` | Neutral description and one-word class per camera over one loop (cameras × 2 requests) |
@@ -300,6 +303,19 @@ colour. Live: one card with 12 occurrences in 3 min (1.0 s each, no request), Ha
 alarm for rail control with Hafnia's summary. XProtect calls take 20–60 ms idle (0.8 s for a whole alarm with one
 camera running) but 0.5–4 s each with six cameras running (`run/clearway-dry-20261025T092705Z-timing`): an alarm with
 its snapshot and bookmarks takes 2–8 s (13 s median in one run) after its card; the machine's 4 cores are busy.
+
+**Owner board (F4) and Smart Client** (`run/clearway-dry-20261025T094247Z-board`): the board runs live beside the
+service and on finished runs; clips play, new cards are highlighted, the questions waiting for the lens show above
+the columns. Smart Client 2026 R1 cannot show it here: its HTML page item (plugin `VideoOS.RemoteClient.Plugin.HtmlViewItem`)
+shows standard display mode with the Windows Community Toolkit's `WebViewCompatible` (legacy Edge, EdgeHTML) and
+otherwise falls back to Internet Explorer in IE 7 mode (user agent `MSIE 7.0; Trident/7.0`; IE Enhanced Security
+blocks its scripts). As the built-in Administrator it says standard mode cannot run elevated; started without the
+Administrators group, and at Medium integrity (`scripts/start_smartclient.ps1`), with either `renderingEngine` value in
+the view item (0 or 1, set with `Set-VmsView`), it still fell back. The WebView2 runtime is not what it uses
+(installed 2026-10-25 while testing: 156.0.4314.42). The board is its own Edge app window (`scripts/open_board.ps1`).
+Views by script: `New-VmsViewGroup` (a top-level group cannot hold views: add a child group) and `New-VmsView`; an
+HTML page item's definition is `VideoOS.RemoteClient.Plugin.HtmlViewItem.HtmlViewItem` with `iteminfo url=...` and a
+`renderingEngine` property. The Web Client (port 8081) shows camera views only.
 
 **Crash category (gate G3)** (`run/lens-test_11-20261024T110155Z`, 3 requests): with COLLISION in the JSON prompt the
 cropped view of test_11's crash says COLLISION ("loses control … veers sharply"), the full frame STALLED_VEHICLE; the

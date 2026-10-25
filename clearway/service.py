@@ -24,7 +24,8 @@ The ledger's effects (raise, reopen or close an incident's alarm) are carried ou
 
 Writes <out>/ledger.jsonl (the ledger's event log; Ledger.replay rebuilds the state), <out>/service.jsonl (changes,
 questions, lens spans, answers, effects, health), <out>/changes.jsonl (every report with its look, and every closing:
-the ledger's input, so a live run can be replayed offline with a changed ledger) and, at the end,
+the ledger's input, so a live run can be replayed offline with a changed ledger), <out>/snaps/<incident>.jpg (the
+camera's frame at the end of each question's clip, the spot boxed; for the board, clearway/board.py) and, at the end,
 <out>/incidents.json. Times are frame times (Unix
 seconds, UTC) unless named wall.
 """
@@ -332,6 +333,8 @@ class Service:
             scale = frames[0].shape[1] / WORK_WIDTH
             box = tuple(v * scale for v in q.box)
             ev = self.evidence[q.incident] = self._snapshot(q.camera, q.box, frames[-1])   # the clip's last frame
+            (self.out / "snaps").mkdir(exist_ok=True)
+            (self.out / "snaps" / f"{q.incident}.jpg").write_bytes(ev["jpeg"])           # for the board
             t0 = time.monotonic()
             if self.lens:
                 q.lens_job = submit(zoom(frames, box), f"{q.incident}-{q.camera}",

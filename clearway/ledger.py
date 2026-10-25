@@ -90,6 +90,7 @@ class Incident:
     merged_into: str = ""               # set when a later answer showed it is the same incident as another
     clip: str = ""
     t_last: float = 0.0                 # last change attached
+    t_occurrence: float = 0.0           # when the current occurrence started changing (the board's "open for")
     active: dict[int, int] = field(default_factory=dict)  # tier 0 change ids still open -> box area (pixels)
     embs: list[np.ndarray] = field(default_factory=list, repr=False)
 
@@ -194,7 +195,7 @@ class Ledger:
         t = t_report if escalated_at is None else escalated_at
         # t_last stays the change's own report time: an old change escalated now must not group with a new one
         inc = Incident(f"cw-{self._n:04d}", camera, box, t_change, t, t_last=t_report,
-                       active={change_id: _area(box)}, embs=[emb])
+                       active={change_id: _area(box)}, embs=[emb], t_occurrence=t_change)
         self.incidents[inc.id] = inc
         self.change_to_incident[(camera, change_id)] = inc.id
         self.stats["asked"] += 1
@@ -227,7 +228,7 @@ class Ledger:
         actions = []
         if inc.state == "cleared":
             inc.state = "open"
-            inc.t_cleared = None
+            inc.t_cleared, inc.t_occurrence = None, t_change
             actions = self._alarm(inc, t_report, recurrence=True, t_change=t_change)
         self._emit("recur", incident=inc.id, camera=camera, change=change_id, t_change=t_change, t=t_report,
                    similarity=round(sim, 3), occurrences=inc.occurrences, state=inc.state, emb=emb,
@@ -289,7 +290,7 @@ class Ledger:
         target.occurrences += inc.occurrences
         effects = []
         if inc.active and target.state == "cleared":
-            target.state, target.t_cleared = "open", None
+            target.state, target.t_cleared, target.t_occurrence = "open", None, inc.t_change
             effects = self._alarm(target, t, recurrence=True, t_change=inc.t_change)
         inc.state, inc.merged_into, inc.active = "merged", target.id, {}
         self._emit("merge", incident=inc.id, into=target.id, t=t, category=inc.category, answer=inc.answer,
@@ -369,67 +370,76 @@ class Ledger:
         """Rebuild the state from an event log (after a restart, or for the board and the summary)."""
         led = cls(None, params)
         for line in log.read_text(encoding="utf-8").splitlines():
-            e = json.loads(line)
-            k = e["kind"]
-            if k == "ask":
-                led._n = max(led._n, int(e["incident"].split("-")[1]))
-                inc = Incident(e["incident"], e["camera"], tuple(e["box"]), e["t_change"], e["t"], t_last=e["t"],
-                               active={e["change"]: e.get("area", 0)}, embs=[np.array(e["emb"], np.float32)])
-                led.incidents[inc.id] = inc
-                led.change_to_incident[(e["camera"], e["change"])] = inc.id
-            elif k in ("fragment", "recur"):
-                inc = led.incidents[e["incident"]]
-                inc.active[e["change"]] = e.get("area", _area(inc.box))
-                inc.t_last = e["t"]
-                if k == "fragment":
-                    inc.box = tuple(e["incident_box"])
-                led.change_to_incident[(e["camera"], e["change"])] = inc.id
-                if k == "recur":
-                    inc.occurrences, inc.state = e["occurrences"], e["state"]
-                    led._remember(inc, [np.array(e["emb"], np.float32)])
-            elif k == "answer":
-                inc = led.incidents[e["incident"]]
-                inc.state, inc.answer, inc.t_answer, inc.clip = e["state"], e["answer"], e["t"], e["clip"]
-                inc.owner, inc.priority = e["owner"], e["priority"]
-                inc.category = e["category"] if e["category"] in OWNERS else ""
-                if inc.state == "dismissed":
-                    led.rejections += [(inc.camera, inc.box, x) for x in inc.embs]
-            elif k == "merge":
-                inc, target = led.incidents[e["incident"]], led.incidents[e["into"]]
-                inc.category, inc.answer, inc.t_answer = e["category"], e["answer"], e["t"]
-                inc.owner, inc.priority = OWNERS[e["category"]]
-                for c, area in inc.active.items():
-                    target.active[c] = area
-                    led.change_to_incident[(inc.camera, c)] = target.id
-                led._remember(target, inc.embs)
-                target.box = _union(target.box, inc.box)
-                target.occurrences, target.state = e["occurrences"], e["state"]
-                if target.state == "open":
-                    target.t_cleared = None
-                inc.state, inc.merged_into, inc.active = "merged", target.id, {}
-            elif k == "alarm":
-                inc = led.incidents[e["incident"]]
-                inc.t_alarm, inc.alarms, inc.alarm_open = e["t"], inc.alarms + 1, True
-            elif k == "alarm_closed":
-                led.incidents[e["incident"]].alarm_open = False
-            elif k == "clear":
-                inc = led.incidents[e["incident"]]
-                for c in inc.active:
-                    led.change_to_incident.pop((inc.camera, c), None)
-                inc.state, inc.t_cleared, inc.active = "cleared", e["t"], {}
-            elif k == "failed":
-                inc = led.incidents[e["incident"]]
-                for c in inc.active:
-                    led.change_to_incident.pop((inc.camera, c), None)
-                inc.state, inc.active = "failed", {}
-            elif k == "operator":
-                inc = led.incidents[e["incident"]]
-                inc.operator = e["verdict"]
-                if e["verdict"] == "rejected":
-                    inc.state = "rejected"
-                    led.rejections += [(inc.camera, inc.box, x) for x in inc.embs]
+            if line.strip():
+                led.apply(json.loads(line))
         return led
 
+    def apply(self, e: dict) -> None:
+        """One event of the log, as _emit wrote it: replay() applies them all; the board applies new ones as the log
+        grows (clearway/board.py)."""
+        k = e["kind"]
+        if k == "ask":
+            self._n = max(self._n, int(e["incident"].split("-")[1]))
+            inc = Incident(e["incident"], e["camera"], tuple(e["box"]), e["t_change"], e["t"], t_last=e["t"],
+                           active={e["change"]: e.get("area", 0)}, embs=[np.array(e["emb"], np.float32)],
+                           t_occurrence=e["t_change"])
+            self.incidents[inc.id] = inc
+            self.change_to_incident[(e["camera"], e["change"])] = inc.id
+        elif k in ("fragment", "recur"):
+            inc = self.incidents[e["incident"]]
+            inc.active[e["change"]] = e.get("area", _area(inc.box))
+            inc.t_last = e["t"]
+            if k == "fragment":
+                inc.box = tuple(e["incident_box"])
+            self.change_to_incident[(e["camera"], e["change"])] = inc.id
+            if k == "recur":
+                if inc.state == "cleared" and e["state"] == "open":
+                    inc.t_cleared, inc.t_occurrence = None, e["t_change"]
+                inc.occurrences, inc.state = e["occurrences"], e["state"]
+                self._remember(inc, [np.array(e["emb"], np.float32)])
+        elif k == "answer":
+            inc = self.incidents[e["incident"]]
+            inc.state, inc.answer, inc.t_answer, inc.clip = e["state"], e["answer"], e["t"], e["clip"]
+            inc.owner, inc.priority = e["owner"], e["priority"]
+            inc.category = e["category"] if e["category"] in OWNERS else ""
+            if inc.state == "cleared":
+                inc.t_cleared = e["t"]
+            if inc.state == "dismissed":
+                self.rejections += [(inc.camera, inc.box, x) for x in inc.embs]
+        elif k == "merge":
+            inc, target = self.incidents[e["incident"]], self.incidents[e["into"]]
+            inc.category, inc.answer, inc.t_answer = e["category"], e["answer"], e["t"]
+            inc.owner, inc.priority = OWNERS[e["category"]]
+            for c, area in inc.active.items():
+                target.active[c] = area
+                self.change_to_incident[(inc.camera, c)] = target.id
+            self._remember(target, inc.embs)
+            target.box = _union(target.box, inc.box)
+            if target.state == "cleared" and e["state"] == "open":
+                target.t_cleared, target.t_occurrence = None, inc.t_change
+            target.occurrences, target.state = e["occurrences"], e["state"]
+            inc.state, inc.merged_into, inc.active = "merged", target.id, {}
+        elif k == "alarm":
+            inc = self.incidents[e["incident"]]
+            inc.t_alarm, inc.alarms, inc.alarm_open = e["t"], inc.alarms + 1, True
+        elif k == "alarm_closed":
+            self.incidents[e["incident"]].alarm_open = False
+        elif k == "clear":
+            inc = self.incidents[e["incident"]]
+            for c in inc.active:
+                self.change_to_incident.pop((inc.camera, c), None)
+            inc.state, inc.t_cleared, inc.active = "cleared", e["t"], {}
+        elif k == "failed":
+            inc = self.incidents[e["incident"]]
+            for c in inc.active:
+                self.change_to_incident.pop((inc.camera, c), None)
+            inc.state, inc.active = "failed", {}
+        elif k == "operator":
+            inc = self.incidents[e["incident"]]
+            inc.operator = e["verdict"]
+            if e["verdict"] == "rejected":
+                inc.state = "rejected"
+                self.rejections += [(inc.camera, inc.box, x) for x in inc.embs]
 
 def _jsonable(o):
     if isinstance(o, np.ndarray):
