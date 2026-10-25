@@ -312,10 +312,11 @@ otherwise falls back to Internet Explorer in IE 7 mode (user agent `MSIE 7.0; Tr
 blocks its scripts). As the built-in Administrator it says standard mode cannot run elevated; started without the
 Administrators group, and at Medium integrity (`scripts/start_smartclient.ps1`), with either `renderingEngine` value in
 the view item (0 or 1, set with `Set-VmsView`), it still fell back. The WebView2 runtime is not what it uses
-(installed 2026-10-25 while testing: 156.0.4314.42). The board is its own Edge app window (`scripts/open_board.ps1`).
-Views by script: `New-VmsViewGroup` (a top-level group cannot hold views: add a child group) and `New-VmsView`; an
-HTML page item's definition is `VideoOS.RemoteClient.Plugin.HtmlViewItem.HtmlViewItem` with `iteminfo url=...` and a
-`renderingEngine` property. The Web Client (port 8081) shows camera views only.
+(installed for a test on 2026-10-25, 156.0.4314.42, and removed again). The board is its own Edge app window
+(`scripts/open_board.ps1`). Views by script: `New-VmsViewGroup` (a top-level group cannot hold views: add a child
+group) and `New-VmsView`; an HTML page item's definition is `VideoOS.RemoteClient.Plugin.HtmlViewItem.HtmlViewItem`
+with `iteminfo url=...` and a `renderingEngine` property (the test view group Clearway › Board was removed again).
+The Web Client (port 8081) shows camera views only.
 
 **Crash category (gate G3)** (`run/lens-test_11-20261024T110155Z`, 3 requests): with COLLISION in the JSON prompt the
 cropped view of test_11's crash says COLLISION ("loses control … veers sharply"), the full frame STALLED_VEHICLE; the
