@@ -149,6 +149,7 @@ diagram (Mermaid): `docs/PLAN-C.md`, "Pipeline".
 | `scripts/run_clearway.py`, `scripts/report_clearway.py` | Run the service on live cameras: `--answers standin` (dry run, no requests; loop phase by frame matching; detectors start at a loop start) or `--answers hafnia --max-requests N`; summarise a run per camera beside the offline replay, scoring Hafnia against the stand-in |
 | `scripts/eval_ledger.py` | The ledger replayed offline against a stand-in for Hafnia: requests, cards, occurrences, alarms, misses; saves each clip's event stream, `--from-events` replays them without the detector |
 | `tier0/change.py`, `tier0/memory.py` | Plan C tier 0: the change detector (`ChangeParams.loops()` / `.real()`) and the SigLIP 2 verdict memory (`Embedder`, `VerdictMemory`) |
+| `tier0/zones.py`, `config/zones.json` | Person triggers (F5): a person's feet inside a camera's danger-zone polygon for 1 s, reported to the ledger like a change; the polygons, by camera name, in image shares (the only per-camera setting) |
 | `scripts/eval_change.py`, `scripts/eval_memory.py` | Offline checks, no requests: the detector on every clip as its camera plays it (`--profile`, gate G1); the memory against a stand-in for Hafnia (`RULES`: none, spot, spot unless confirmed, appearance, SigLIP) |
 | `scripts/probe_cameras.py` | Neutral description and one-word class per camera over one loop (cameras × 2 requests) |
 | `scripts/inspect_footage.py`, `scripts/remote_zip.py` | Candidate footage: contact sheet and YOLO road-user counts; single files out of huge remote zips by HTTP range requests |
@@ -289,6 +290,16 @@ keeps an incident's alarm open while it recurs and closes it once it has stayed 
 quiet period; same replay counts); a closed incident that recurs reopens the same alarm (state New), tested live with
 a 5 s delay. XProtect applies alarm updates about 1 s later, so every update names its state and priority (a comment
 right after a close would otherwise read the old state back and reopen the alarm).
+
+**Person on the tracks (F5)** (`run/clearway-live-20261025T092317Z-tracks/README.md`, 2 requests): the change detector
+holds people back, so it saw the person on the tracks in 1–2 of 20 loops; a danger-zone trigger (feet, the bottom
+centre of YOLO's box at 5 fps, inside the polygon for 1 s) reports them in every loop (feet inside from 6.2 s into the loop, reported at 7.2 s;
+offline, 4 of 4 loops). The polygon is
+everything beyond the near platform's yellow tactile strip ("stay behind the yellow line"), the strip's edge fitted by
+colour. Live: one card with 12 occurrences in 3 min (1.0 s each, no request), Hafnia PERSON_ON_TRACKS 2 of 2, a High
+alarm for rail control with Hafnia's summary. XProtect calls take 20–60 ms idle (0.8 s for a whole alarm with one
+camera running) but 0.5–4 s each with six cameras running (`run/clearway-dry-20261025T092705Z-timing`): an alarm with
+its snapshot and bookmarks takes 2–8 s (13 s median in one run) after its card; the machine's 4 cores are busy.
 
 **Crash category (gate G3)** (`run/lens-test_11-20261024T110155Z`, 3 requests): with COLLISION in the JSON prompt the
 cropped view of test_11's crash says COLLISION ("loses control … veers sharply"), the full frame STALLED_VEHICLE; the

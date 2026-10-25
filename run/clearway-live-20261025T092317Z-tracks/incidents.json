@@ -1,0 +1,92 @@
+[
+  {
+    "id": "cw-0001",
+    "camera": "person_on_railway_tracks",
+    "box": [
+      256,
+      140,
+      387,
+      310
+    ],
+    "t_change": 1792920235.723,
+    "t_report": 1792920236.723,
+    "state": "cleared",
+    "category": "PERSON_ON_TRACKS",
+    "owner": "Rail control",
+    "priority": "High",
+    "answer": {
+      "category": "PERSON_ON_TRACKS",
+      "object": "person in red jacket",
+      "where": "track",
+      "still_present": true,
+      "summary": "A person in a red jacket crawls along the edge of the platform and settles onto the railway tracks, remaining there as the clip ends.",
+      "json_ok": true,
+      "response": "```json\n{\n  \"category\": \"PERSON_ON_TRACKS\",\n  \"object\": \"person in red jacket\",\n  \"where\": \"track\",\n  \"still_present\": true,\n  \"summary\": \"A person in a red jacket crawls along the edge of the platform and settles onto the railway tracks, remaining there as the clip ends.\"\n}\n```",
+      "summary_id": "7cad58c7-db84-4229-b65c-5160b882fbc8",
+      "hafnia_s": 6.2,
+      "expected": {
+        "category": "PERSON_ON_TRACKS",
+        "standin": true,
+        "seen_s": 5.8,
+        "loop_start": 4.42,
+        "phase_match": 1.0
+      }
+    },
+    "t_answer": 1792920256.023,
+    "t_alarm": 1792920256.023,
+    "alarms": 1,
+    "alarm_open": true,
+    "t_cleared": 1792920394.723,
+    "occurrences": 12,
+    "operator": "",
+    "merged_into": "",
+    "clip": "20261025T092400192048_cw-0001-person_on_railway_tracks",
+    "t_last": 1792920386.723,
+    "active": []
+  },
+  {
+    "id": "cw-0002",
+    "camera": "person_on_railway_tracks",
+    "box": [
+      270,
+      182,
+      336,
+      310
+    ],
+    "t_change": 1792920239.923,
+    "t_report": 1792920241.423,
+    "state": "merged",
+    "category": "PERSON_ON_TRACKS",
+    "owner": "Rail control",
+    "priority": "High",
+    "answer": {
+      "category": "PERSON_ON_TRACKS",
+      "object": "person in red jacket",
+      "where": "track",
+      "still_present": false,
+      "summary": "A person in a red jacket sits on the railway tracks, then stands and walks away along the tracks, exiting the frame.",
+      "json_ok": true,
+      "response": "```json\n{\n  \"category\": \"PERSON_ON_TRACKS\",\n  \"object\": \"person in red jacket\",\n  \"where\": \"track\",\n  \"still_present\": false,\n  \"summary\": \"A person in a red jacket sits on the railway tracks, then stands and walks away along the tracks, exiting the frame.\"\n}\n```",
+      "summary_id": "a253f143-1fea-454a-9ff2-bfc9b707486c",
+      "hafnia_s": 6.2,
+      "expected": {
+        "category": "PERSON_ON_TRACKS",
+        "standin": true,
+        "seen_s": 6.5,
+        "loop_start": 4.42,
+        "phase_match": 1.0
+      }
+    },
+    "t_answer": 1792920266.023,
+    "t_alarm": null,
+    "alarms": 0,
+    "alarm_open": false,
+    "t_cleared": null,
+    "occurrences": 2,
+    "operator": "",
+    "merged_into": "cw-0001",
+    "clip": "20261025T092404943499_cw-0002-person_on_railway_tracks",
+    "t_last": 1792920255.223,
+    "active": []
+  }
+]

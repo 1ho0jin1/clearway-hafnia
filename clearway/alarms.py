@@ -42,14 +42,25 @@ class XProtectAlarms:
         self.priority: dict[str, str] = {}
         self.pool = ThreadPoolExecutor(max_workers=1)
         self.pending: list[Future] = []
+        self._timing: dict[str, float] = {}
 
     def submit(self, effect: dict, incident: dict, evidence: dict) -> None:
         """effect: the ledger's {"alarm": ...} or {"close_alarm": ...}; incident: Incident.public(); evidence:
         {"jpeg", "size", "span"} (snapshot, its size, lens_1's span of the clip Hafnia judged)."""
-        self.pending.append(self.pool.submit(self._run, effect, incident, evidence))
+        self.pending.append(self.pool.submit(self._run, {**effect, "submitted": time.time()}, incident, evidence))
+
+    def _call(self, name: str, fn, *args, **kwargs):
+        """One XProtect call, timed: idle, each takes 20-60 ms; with six cameras running an action took 13 s
+        (median, 2026-10-25), so the log shows where the time goes."""
+        t0 = time.monotonic()
+        try:
+            return fn(*args, **kwargs)
+        finally:
+            self._timing[name] = round(self._timing.get(name, 0.0) + time.monotonic() - t0, 2)
 
     def _run(self, effect: dict, inc: dict, ev: dict) -> None:
         t0 = time.monotonic()
+        self._timing: dict[str, float] = {}
         try:
             if "alarm" in effect:
                 done = self._reopen(effect, inc, ev) if inc["id"] in self.alarm else self._raise(effect, inc, ev)
@@ -57,7 +68,8 @@ class XProtectAlarms:
                 done = self._close(inc["id"], self._close_comment(effect))
             else:
                 return
-            self.log("xprotect", incident=inc["id"], seconds=round(time.monotonic() - t0, 2), **done)
+            self.log("xprotect", incident=inc["id"], seconds=round(time.monotonic() - t0, 2), timing=self._timing,
+                     queued_s=round(time.time() - effect["submitted"], 2) if "submitted" in effect else None, **done)
         except Exception as e:                # XProtect trouble must not stop the service
             self.log("xprotect_error", incident=inc["id"], effect=effect, error=repr(e))
 
@@ -65,7 +77,7 @@ class XProtectAlarms:
     def _raise(self, effect: dict, inc: dict, ev: dict) -> dict:
         cam = self.camera_ids[inc["camera"]]
         when = _utc(effect["t_change"])
-        alarm = self.xp.trigger_alarm(f"{self.label}Clearway: {inc['category']}, {inc['owner']}"[:100],
+        alarm = self._call("trigger", self.xp.trigger_alarm, f"{self.label}Clearway: {inc['category']}, {inc['owner']}"[:100],
                                       self._message(inc, ev)[:1000], cam, when, priority=inc["priority"],
                                       tag=f"clearway/{inc['id']}")
         self.alarm[inc["id"]], self.is_open[inc["id"]], self.priority[inc["id"]] = alarm, True, inc["priority"]
@@ -76,7 +88,7 @@ class XProtectAlarms:
     def _reopen(self, effect: dict, inc: dict, ev: dict) -> dict:
         alarm = self.alarm[inc["id"]]
         when = _utc(effect["t_change"])
-        self.xp.update_alarm(alarm, f"Happened again: the spot changed at {when:%H:%M:%S} UTC (occurrence "
+        self._call("update", self.xp.update_alarm, alarm, f"Happened again: the spot changed at {when:%H:%M:%S} UTC (occurrence "
                                     f"{inc['occurrences']}). Reopened by Clearway.",
                              priority=inc["priority"], state="New")
         self.is_open[inc["id"]] = True
@@ -88,7 +100,7 @@ class XProtectAlarms:
         alarm = self.alarm.get(incident_id)
         if alarm is None:
             return {"action": "close", "alarm": None, "note": "no XProtect alarm for this incident"}
-        self.xp.update_alarm(alarm, comment, priority=self.priority[incident_id], state="Closed")
+        self._call("update", self.xp.update_alarm, alarm, comment, priority=self.priority[incident_id], state="Closed")
         self.is_open[incident_id] = False
         return {"action": "close", "alarm": alarm, "comment": comment}
 
@@ -129,7 +141,7 @@ class XProtectAlarms:
         if ev.get("jpeg"):
             try:
                 w, h = ev["size"]
-                self.xp.attach_snapshot(alarm, ev["jpeg"], w, h)
+                self._call("snapshot", self.xp.attach_snapshot, alarm, ev["jpeg"], w, h)
                 out["snapshot"] = True
             except Exception as e:
                 out["errors"].append(f"snapshot: {e!r}")
@@ -145,7 +157,8 @@ class XProtectAlarms:
             marks.append((self.lens_id, f"Clearway lens {inc['category']} {inc['id']}", s, e, s))
         for device, header, b, e, trig in marks:
             try:
-                out["bookmarks"].append(self.xp.create_bookmark(device, header, description, b, e, trig))
+                out["bookmarks"].append(self._call("bookmarks", self.xp.create_bookmark, device, header, description,
+                                                   b, e, trig))
             except Exception as err:
                 out["errors"].append(f"bookmark: {err!r}")
         if not out["errors"]:

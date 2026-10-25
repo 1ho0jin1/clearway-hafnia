@@ -59,12 +59,14 @@ flowchart TD
     subgraph T0["Tier 0, on the T4, every frame, free"]
         CD["Change detector<br/>dual background: changed and stayed changed<br/>people held back"]
         SV["Stalled-vehicle trigger<br/>YOLO + ByteTrack: moving, then stopped in a lane"]
-        PT["Person triggers<br/>danger zone (tracks), staying at one spot (gate)"]
+        PT["Person trigger<br/>feet in a danger zone for 1 s (tracks)"]
+        PS["Person trigger<br/>staying at one spot (gate)"]
     end
 
     CD --> CAND["Candidate<br/>camera, box, change start, report time"]
     SV --> CAND
     PT --> CAND
+    PS --> CAND
     CAND --> MEM{"Verdict memory, SigLIP 2<br/>same spot and same look<br/>as a change Hafnia rejected?"}
     MEM -- "yes: skip" --> DROP(["not asked, no request"])
     MEM -- no --> RT["Router<br/>one request per question,<br/>run cap and daily cap from DailySummaryCount"]
@@ -83,13 +85,14 @@ flowchart TD
 
     classDef built fill:#d8f0d8,stroke:#2e7d32,color:#000
     classDef planned fill:#fff3cd,stroke:#b38600,color:#000
-    class CAM,FB,CD,CAND,MEM,DROP,RT,LENS,PUB,L1,GW,ANS,REJ,ITEM,WATCH,ALARM,CLOSE built
-    class SV,PT planned
+    class CAM,FB,CD,PT,CAND,MEM,DROP,RT,LENS,PUB,L1,GW,ANS,REJ,ITEM,WATCH,ALARM,CLOSE built
+    class SV,PS planned
 ```
 
 Green: built and measured (live since 2026-10-25: `clearway/service.py`, `run/clearway-live-20261025T083623Z`).
 XProtect alarms and bookmarks since 2026-10-25 too (`clearway/alarms.py`, F3, `run/clearway-dry-20261025T090255Z`).
-Yellow: to build (the stalled-vehicle rules exist from plan A and need plan C's keys; person triggers, F5). Tested and **not** in the
+The danger-zone trigger too (`tier0/zones.py`, F5). Yellow: to build (the stalled-vehicle rules exist from plan A and
+need plan C's keys; the gate's staying-at-a-spot trigger, F11). Tested and **not** in the
 default lens: super-resolution (`lens/enhance.py`) and BEFORE/AFTER stills (`lens.client.before_after`), both kept as
 options.
 
@@ -100,7 +103,7 @@ options.
 | 1 | Change detector (`tier0/change.py`) | **built, G1** | Dual-rate background (Porikli et al., 2008) with a median warm-up; per-pixel static time that pauses while something moves across a spot; people held back; whole-view changes ignored; each change closed when its spot matches its BEFORE snapshot. Two settings: `ChangeParams.loops()` (synthetic clips) and `.real()` (640 px, 0.15%, 15 s). |
 | 2 | Verdict memory (`tier0/memory.py`) | **built, offline** | SigLIP 2 (`google/siglip2-base-patch16-224`, Apache-2.0) embeddings of each changed spot, kept with Hafnia's verdict; a change at a rejected spot that looks like the rejection is not sent. 45% fewer requests, no incident skipped, against a stand-in for Hafnia (`run/memory-compare`). |
 | 3 | Stalled-vehicle trigger | to build | A vehicle track that was moving and has stood still for ≥ N s in a lane (`tier0/rules.py`, `sharp_decel`). Covers the breakdown and crash aftermaths. |
-| 4 | Person triggers | to build | A person's feet inside a danger-zone polygon for ≥ 1 s (tracks; one polygon per camera, the only per-camera setting); a person staying at one spot for ≥ N s (gate). YOLO's person box stood in for both in the pilot. |
+| 4 | Person triggers | danger zone **built, live** (F5); staying at a spot to build (F11) | `tier0/zones.py`: a person's feet (bottom centre of YOLO's box, 5 fps) inside a danger-zone polygon for ≥ 1 s is reported like a change; closed after 2 s empty. One polygon per camera in `config/zones.json` (the only per-camera setting); the tracks' polygon is everything beyond the near platform's yellow tactile strip, its edge fitted by colour. Live: the person on the track reported in every loop, PERSON_ON_TRACKS from Hafnia. To build: a person staying at one spot for ≥ N s (gate). |
 | 5 | Router | **built, live** | In the service (`clearway/service.py`, `HafniaAnswers`): one request per ledger question, a run cap, none once today's `DailySummaryCount` reaches a limit. Not built: urgent first. The single lens camera is the bottleneck (first cards 36–85 s after the change when six incidents start within a minute). |
 | 6 | Lens | **built, M1** | `lens/` (publisher, client, `lens_1`): event window from 2 s before the change started to 3 s after it was reported, cropped to the spot. Options measured and left out of the default: Real-ESRGAN super-resolution (`lens/enhance.py`), BEFORE/AFTER stills (`before_after()`). |
 | 7 | Prompt and parser | **built, M1, G3** | `clearway/prompt.py` `PROMPT`: JSON with `category` (`PERSON_ON_TRACKS`, `COLLISION`, `STALLED_VEHICLE`, `OBSTRUCTION`, `DAMAGE`, `TAMPERING`, `NONE`, each defined), `object`, `where`, `still_present`, `summary`; parsed in code with a keyword fallback. Use the category and `still_present`; treat `object` details (tool types) as unreliable. Live: 10 of 10 valid JSON, 6 of 6 incidents right. |

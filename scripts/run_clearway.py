@@ -15,6 +15,7 @@ this run, none once today's count reaches --stop-at. The planned count is printe
 snapshot, bookmarks on the camera and on lens_1; closed once the incident stayed cleared); a dry run's alarms are
 named "[dry run] ...". --close-alarms-at-end (test harness) closes the alarms still open when the run ends;
 --close-after S (test harness) shortens the ledger's close_after_s (60 s), so that loops close and reopen alarms.
+--zones (default config\zones.json): danger zones for person triggers (tier0/zones.py).
 Default cameras: the organizers' six incident cameras; --real cameras use the real-camera detector setting. Writes
 run\clearway-<dry|live>-<UTC>\ (ledger.jsonl, service.jsonl, incidents.json). Needs the lens (scripts\start_lens.ps1)
 unless --no-lens.
@@ -42,6 +43,7 @@ from eval_change import CASES, frames  # noqa: E402
 from eval_ledger import LATENCY_S, TRUTH  # noqa: E402
 from hafnia.xprotect_rest import XProtect  # noqa: E402
 from tier0.change import ChangeParams  # noqa: E402
+from tier0.zones import load_zones  # noqa: E402
 
 INCIDENT_CAMERAS = ["vehicle_breakdown_traffic_queue", "bin_pushed_over_onto_sidewalk", "escooter_left_across_sidewalk",
                     "school_gate_break_in_night", "person_on_railway_tracks", "graffiti_on_standing_train"]
@@ -144,6 +146,8 @@ def main() -> int:
     ap.add_argument("--alarms", action="store_true", help="raise, reopen and close XProtect alarms and bookmarks")
     ap.add_argument("--close-alarms-at-end", action="store_true", help="test harness: close open alarms at the end")
     ap.add_argument("--close-after", type=float, help="test harness: the ledger's close_after_s")
+    ap.add_argument("--zones", type=Path, default=REPO / "config" / "zones.json",
+                    help="danger zones per camera (person triggers); a missing file means none")
     args = ap.parse_args()
     mode = "dry" if args.answers == "standin" else "live"
     out = args.out or REPO / "run" / f"clearway-{mode}-{dt.datetime.now(dt.timezone.utc):%Y%m%dT%H%M%SZ}"
@@ -180,7 +184,8 @@ def main() -> int:
     cameras = {c: ChangeParams.real() if c in args.real else ChangeParams.loops() for c in args.cameras}
     params = Params() if args.close_after is None else Params(close_after_s=args.close_after)
     service = Service(cameras, answer, out, lens=args.lens, params=params, on_frame=on_frame,
-                      echo=lambda s: print(s, flush=True), close_alarms_at_end=args.close_alarms_at_end)
+                      echo=lambda s: print(s, flush=True), close_alarms_at_end=args.close_alarms_at_end,
+                      zones=load_zones(args.zones) if args.zones.exists() else None)
     if args.alarms:
         from clearway.alarms import XProtectAlarms
         service.alarms = XProtectAlarms(known, known.get("lens_1") if args.lens else None, service.log,

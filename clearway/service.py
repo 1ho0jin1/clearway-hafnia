@@ -8,7 +8,8 @@ managed about 4.3 of 10 fps on each of six cameras, 2026-10-25); YOLO and SigLIP
 that falls more than QUEUE frames behind skips its oldest frames (counted as dropped). Per frame (FrameBridge, 10 fps
 per camera):
 1. the change detector (tier0/change.py) on the frame scaled to 640 px, people held back (YOLO11m, run only when a
-   change is about to be reported);
+   change is about to be reported); on a camera with a danger zone (tier0/zones.py, config/zones.json) also YOLO on
+   every ZONE_EVERY-th frame, and a person's feet inside the zone for its dwell time reported like a change;
 2. each reported change's crop is embedded with SigLIP 2 (tier0/memory.py) and given to the ledger
    (clearway/ledger.py), which decides: a piece of a known occurrence, a recurrence of a known incident, a known
    rejection (held, and asked about after all if it stays: Ledger.tick, every second), or a question;
@@ -50,6 +51,7 @@ from incident.bridge import FrameBridge
 from lens.client import mark, span, submit, wait, zoom
 from tier0.change import Change, ChangeDetector, ChangeParams
 from tier0.memory import Embedder, crop
+from tier0.zones import Zone, ZoneWatch
 
 REPO = Path(__file__).resolve().parent.parent
 WORK_WIDTH = 640    # frames for the detector and the look, as in the offline replay (scripts/eval_ledger.py)
@@ -58,6 +60,7 @@ AFTER_S = 3.0       # ... and ends this long after it was reported, so the outco
 MAX_CLIP_S = 30.0   # a change reported long after it started (real cameras: at least 15 s) is shown in its last 30 s
 KEEP_S = 90.0       # frames kept per camera: an escalated question (30 s after the report) still needs its clip
 QUEUE = 50          # frames waiting per camera (5 s); beyond that the oldest are dropped
+ZONE_EVERY = 2      # a camera with a danger zone looks for people on every 2nd frame (5 fps)
 
 
 @dataclass
@@ -148,13 +151,14 @@ class Service:
     def __init__(self, cameras: dict[str, ChangeParams], answer: Callable[[Question], dict], out: Path,
                  lens: bool = True, params: Params | None = None, workers: int = 32,
                  on_frame: Callable[[str, float, np.ndarray], bool | None] | None = None, echo=print,
-                 alarms=None, close_alarms_at_end: bool = False):
+                 alarms=None, close_alarms_at_end: bool = False, zones: dict[str, list[Zone]] | None = None):
         """cameras: name -> change detector setting. answer: Question -> {"category": ... or None, ...}, called on a
         worker thread after the clip has played. workers: questions in flight; each captures its clip as soon as its
         window has passed, so none may wait for a free worker (the frames are kept only KEEP_S). on_frame (camera,
         frame time, 640-px frame), for test harnesses: returning False keeps that frame from the detector. alarms: an
         XProtectAlarms (clearway/alarms.py) to carry out the ledger's effects; close_alarms_at_end (test harness):
-        close the alarms still open when the run ends."""
+        close the alarms still open when the run ends. zones: {camera name: [Zone, ...]}, the danger zones
+        (tier0/zones.load_zones)."""
         from ultralytics import YOLO
         self.cameras, self.answer, self.out, self.lens = cameras, answer, out, lens
         self.on_frame, self.echo = on_frame, echo
@@ -167,7 +171,9 @@ class Service:
         self.recent = {c: Recent() for c in cameras}
         self.inbox = {c: queue.Queue(maxsize=QUEUE) for c in cameras}
         self.stats = {c: {"t_first": None, "received": 0, "frames": 0, "dropped": 0, "fps": 0.0, "lag_s": 0.0,
-                          "reports": 0, "errors": 0} for c in cameras}
+                          "reports": 0, "zone_reports": 0, "errors": 0} for c in cameras}
+        self.zones = {c: [ZoneWatch(z, first_id=1_000_000 * (i + 1)) for i, z in enumerate(zs)]
+                      for c, zs in (zones or {}).items() if c in cameras}
         self.embedder = Embedder()
         self.yolo = YOLO(str(REPO / "models" / "yolo11m.pt"))
         self.pool = ThreadPoolExecutor(max_workers=workers)
@@ -213,10 +219,17 @@ class Service:
                 if self.on_frame is not None and self.on_frame(camera, t, frame) is False:
                     s["frames"] += 1
                     continue
-                for c in det.update(t, frame, lambda: self._people(frame)):
+                people = None
+                if camera in self.zones and s["frames"] % ZONE_EVERY == 0:
+                    people = self._people(frame)
+                    for zw in self.zones[camera]:
+                        for o in zw.update(t, people, frame.shape[1], frame.shape[0])[0]:
+                            s["zone_reports"] += 1
+                            self._on_report(camera, o, frame, source=zw.zone.name)
+                for c in det.update(t, frame, (lambda: people) if people is not None else (lambda: self._people(frame))):
                     s["reports"] += 1
                     self._on_report(camera, c, frame)
-                self._closings(camera)
+                self._closings(camera)       # changes and zone occupations alike
                 s["frames"] += 1
                 s["lag_s"] = round(time.time() - t, 2)
             except Exception as e:           # one bad frame must not stop the camera
@@ -238,17 +251,18 @@ class Service:
                 if e.get("action") != "ask":     # an alarm closing
                     self._effect(e)
 
-    def _on_report(self, camera: str, c: Change, frame: np.ndarray) -> None:
+    def _on_report(self, camera: str, c: Change, frame: np.ndarray, source: str = "detector") -> None:
+        """A change from the detector, or a zone occupation (tier0.zones.Occupation, shaped alike)."""
         with self.gpu:
             emb = self.embedder.images([crop(frame, c.box)])[0]
         self.open[camera][c.id] = c
         self._record(kind="report", camera=camera, change=c.id, t_change=c.t_start, t=c.t_detect, box=c.box,
-                     area=c.area, emb=emb)
+                     area=c.area, emb=emb, source=source)
         with self.lock:
             d = self.ledger.on_change(camera, c.id, c.t_start, c.t_detect, c.box, emb)
             q = self._question(d, c.t_detect) if d["action"] == "ask" else None
-        self.log("change", camera=camera, change=c.id, t_change=round(c.t_start, 2), t=round(c.t_detect, 2),
-                 box=c.box, area=c.area, action=d["action"], incident=d.get("incident"),
+        self.log("change", camera=camera, change=c.id, source=source, t_change=round(c.t_start, 2),
+                 t=round(c.t_detect, 2), box=c.box, area=c.area, action=d["action"], incident=d.get("incident"),
                  similarity=round(d["similarity"], 3) if "similarity" in d else None)
         for e in d.get("effects", []):
             self._effect(e)

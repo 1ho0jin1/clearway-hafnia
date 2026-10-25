@@ -1,0 +1,67 @@
+{
+  "run": "clearway-live-20261025T092317Z-tracks",
+  "minutes": 3.0,
+  "cameras": {
+    "person_on_railway_tracks": {
+      "fps": 9.9,
+      "dropped": 0,
+      "questions": 2,
+      "startup_questions": 2,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "PERSON_ON_TRACKS": 2
+      },
+      "cards": 1,
+      "occurrences_on_cards": 12,
+      "dismissed": 0,
+      "merged": 1,
+      "to_card_s_asked_median": 20.3,
+      "to_card_s_recurrence_median": 1.0,
+      "lens_wait_s_median": 10.9,
+      "hafnia_s_median": 6.2,
+      "scored": [
+        {
+          "incident": "cw-0001",
+          "hafnia": "PERSON_ON_TRACKS",
+          "expected": "PERSON_ON_TRACKS",
+          "agree": true,
+          "summary": "A person in a red jacket crawls along the edge of the platform and settles onto the railway tracks, remaining there as the clip ends."
+        },
+        {
+          "incident": "cw-0002",
+          "hafnia": "PERSON_ON_TRACKS",
+          "expected": "PERSON_ON_TRACKS",
+          "agree": true,
+          "summary": "A person in a red jacket sits on the railway tracks, then stands and walks away along the tracks, exiting the frame."
+        }
+      ],
+      "replay_no_guard": {
+        "requests": 1,
+        "cards": 1
+      }
+    }
+  },
+  "totals": {
+    "questions": 2,
+    "startup_questions": 2,
+    "cards": 1
+  },
+  "xprotect": {
+    "raise": 1,
+    "reopen": 0,
+    "close": 1,
+    "bookmarks": 2,
+    "errors": [],
+    "checked": [
+      {
+        "alarm": "25f7c6a0-ed82-4771-943b-bd556068505b",
+        "name": "Clearway: PERSON_ON_TRACKS, Rail control",
+        "priority": "High",
+        "state": "Closed",
+        "expected": "Closed",
+        "ok": true
+      }
+    ]
+  }
+}

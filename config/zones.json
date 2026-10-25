@@ -1,0 +1,10 @@
+{
+  "person_on_railway_tracks": [
+    {
+      "name": "track bed",
+      "polygon": [[0.1791, 0.2667], [0.3606, 0.3125], [1.0, 0.65], [1.0, 1.0], [0.5697, 1.0]],
+      "dwell_s": 1.0,
+      "note": "Beyond the near platform's yellow tactile strip (the platform edge and the track bed) up to the far platform's wall. The strip's track-side edge was fitted by colour on the camera's clip: x = 0.921 y + 31.5 px at 832x480 (2026-10-25)."
+    }
+  ]
+}
