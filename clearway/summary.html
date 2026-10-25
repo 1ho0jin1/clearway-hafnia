@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clearway shift summary</title>
+<style>
+  :root {
+    --bg: #0d1015; --panel: #141920; --card: #1b2129; --line: #29313c;
+    --text: #e7eaef; --muted: #939ca8; --faint: #5e6773;
+    --high: #ef4d55; --medium: #f0a33b; --low: #4b9ef3; --ok: #39c98a;
+    --bar: #8b9bb0;            /* magnitude: one neutral hue, apart from the priority colours */
+    --radius: 10px;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); font-size: 14px; }
+  a { color: var(--text); }
+
+  .top { display: flex; align-items: center; gap: 24px; padding: 10px 16px; border-bottom: 1px solid var(--line);
+         background: var(--panel); position: sticky; top: 0; z-index: 2; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .mark { width: 26px; height: 26px; border-radius: 7px; flex: none;
+          background: linear-gradient(135deg, var(--ok), #1f8f61); position: relative; }
+  .mark::after { content: ""; position: absolute; left: 6px; right: 6px; top: 11px; height: 4px; border-radius: 2px;
+                 background: var(--panel); }
+  .name { font-weight: 650; font-size: 17px; }
+  .sub { color: var(--muted); font-size: 12px; }
+  .nav { margin-left: auto; display: flex; gap: 14px; align-items: center; font-size: 13px; }
+  .nav a { text-decoration: none; padding: 4px 10px; border: 1px solid var(--line); border-radius: 6px; }
+  .nav a:hover { border-color: var(--muted); }
+  .notice { padding: 6px 16px; font-size: 12px; color: var(--muted); background: #11161c; border-bottom: 1px solid var(--line); }
+  .notice div + div { margin-top: 3px; }
+  .notice b { color: var(--text); font-weight: 600; }
+
+  main { padding: 14px 16px 24px; display: flex; flex-direction: column; gap: 14px; max-width: 1600px; margin: 0 auto; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .tile { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; }
+  .tile .label { color: var(--muted); font-size: 12px; }
+  .tile .value { font-size: 26px; font-weight: 600; margin-top: 4px; }
+  .tile .note { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .tile.hero .value { font-size: 48px; line-height: 1.05; }
+  .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 14px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px;
+           min-width: 0; }
+  h2 { font-size: 14px; font-weight: 600; margin: 0 0 10px; }
+  h2 .h-note { color: var(--muted); font-weight: 400; font-size: 12px; margin-left: 6px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--muted); font-weight: 500; font-size: 12px; padding: 4px 8px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  td { padding: 6px 8px; border-bottom: 1px solid #1f262f; vertical-align: top; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  .owner { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .pbar { width: 4px; height: 16px; border-radius: 2px; flex: none; }
+  .barcell { display: flex; align-items: center; gap: 8px; min-width: 120px; }
+  .bar { height: 10px; border-radius: 0 4px 4px 0; background: var(--bar); min-width: 2px; }
+  .barcell .v { font-variant-numeric: tabular-nums; color: var(--text); }
+  .muted { color: var(--muted); } .faint { color: var(--faint); }
+  .summary-text { color: var(--muted); font-size: 12px; max-width: 520px; }
+  .ai { display: inline-block; font-size: 10px; letter-spacing: .4px; text-transform: uppercase; color: var(--muted);
+        border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; margin-right: 6px; }
+  .pill { font-size: 11px; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+  .pill.on { color: var(--text); border-color: var(--high); }
+  .pill.ok { color: var(--ok); border-color: #22684b; }
+
+  .times { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+  .times .tile { background: var(--card); }
+  .spots { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+  .spot { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .spot img, .spot .noimg { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: #000; }
+  .spot .noimg { display: flex; align-items: center; justify-content: center; color: var(--faint); font-size: 12px; }
+  .spot .cap { padding: 8px 10px; }
+  .spot .n { font-size: 20px; font-weight: 600; }
+  .spot .what { font-size: 12px; color: var(--muted); }
+  .facts { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 13px; }
+  .facts .k { color: var(--muted); }
+  .empty { color: var(--faint); font-size: 12px; padding: 8px 0; }
+  .stale .top { background: #2a1d10; }
+  .scroll { overflow-x: auto; }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <span class="mark" aria-hidden="true"></span>
+    <div><div class="name">Clearway · Shift summary</div><div class="sub" id="span">loading…</div></div>
+  </div>
+  <nav class="nav"><span class="muted" id="updated"></span><a href="/">Board</a></nav>
+</header>
+<div class="notice" id="notice" hidden></div>
+<main>
+  <section class="kpis" id="kpis"></section>
+  <section class="row">
+    <div class="panel"><h2>By owner</h2><div class="scroll"><table id="owners"></table></div></div>
+    <div class="panel"><h2>How fast <span class="h-note">medians</span></h2><div class="times" id="times"></div></div>
+  </section>
+  <section class="panel"><h2>Where it keeps happening <span class="h-note" id="spots-note"></span></h2><div class="spots" id="spots"></div></section>
+  <section class="panel"><h2>Incidents</h2><div class="scroll"><table id="incidents"></table></div></section>
+  <section class="row">
+    <div class="panel"><h2>What it cost <span class="h-note" id="cost-note"></span></h2><div id="cost"></div></div>
+    <div class="panel"><h2>Operator</h2><div id="operator"></div></div>
+  </section>
+</main>
+<script>
+"use strict";
+const CATEGORY = { PERSON_ON_TRACKS: "Person on the tracks", COLLISION: "Collision", STALLED_VEHICLE: "Stalled vehicle",
+                   OBSTRUCTION: "Obstruction", DAMAGE: "Damage", TAMPERING: "Tampering" };
+const PRIORITY = { "Rail control": "high", "Traffic operations": "high", "Street services": "medium",
+                   "Asset owner": "low", "Security": "low" };
+const $ = (id) => document.getElementById(id);
+const human = (s) => s.replace(/_/g, " ");
+const cat = (c) => CATEGORY[c] || human(c);
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function hms(t) { return new Date(t * 1000).toISOString().slice(11, 19); }
+function secs(s) {                 // operator time: seconds on loops, minutes on real streets
+  if (s == null) return "–";
+  if (s < 90) return `${s < 10 ? s.toFixed(1) : Math.round(s)} s`;
+  const m = Math.floor(s / 60), r = Math.round(s % 60);
+  if (s < 3600) return `${m} min ${String(r).padStart(2, "0")} s`;
+  return `${Math.floor(s / 3600)} h ${String(m % 60).padStart(2, "0")} min`;
+}
+function tile(label, value, note, hero) {
+  const t = el("div", "tile" + (hero ? " hero" : ""));
+  t.append(el("div", "label", label), el("div", "value", value));
+  if (note) t.append(el("div", "note", note));
+  return t;
+}
+function barCell(v, max, label, title) {
+  const c = el("div", "barcell"), b = el("div", "bar");
+  b.style.width = `${max ? Math.max(2, 120 * v / max) : 2}px`;
+  b.title = title || `${label ?? v}`;
+  c.append(b, el("span", "v", label ?? String(v)));
+  return c;
+}
+function table(t, head, rows) {
+  const tr = el("tr");
+  head.forEach(([h, num]) => tr.append(el("th", num ? "num" : null, h)));
+  t.replaceChildren(tr, ...rows.map(cells => {
+    const r = el("tr");
+    cells.forEach(([v, num]) => { const td = el("td", num ? "num" : null); if (v instanceof Node) td.append(v); else td.textContent = v ?? "–"; r.append(td); });
+    return r;
+  }));
+}
+function ownerCell(owner) {
+  const d = el("div", "owner"), p = el("span", "pbar");
+  p.style.background = `var(--${PRIORITY[owner] || "faint"})`;
+  d.append(p, el("span", null, owner));
+  return d;
+}
+
+function render(s) {
+  document.body.classList.remove("stale");
+  const live = !s.ended;
+  $("span").textContent = `${s.run} · ${hms(s.started)}–${hms(s.until)} UTC · ${secs(s.hours * 3600)}` +
+    ` · ${s.cameras.length} cameras` + (live ? " · live, so far" : "");
+  $("updated").textContent = live ? `updated ${hms(Date.now() / 1000)} UTC` : "";
+
+  const notes = [];
+  if (s.mode === "dry") notes.push(["Dry run: ", "answers came from the test stand-in, not from Hafnia; costs are questions, not requests."]);
+  if (s.looped_cameras.length) notes.push(["Looped clips: ", `${s.looped_cameras.length} of ${s.cameras.length} cameras play the organizers' clips, which restart every 8–17 s. An occurrence there is a replay of one incident, so times are seconds and "keeps happening" counts replays.`]);
+  if (s.cost.short_run) notes.push(["Short run: ", "every incident's first question comes at once at the start, so rates per hour and per day are far above a steady shift's."]);
+  const notice = $("notice");
+  notice.hidden = !notes.length;
+  notice.replaceChildren(...notes.map(([b, t]) => { const d = el("div"); d.append(el("b", null, b), document.createTextNode(t)); return d; }));
+
+  const t = s.times_s;
+  $("kpis").replaceChildren(
+    tile("Incidents", String(s.incidents), `${s.open_at_end} open ${live ? "now" : "at the end"}`, true),
+    tile("Times they happened", String(s.occurrences), "occurrences on the cards"),
+    tile("Spot changed to card", secs(t.change_to_card_first.median), `first time; repeats ${secs(t.change_to_card_repeat.median)}`),
+    tile(s.cost.dry ? "Questions" : "Hafnia requests", String(s.cost.total), `${s.cost.without_a_question} of ${s.cost.changes} changes needed none`),
+    tile("False cards", String(s.false_cards), "rejected by the operator"),
+  );
+
+  const maxInc = Math.max(1, ...s.by_owner.map(o => o.incidents)), maxOcc = Math.max(1, ...s.by_owner.map(o => o.occurrences));
+  table($("owners"), [["Owner"], ["Incidents"], ["Occurrences"], ["To card", 1], ["Open, total", 1], ["Longest", 1]],
+    s.by_owner.map(o => [[ownerCell(o.owner)], [barCell(o.incidents, maxInc, `${o.incidents}${o.open_at_end ? ` (${o.open_at_end} open)` : ""}`)],
+      [barCell(o.occurrences, maxOcc)], [secs(o.to_card_s_median), 1], [o.incidents ? secs(o.open_s_total) : "–", 1],
+      [secs(o.longest_s), 1]]));
+
+  $("times").replaceChildren(
+    tile("Change to card, first time", secs(t.change_to_card_first.median), `max ${secs(t.change_to_card_first.max)}: the lens queue and Hafnia`),
+    tile("Change to card, repeat", secs(t.change_to_card_repeat.median), `${t.change_to_card_repeat.n} repeats, no request`),
+    tile("Card to XProtect alarm", secs(t.card_to_xprotect_alarm.median), t.card_to_xprotect_alarm.n ? `${t.card_to_xprotect_alarm.n} alarms raised` : "no alarms in this run"),
+    tile("Alarm to clear", secs(t.alarm_to_clear.median), `${t.alarm_to_clear.n} alarms; ${t.alarm_to_clear.cleared_before_alarm} cleared before theirs`),
+    tile("Clear to alarm closed", secs(t.clear_to_alarm_closed.median), t.clear_to_alarm_closed.n ? `${t.clear_to_alarm_closed.n} closed by themselves` : "none closed by themselves"),
+    tile("Occurrence", secs(t.occurrence.median), `${t.occurrence.n} that cleared`),
+  );
+
+  $("spots-note").textContent = s.looped_cameras.length ? "on looped clips these are replays" : "";
+  $("spots").replaceChildren(...(s.recurring.length ? s.recurring.map(r => {
+    const d = el("div", "spot");
+    if (r.snap) { const i = el("img"); i.src = r.snap; i.alt = `${human(r.camera)}, the spot boxed`; d.append(i); }
+    else d.append(el("div", "noimg", "no snapshot in this run"));
+    const cap = el("div", "cap");
+    cap.append(el("div", "n", `${r.occurrences} times`), el("div", null, cat(r.category)), el("div", "what", `${human(r.camera)} · ${r.owner}`));
+    d.append(cap);
+    return d;
+  }) : [el("div", "empty", "Nothing happened twice at one spot.")]));
+
+  table($("incidents"), [["Incident"], ["Camera"], ["Owner"], ["First seen", 1], ["Times", 1], ["To card", 1], ["Time open", 1], ["Longest", 1], [live ? "Now" : "At the end"], ["Hafnia said"]],
+    s.list.map(x => {
+      const now = el("span", "pill" + (x.open_at_end ? " on" : x.operator === "confirmed" ? " ok" : ""),
+        x.open_at_end ? "open" : "cleared");
+      const state = el("div"); state.append(now);
+      if (x.operator === "confirmed") state.append(document.createTextNode(" "), el("span", "pill ok", "confirmed"));
+      const said = el("div", "summary-text");
+      if (x.summary) said.append(el("span", "ai", "AI · Hafnia"), document.createTextNode(x.summary));
+      else said.textContent = s.mode === "dry" ? "dry run" : "–";
+      return [[cat(x.category)], [human(x.camera)], [ownerCell(x.owner)], [hms(x.first_seen), 1], [String(x.occurrences), 1],
+              [secs(x.to_card_s), 1], [secs(x.open_s), 1], [secs(x.longest_s), 1], [state], [said]];
+    }));
+
+  const c = s.cost, maxReq = Math.max(1, ...Object.values(c.by_camera));
+  $("cost-note").textContent = c.dry ? "questions the stand-in answered" : "Hafnia requests";
+  const ct = el("table");
+  table(ct, [["Camera"], [c.dry ? "Questions" : "Requests"]],
+    Object.entries(c.by_camera).map(([cam, n]) => [[human(cam)], [barCell(n, maxReq)]]));
+  const facts = el("div", "facts");
+  const fact = (k, v) => facts.append(el("span", "k", k), el("span", null, v));
+  fact("Changes seen", `${c.changes}: ${c.recurrences} repeats, ${c.pieces} pieces, ${c.skipped} skipped as known harmless, ${c.escalated} asked after all`);
+  fact("Per camera-hour", `${c.per_camera_hour} ${c.dry ? "questions" : "requests"}`);
+  fact("500 a day covers", c.cameras_per_allowance == null ? "–" : `${c.cameras_per_allowance} cameras at this rate${c.short_run ? " (short run: see the note)" : ""}`);
+  facts.style.marginTop = "12px";
+  $("cost").replaceChildren(ct, facts);
+
+  const o = s.operator, of = el("div", "facts");
+  const ofact = (k, v) => of.append(el("span", "k", k), el("span", null, v));
+  ofact("Confirmed", String(o.confirmed));
+  ofact("Rejected", `${o.rejected} (false cards: ${o.false_cards_per_camera_hour} per camera-hour)`);
+  ofact("Later look-alikes skipped", `${o.skipped_like_rejected}, because of the rejections`);
+  $("operator").replaceChildren(of);
+  return live;
+}
+
+async function load() {
+  let live = true;
+  try {
+    const r = await fetch("/api/summary", { cache: "no-store" });
+    if (!r.ok) throw new Error(r.status);
+    live = render(await r.json());
+  } catch (e) {
+    document.body.classList.add("stale");
+  } finally {
+    if (live) setTimeout(load, 15000);
+  }
+}
+load();
+</script>
+</body>
+</html>

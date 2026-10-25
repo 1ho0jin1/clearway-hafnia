@@ -37,6 +37,9 @@
   .cam-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--faint); }
   .cam-dot.ok { background: var(--ok); } .cam-dot.slow { background: var(--medium); }
   .clock { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; min-width: 92px; text-align: right; }
+  .navlink { color: var(--text); text-decoration: none; font-size: 13px; padding: 4px 10px; border: 1px solid var(--line);
+             border-radius: 6px; white-space: nowrap; }
+  .navlink:hover { border-color: var(--muted); }
 
   .notice { padding: 6px 16px; font-size: 12px; color: var(--muted); background: #11161c; border-bottom: 1px solid var(--line); }
   .notice b { color: var(--text); font-weight: 600; }
@@ -125,6 +128,7 @@
     <div class="stat"><span class="v" id="st-requests">0</span><span class="k" id="st-requests-k">Hafnia requests</span></div>
   </div>
   <div class="right">
+    <a class="navlink" href="/summary">Shift summary</a>
     <div class="cams" id="cams" title="cameras"></div>
     <div class="clock" id="clock"></div>
   </div>

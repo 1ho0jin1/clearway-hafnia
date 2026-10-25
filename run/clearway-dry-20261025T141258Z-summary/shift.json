@@ -1,0 +1,310 @@
+{
+  "run": "clearway-dry-20261025T141258Z-summary",
+  "mode": "dry",
+  "started": 1792937610.448,
+  "ended": 1792937828.824,
+  "until": 1792937828.824,
+  "hours": 0.061,
+  "cameras": [
+    "vehicle_breakdown_traffic_queue",
+    "bin_pushed_over_onto_sidewalk",
+    "escooter_left_across_sidewalk",
+    "school_gate_break_in_night",
+    "person_on_railway_tracks",
+    "graffiti_on_standing_train"
+  ],
+  "looped_cameras": [
+    "vehicle_breakdown_traffic_queue",
+    "bin_pushed_over_onto_sidewalk",
+    "escooter_left_across_sidewalk",
+    "school_gate_break_in_night",
+    "person_on_railway_tracks",
+    "graffiti_on_standing_train"
+  ],
+  "incidents": 6,
+  "false_cards": 0,
+  "occurrences": 114,
+  "open_at_end": 6,
+  "by_owner": [
+    {
+      "owner": "Rail control",
+      "incidents": 1,
+      "occurrences": 14,
+      "open_at_end": 1,
+      "to_card_s_median": 21.4,
+      "open_s_total": 208.1,
+      "longest_s": 208.1
+    },
+    {
+      "owner": "Traffic operations",
+      "incidents": 1,
+      "occurrences": 15,
+      "open_at_end": 1,
+      "to_card_s_median": 143.3,
+      "open_s_total": 149.5,
+      "longest_s": 41.7
+    },
+    {
+      "owner": "Street services",
+      "incidents": 2,
+      "occurrences": 34,
+      "open_at_end": 2,
+      "to_card_s_median": 47.4,
+      "open_s_total": 360.8,
+      "longest_s": 125.7
+    },
+    {
+      "owner": "Asset owner",
+      "incidents": 1,
+      "occurrences": 12,
+      "open_at_end": 1,
+      "to_card_s_median": 57.3,
+      "open_s_total": 123.0,
+      "longest_s": 40.4
+    },
+    {
+      "owner": "Security",
+      "incidents": 1,
+      "occurrences": 39,
+      "open_at_end": 1,
+      "to_card_s_median": 37.6,
+      "open_s_total": 177.1,
+      "longest_s": 40.3
+    }
+  ],
+  "event_counts": {
+    "DAMAGE": 1,
+    "OBSTRUCTION": 2,
+    "PERSON_ON_TRACKS": 1,
+    "STALLED_VEHICLE": 1,
+    "TAMPERING": 1
+  },
+  "times_s": {
+    "change_to_card_first": {
+      "median": 47.5,
+      "max": 143.3,
+      "n": 6
+    },
+    "change_to_card_repeat": {
+      "median": 1.4,
+      "n": 44
+    },
+    "card_to_xprotect_alarm": {
+      "median": null,
+      "n": 0
+    },
+    "alarm_to_clear": {
+      "median": 31.7,
+      "n": 4,
+      "cleared_before_alarm": 1
+    },
+    "clear_to_alarm_closed": {
+      "median": null,
+      "n": 0
+    },
+    "occurrence": {
+      "median": 11.8,
+      "n": 39
+    }
+  },
+  "longest_open": [
+    {
+      "id": "cw-0001",
+      "camera": "person_on_railway_tracks",
+      "category": "PERSON_ON_TRACKS",
+      "owner": "Rail control",
+      "longest_s": 208.1,
+      "open_at_end": true
+    },
+    {
+      "id": "cw-0006",
+      "camera": "bin_pushed_over_onto_sidewalk",
+      "category": "OBSTRUCTION",
+      "owner": "Street services",
+      "longest_s": 125.7,
+      "open_at_end": true
+    },
+    {
+      "id": "cw-0002",
+      "camera": "escooter_left_across_sidewalk",
+      "category": "OBSTRUCTION",
+      "owner": "Street services",
+      "longest_s": 95.5,
+      "open_at_end": true
+    }
+  ],
+  "recurring": [
+    {
+      "id": "cw-0003",
+      "camera": "school_gate_break_in_night",
+      "category": "TAMPERING",
+      "owner": "Security",
+      "occurrences": 39,
+      "snap": "/snaps/cw-0003.jpg?run=clearway-dry-20261025T141258Z-summary"
+    },
+    {
+      "id": "cw-0006",
+      "camera": "bin_pushed_over_onto_sidewalk",
+      "category": "OBSTRUCTION",
+      "owner": "Street services",
+      "occurrences": 20,
+      "snap": "/snaps/cw-0006.jpg?run=clearway-dry-20261025T141258Z-summary"
+    },
+    {
+      "id": "cw-0013",
+      "camera": "vehicle_breakdown_traffic_queue",
+      "category": "STALLED_VEHICLE",
+      "owner": "Traffic operations",
+      "occurrences": 15,
+      "snap": "/snaps/cw-0013.jpg?run=clearway-dry-20261025T141258Z-summary"
+    },
+    {
+      "id": "cw-0001",
+      "camera": "person_on_railway_tracks",
+      "category": "PERSON_ON_TRACKS",
+      "owner": "Rail control",
+      "occurrences": 14,
+      "snap": "/snaps/cw-0001.jpg?run=clearway-dry-20261025T141258Z-summary"
+    },
+    {
+      "id": "cw-0002",
+      "camera": "escooter_left_across_sidewalk",
+      "category": "OBSTRUCTION",
+      "owner": "Street services",
+      "occurrences": 14,
+      "snap": "/snaps/cw-0002.jpg?run=clearway-dry-20261025T141258Z-summary"
+    }
+  ],
+  "list": [
+    {
+      "id": "cw-0001",
+      "camera": "person_on_railway_tracks",
+      "category": "PERSON_ON_TRACKS",
+      "owner": "Rail control",
+      "priority": "High",
+      "state": "open",
+      "operator": "",
+      "first_seen": 1792937620.723,
+      "occurrences": 14,
+      "to_card_s": 21.4,
+      "open_s": 208.1,
+      "longest_s": 208.1,
+      "open_at_end": true,
+      "summary": "",
+      "snap": "/snaps/cw-0001.jpg?run=clearway-dry-20261025T141258Z-summary"
+    },
+    {
+      "id": "cw-0002",
+      "camera": "escooter_left_across_sidewalk",
+      "category": "OBSTRUCTION",
+      "owner": "Street services",
+      "priority": "Medium",
+      "state": "open",
+      "operator": "",
+      "first_seen": 1792937624.796,
+      "occurrences": 14,
+      "to_card_s": 27.9,
+      "open_s": 177.7,
+      "longest_s": 95.5,
+      "open_at_end": true,
+      "summary": "",
+      "snap": "/snaps/cw-0002.jpg?run=clearway-dry-20261025T141258Z-summary"
+    },
+    {
+      "id": "cw-0003",
+      "camera": "school_gate_break_in_night",
+      "category": "TAMPERING",
+      "owner": "Security",
+      "priority": "Low",
+      "state": "open",
+      "operator": "",
+      "first_seen": 1792937624.987,
+      "occurrences": 39,
+      "to_card_s": 37.6,
+      "open_s": 177.1,
+      "longest_s": 40.3,
+      "open_at_end": true,
+      "summary": "",
+      "snap": "/snaps/cw-0003.jpg?run=clearway-dry-20261025T141258Z-summary"
+    },
+    {
+      "id": "cw-0005",
+      "camera": "graffiti_on_standing_train",
+      "category": "DAMAGE",
+      "owner": "Asset owner",
+      "priority": "Low",
+      "state": "open",
+      "operator": "",
+      "first_seen": 1792937625.44,
+      "occurrences": 12,
+      "to_card_s": 57.3,
+      "open_s": 123.0,
+      "longest_s": 40.4,
+      "open_at_end": true,
+      "summary": "",
+      "snap": "/snaps/cw-0005.jpg?run=clearway-dry-20261025T141258Z-summary"
+    },
+    {
+      "id": "cw-0006",
+      "camera": "bin_pushed_over_onto_sidewalk",
+      "category": "OBSTRUCTION",
+      "owner": "Street services",
+      "priority": "Medium",
+      "state": "open",
+      "operator": "",
+      "first_seen": 1792937625.972,
+      "occurrences": 20,
+      "to_card_s": 66.9,
+      "open_s": 183.1,
+      "longest_s": 125.7,
+      "open_at_end": true,
+      "summary": "",
+      "snap": "/snaps/cw-0006.jpg?run=clearway-dry-20261025T141258Z-summary"
+    },
+    {
+      "id": "cw-0013",
+      "camera": "vehicle_breakdown_traffic_queue",
+      "category": "STALLED_VEHICLE",
+      "owner": "Traffic operations",
+      "priority": "High",
+      "state": "open",
+      "operator": "",
+      "first_seen": 1792937634.365,
+      "occurrences": 15,
+      "to_card_s": 143.3,
+      "open_s": 149.5,
+      "longest_s": 41.7,
+      "open_at_end": true,
+      "summary": "",
+      "snap": "/snaps/cw-0013.jpg?run=clearway-dry-20261025T141258Z-summary"
+    }
+  ],
+  "cost": {
+    "kind": "questions",
+    "dry": true,
+    "by_camera": {
+      "vehicle_breakdown_traffic_queue": 1,
+      "bin_pushed_over_onto_sidewalk": 5,
+      "escooter_left_across_sidewalk": 2,
+      "school_gate_break_in_night": 5,
+      "person_on_railway_tracks": 4,
+      "graffiti_on_standing_train": 1
+    },
+    "total": 18,
+    "per_camera_hour": 49.5,
+    "cameras_per_allowance": 0.4,
+    "short_run": true,
+    "changes": 189,
+    "without_a_question": 171,
+    "recurrences": 96,
+    "pieces": 75,
+    "skipped": 0,
+    "escalated": 0
+  },
+  "operator": {
+    "confirmed": 0,
+    "rejected": 0,
+    "skipped_like_rejected": 0,
+    "false_cards_per_camera_hour": 0.0
+  }
+}

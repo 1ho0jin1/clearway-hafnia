@@ -12,6 +12,8 @@ page in an HTML page view item (F4); a browser on the machine works too.
     /api/board      cards by owner, changes being checked, counts, camera health (JSON)
     /clips/<id>.mp4 the lens clip Hafnia judged, made from the lens spool on first request (H.264, cached in <run>/clips)
     /snaps/<id>.jpg the camera's frame at the end of that clip, the spot boxed (written by the service)
+    /summary        the shift summary (F8, clearway/summary.html; /api/summary: clearway/summary.py on the same run,
+                    recomputed at most every 10 s)
     POST /api/operator  {"incident": "cw-0003", "verdict": "confirmed" | "rejected"}: an operator's verdict on a card
                     (F7), checked against the ledger and appended to <run>/operator.jsonl, which the running service
                     reads (clearway/service.py); the card shows it as pending until the ledger has it. Only from the
@@ -31,10 +33,13 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from clearway.ledger import OWNERS, Ledger
+from clearway.summary import summarise
 from lens.publisher import FFMPEG, SPOOL
 
 REPO = Path(__file__).resolve().parent.parent
 PAGE = Path(__file__).with_name("board.html")
+SUMMARY_PAGE = Path(__file__).with_name("summary.html")
+SUMMARY_EVERY_S = 10        # a long shift's logs take a second or two to summarise
 OWNER_ORDER = list(dict.fromkeys(owner for owner, _ in OWNERS.values()))
 PRIORITY = {owner: prio for owner, prio in OWNERS.values()}
 INCIDENT_ID = re.compile(r"^cw-\d{4,}$")
@@ -201,6 +206,8 @@ class Board:
         self.follower = RunFollower(run or self._newest())
         self._checked = time.monotonic()
         self._clip_lock = threading.Lock()
+        self._summary_lock = threading.Lock()
+        self._summary: tuple[Path, float, dict] | None = None    # run, when, summary
 
     def _newest(self) -> Path:
         found = sorted((p for p in self.runs.glob("clearway-*") if (p / "service.jsonl").exists()),
@@ -221,6 +228,14 @@ class Board:
         with self._clip_lock:      # one conversion at a time; later requests find the cached file
             return self.current().clip(incident)
 
+    def summary(self) -> dict:
+        run = self.current().run
+        with self._summary_lock:
+            if self._summary is None or self._summary[0] != run or (
+                    time.monotonic() - self._summary[1] > SUMMARY_EVERY_S):
+                self._summary = (run, time.monotonic(), summarise(run))
+            return self._summary[2]
+
 
 def make_handler(board: Board):
     class Handler(BaseHTTPRequestHandler):
@@ -228,7 +243,7 @@ def make_handler(board: Board):
             """One line per request with the browser engine (Smart Client's HTML page item: Edge WebView2 in standard
             display mode, Internet Explorer in compatibility mode); the board's 2 s polls are not logged."""
             agent = self.headers.get("User-Agent", "")
-            if self.path.startswith("/api/board"):
+            if self.path.startswith(("/api/board", "/api/summary")):
                 seen = board.__dict__.setdefault("_pollers", set())
                 if agent in seen:
                     return
@@ -301,6 +316,10 @@ def make_handler(board: Board):
                     self._send(HTTPStatus.OK, PAGE.read_bytes(), "text/html; charset=utf-8")
                 elif path == "/api/board":
                     self._send(HTTPStatus.OK, json.dumps(board.current().state()).encode(), "application/json")
+                elif path == "/summary":
+                    self._send(HTTPStatus.OK, SUMMARY_PAGE.read_bytes(), "text/html; charset=utf-8")
+                elif path == "/api/summary":
+                    self._send(HTTPStatus.OK, json.dumps(board.summary()).encode(), "application/json")
                 elif m := re.match(r"^/clips/(cw-\d+)\.mp4$", path):
                     clip = board.clip(m.group(1))
                     if clip is None:

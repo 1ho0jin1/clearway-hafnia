@@ -150,6 +150,7 @@ diagram (Mermaid): `docs/PLAN-C.md`, "Pipeline".
 | `scripts/eval_ledger.py` | The ledger replayed offline against a stand-in for Hafnia: requests, cards, occurrences, alarms, misses; saves each clip's event stream, `--from-events` replays them without the detector |
 | `tier0/change.py`, `tier0/memory.py` | Plan C tier 0: the change detector (`ChangeParams.loops()` / `.real()`) and the SigLIP 2 verdict memory (`Embedder`, `VerdictMemory`) |
 | `clearway/board.py`, `clearway/board.html` | The owner board (F4): a standard-library web server on 127.0.0.1:8765 following a run folder (`--latest` by default): cards by owner with the lens clip (MP4 made from the spool on first view), snapshot, summary, time open, recurrences, alarm state, Confirm / Reject (F7: `POST /api/operator`, board's own page only, appended to the run's `operator.jsonl`); JSON at `/api/board` |
+| `clearway/summary.py`, `clearway/summary.html` | The shift summary (F8), from a run's logs (no requests): incidents by owner and category, false cards, change to card (first and repeat), card to XProtect alarm, alarm to clear, clear to alarm closed, time open and longest occurrence (the ledger's clearing rule replayed over its log and the detector's closings), recurring spots with snapshots, cost per camera-hour and cameras per 500-a-day allowance, operator verdicts; `shift.json` (written by the service at the end, or `python -m clearway.summary <run>`) and the board's `/summary` page |
 | `scripts/start_board.ps1`, `scripts/open_board.ps1` | Start the board detached (logs in `run/board/`); open it as an Edge app window beside Smart Client |
 | `scripts/start_smartclient.ps1` | Start Smart Client not elevated (Medium integrity) from the built-in Administrator; did not make HTML page items use Edge here |
 | `tier0/zones.py`, `config/zones.json` | Person triggers (F5): a person's feet inside a camera's danger-zone polygon for 1 s, reported to the ledger like a change; the polygons, by camera name, in image shares (the only per-camera setting) |
@@ -329,6 +330,16 @@ rejected (asked before the verdict, or about a held look-alike) now join the rej
 category; another category still gets a card. Escalated look-alikes of a rejected card still cost a request each (2
 in 3 min on the bin). Verdicts live in the run's ledger: a new run starts without them. The board's media URLs carry
 the run (`?run=`): ids restart every run and the browser had shown a previous run's snapshot.
+
+**Shift summary (F8)** (`run/clearway-dry-20261025T141258Z-summary`, no requests): `clearway/summary.py` builds it from
+a run's logs (the board's `/summary`, refreshed every 15 s while live; `shift.json` written by the service at the end).
+How long things lasted is not in the ledger's log alone (it logs a clearing only for an open card), so the summary
+replays the ledger's clearing rule over its log and the detector's closings: all 201 clearings the ledger logged on
+three runs fall at the end of a replayed occurrence (172) or inside one where two pieces asked about apart overlapped
+(29). A union of each change's own interval was wrong: on loops small pieces never close, and every incident lasted the
+whole run. On the loops a median occurrence lasts 7.6-11.8 s and a repeat is carded in 1.4 s; the first card takes
+38-62 s (median), the lens queue. The page names looped cameras and short runs, whose per-hour rates are a start-up
+burst's. The looks (768 numbers a line) are cut out before parsing: 0.03 s instead of 0.12 s for 5 min of logs.
 
 **Crash category (gate G3)** (`run/lens-test_11-20261024T110155Z`, 3 requests): with COLLISION in the JSON prompt the
 cropped view of test_11's crash says COLLISION ("loses control … veers sharply"), the full frame STALLED_VEHICLE; the

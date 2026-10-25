@@ -1,0 +1,155 @@
+{
+  "run": "clearway-dry-20261025T141258Z-summary",
+  "minutes": 3.6,
+  "cameras": {
+    "vehicle_breakdown_traffic_queue": {
+      "fps": 8.0,
+      "dropped": 0,
+      "questions": 1,
+      "startup_questions": 1,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "STALLED_VEHICLE": 1
+      },
+      "cards": 1,
+      "occurrences_on_cards": 15,
+      "dismissed": 0,
+      "merged": 0,
+      "to_card_s_asked_median": 143.3,
+      "to_card_s_recurrence_median": 2.3,
+      "lens_wait_s_median": 130.4,
+      "hafnia_s_median": null,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 2,
+        "cards": 1
+      }
+    },
+    "bin_pushed_over_onto_sidewalk": {
+      "fps": 8.0,
+      "dropped": 0,
+      "questions": 5,
+      "startup_questions": 4,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "OBSTRUCTION": 5
+      },
+      "cards": 1,
+      "occurrences_on_cards": 20,
+      "dismissed": 0,
+      "merged": 4,
+      "to_card_s_asked_median": 66.9,
+      "to_card_s_recurrence_median": 1.4,
+      "lens_wait_s_median": 105.8,
+      "hafnia_s_median": null,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 3,
+        "cards": 1
+      }
+    },
+    "escooter_left_across_sidewalk": {
+      "fps": 8.0,
+      "dropped": 0,
+      "questions": 2,
+      "startup_questions": 2,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "OBSTRUCTION": 2
+      },
+      "cards": 1,
+      "occurrences_on_cards": 14,
+      "dismissed": 0,
+      "merged": 1,
+      "to_card_s_asked_median": 27.9,
+      "to_card_s_recurrence_median": 2.3,
+      "lens_wait_s_median": 44.7,
+      "hafnia_s_median": null,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 2,
+        "cards": 1
+      }
+    },
+    "school_gate_break_in_night": {
+      "fps": 8.0,
+      "dropped": 0,
+      "questions": 5,
+      "startup_questions": 5,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "TAMPERING": 5
+      },
+      "cards": 1,
+      "occurrences_on_cards": 39,
+      "dismissed": 0,
+      "merged": 4,
+      "to_card_s_asked_median": 37.6,
+      "to_card_s_recurrence_median": 1.6,
+      "lens_wait_s_median": 83.9,
+      "hafnia_s_median": null,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 2,
+        "cards": 2
+      }
+    },
+    "person_on_railway_tracks": {
+      "fps": 8.1,
+      "dropped": 0,
+      "questions": 4,
+      "startup_questions": 4,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "PERSON_ON_TRACKS": 4
+      },
+      "cards": 1,
+      "occurrences_on_cards": 14,
+      "dismissed": 0,
+      "merged": 3,
+      "to_card_s_asked_median": 21.4,
+      "to_card_s_recurrence_median": 1.0,
+      "lens_wait_s_median": 78.6,
+      "hafnia_s_median": null,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 1,
+        "cards": 1
+      }
+    },
+    "graffiti_on_standing_train": {
+      "fps": 8.1,
+      "dropped": 0,
+      "questions": 1,
+      "startup_questions": 1,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "DAMAGE": 1
+      },
+      "cards": 1,
+      "occurrences_on_cards": 12,
+      "dismissed": 0,
+      "merged": 0,
+      "to_card_s_asked_median": 57.3,
+      "to_card_s_recurrence_median": 1.4,
+      "lens_wait_s_median": 43.9,
+      "hafnia_s_median": null,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 1,
+        "cards": 1
+      }
+    }
+  },
+  "totals": {
+    "questions": 18,
+    "startup_questions": 17,
+    "cards": 6
+  }
+}

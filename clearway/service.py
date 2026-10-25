@@ -466,4 +466,9 @@ class Service:
             (self.out / "incidents.json").write_text(json.dumps(incidents, indent=2, default=_json), encoding="utf-8")
             self.log("end", ledger=dict(self.ledger.stats), cameras=self.stats,
                      cards=sum(bool(i["category"]) and not i["merged_into"] for i in incidents))
+            try:                             # the shift summary (F8), from the logs just closed
+                from clearway.summary import summarise
+                (self.out / "shift.json").write_text(json.dumps(summarise(self.out), indent=2), encoding="utf-8")
+            except Exception as e:
+                self.log("error", error=f"shift summary: {e!r}", trace=traceback.format_exc())
         return {"ledger": dict(self.ledger.stats), "cameras": self.stats}
