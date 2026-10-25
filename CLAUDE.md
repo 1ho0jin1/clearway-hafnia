@@ -143,7 +143,8 @@ diagram (Mermaid): `docs/PLAN-C.md`, "Pipeline".
 | `scripts/setup_lens.ps1`, `scripts/start_lens.ps1` | Install MediaMTX (pinned, SHA-256 checked) and camera `lens_1` (Universal 1 channel driver, our rule "Lens: record lens_1 always"); start MediaMTX and the publisher detached (logs in `run/lens/`) |
 | `scripts/lens_compare.py` | One looped event asked about plainly and through the lens (`--variants crop crop_slow2 crop_sr`, `--prompt classify|json`, `--asks N`): finds the event live by frame matching; (1 + variants) × asks requests |
 | `scripts/lens_pilot.py` | Plan C's lens pilot (M1): each synthetic incident camera, five views (full loop, event window, crop, crop + SR, BEFORE/AFTER), one JSON prompt (`clearway/prompt.py`); 5 requests per camera |
-| `clearway/ledger.py` | The ledger (product F1): incidents, pieces, recurrences (no request), provisional skips with escalation, same-category merge, alarms with a quiet period, clearing, failed questions; returns actions, logs events (JSONL), `Ledger.replay()` |
+| `clearway/ledger.py` | The ledger (product F1): incidents, pieces, recurrences (no request), provisional skips with escalation, same-category merge, one alarm per incident (closed once it stayed cleared 60 s, reopened when it recurs), clearing, failed questions; returns actions, logs events (JSONL), `Ledger.replay()` |
+| `clearway/alarms.py` | XProtect alarms and bookmarks for the ledger's incidents (F3): raise on the incident's camera (category priority, owner in the name, Hafnia's summary marked AI-generated, snapshot, bookmarks on the camera and on `lens_1`), reopen, close; one thread, in order |
 | `clearway/service.py`, `clearway/prompt.py` | The Clearway service (F2): FrameBridge → change detector (a thread per camera) → SigLIP look → ledger → lens clip → `HafniaAnswers` (run cap, daily count) → ledger; logs `service.jsonl`, `ledger.jsonl`, `changes.jsonl` (replayable). The JSON prompt and its parser |
 | `scripts/run_clearway.py`, `scripts/report_clearway.py` | Run the service on live cameras: `--answers standin` (dry run, no requests; loop phase by frame matching; detectors start at a loop start) or `--answers hafnia --max-requests N`; summarise a run per camera beside the offline replay, scoring Hafnia against the stand-in |
 | `scripts/eval_ledger.py` | The ledger replayed offline against a stand-in for Hafnia: requests, cards, occurrences, alarms, misses; saves each clip's event stream, `--from-events` replays them without the detector |
@@ -280,6 +281,14 @@ an incident's rarer spots (diverse looks; merges take the box), lens-client race
 leaving its incident pending (`Ledger.on_failed`). Test harness: looped cameras' detectors start at a loop start (a
 mid-loop start put part of the incident in the warm-up background); the gate's stream never delivers its loop's
 first 5 frames.
+
+**XProtect alarms (F3)** (`run/clearway-dry-20261025T090255Z/README.md`, no requests): one alarm per incident on its
+camera, named for the category and owner, the category's priority, a snapshot of the spot, bookmarks on the camera
+(event window) and on `lens_1` (the clip Hafnia judged); 6 of 6 right on the incident cameras, 0 errors. The ledger
+keeps an incident's alarm open while it recurs and closes it once it has stayed cleared for 60 s (replaces the 5-min
+quiet period; same replay counts); a closed incident that recurs reopens the same alarm (state New), tested live with
+a 5 s delay. XProtect applies alarm updates about 1 s later, so every update names its state and priority (a comment
+right after a close would otherwise read the old state back and reopen the alarm).
 
 **Crash category (gate G3)** (`run/lens-test_11-20261024T110155Z`, 3 requests): with COLLISION in the JSON prompt the
 cropped view of test_11's crash says COLLISION ("loses control … veers sharply"), the full frame STALLED_VEHICLE; the

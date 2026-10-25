@@ -76,20 +76,20 @@ flowchart TD
     ANS -- NONE --> REJ["Remember the rejection"]
     REJ -.-> MEM
     ANS -- "COLLISION, STALLED_VEHICLE, PERSON_ON_TRACKS,<br/>OBSTRUCTION, DAMAGE, TAMPERING" --> ITEM["Ledger item opened<br/>owner and priority from the category"]
-    ITEM --> ALARM["XProtect alarm for the owner<br/>+ bookmark on the lens clip"]
+    ITEM --> ALARM["XProtect alarm for the owner<br/>+ snapshot, bookmarks on the camera and the lens clip"]
     ITEM -.-> MEM
     ITEM --> WATCH["Tier 0 watches the spot"]
-    WATCH -- "looks as before" --> CLOSE(["Item and alarm closed, no request"])
+    WATCH -- "looks as before for 60 s" --> CLOSE(["Item cleared, alarm closed, no request<br/>reopened if it recurs"])
 
     classDef built fill:#d8f0d8,stroke:#2e7d32,color:#000
     classDef planned fill:#fff3cd,stroke:#b38600,color:#000
-    class CAM,FB,CD,CAND,MEM,DROP,RT,LENS,PUB,L1,GW,ANS,REJ,ITEM,WATCH built
-    class SV,PT,ALARM,CLOSE planned
+    class CAM,FB,CD,CAND,MEM,DROP,RT,LENS,PUB,L1,GW,ANS,REJ,ITEM,WATCH,ALARM,CLOSE built
+    class SV,PT planned
 ```
 
 Green: built and measured (live since 2026-10-25: `clearway/service.py`, `run/clearway-live-20261025T083623Z`).
-Yellow: to build (the stalled-vehicle rules exist from plan A and need plan C's keys; alarms and bookmarks exist in
-`hafnia/xprotect_rest.py`, F3; the ledger already clears an incident when its spot looks as before). Tested and **not** in the
+XProtect alarms and bookmarks since 2026-10-25 too (`clearway/alarms.py`, F3, `run/clearway-dry-20261025T090255Z`).
+Yellow: to build (the stalled-vehicle rules exist from plan A and need plan C's keys; person triggers, F5). Tested and **not** in the
 default lens: super-resolution (`lens/enhance.py`) and BEFORE/AFTER stills (`lens.client.before_after`), both kept as
 options.
 
@@ -104,7 +104,7 @@ options.
 | 5 | Router | **built, live** | In the service (`clearway/service.py`, `HafniaAnswers`): one request per ledger question, a run cap, none once today's `DailySummaryCount` reaches a limit. Not built: urgent first. The single lens camera is the bottleneck (first cards 36–85 s after the change when six incidents start within a minute). |
 | 6 | Lens | **built, M1** | `lens/` (publisher, client, `lens_1`): event window from 2 s before the change started to 3 s after it was reported, cropped to the spot. Options measured and left out of the default: Real-ESRGAN super-resolution (`lens/enhance.py`), BEFORE/AFTER stills (`before_after()`). |
 | 7 | Prompt and parser | **built, M1, G3** | `clearway/prompt.py` `PROMPT`: JSON with `category` (`PERSON_ON_TRACKS`, `COLLISION`, `STALLED_VEHICLE`, `OBSTRUCTION`, `DAMAGE`, `TAMPERING`, `NONE`, each defined), `object`, `where`, `still_present`, `summary`; parsed in code with a keyword fallback. Use the category and `still_present`; treat `object` details (tool types) as unreliable. Live: 10 of 10 valid JSON, 6 of 6 incidents right. |
-| 8 | Ledger and XProtect | ledger **built, live** (F1, F2); XProtect to build (F3) | `clearway/ledger.py`: one record per incident (pieces, recurrences, provisional skips, merges, clearing, failed questions), event log replayable. To build: alarm priority by category, owner in the alarm text, the lens clip's span bookmarked; closed when the incident clears. |
+| 8 | Ledger and XProtect | **built, live** (F1, F2, F3) | `clearway/ledger.py`: one record per incident (pieces, recurrences, provisional skips, merges, clearing, failed questions), event log replayable. `clearway/alarms.py`: one XProtect alarm per incident on its camera, priority by category, owner in the name, Hafnia's summary, a snapshot, bookmarks on the camera and on the lens clip; closed once the incident has stayed cleared for 60 s, reopened when it recurs. |
 | 9 | Ledger page | to build | Open and closed items with thumbnails, time to open and to close, owner, requests used today (from `scripts/viz_pipeline.py`). |
 | 10 | Setup | partly | `scripts/setup_lens.ps1` exists; `setup.ps1` for a fresh machine; CC0 footage fetched by script from Wikimedia Commons. |
 

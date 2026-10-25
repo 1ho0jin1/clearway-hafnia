@@ -1,0 +1,142 @@
+[
+  {
+    "id": "cw-0001",
+    "camera": "bin_pushed_over_onto_sidewalk",
+    "box": [
+      18,
+      174,
+      302,
+      368
+    ],
+    "t_change": 1792919355.972,
+    "t_report": 1792919357.372,
+    "state": "open",
+    "category": "OBSTRUCTION",
+    "owner": "Street services",
+    "priority": "Medium",
+    "answer": {
+      "category": "OBSTRUCTION",
+      "standin": true,
+      "seen_s": 4.7,
+      "loop_start": 5.67,
+      "phase_match": 1.0
+    },
+    "t_answer": 1792919377.572,
+    "t_alarm": 1792919414.572,
+    "alarms": 4,
+    "alarm_open": true,
+    "t_cleared": null,
+    "occurrences": 8,
+    "operator": "",
+    "merged_into": "",
+    "clip": "20261025T090920812531_cw-0001-bin_pushed_over_onto_sidewalk",
+    "t_last": 1792919416.272,
+    "active": [
+      16,
+      17,
+      18
+    ]
+  },
+  {
+    "id": "cw-0002",
+    "camera": "bin_pushed_over_onto_sidewalk",
+    "box": [
+      132,
+      178,
+      192,
+      242
+    ],
+    "t_change": 1792919356.672,
+    "t_report": 1792919361.072,
+    "state": "merged",
+    "category": "OBSTRUCTION",
+    "owner": "Street services",
+    "priority": "Medium",
+    "answer": {
+      "category": "OBSTRUCTION",
+      "standin": true,
+      "seen_s": 5.0,
+      "loop_start": 5.67,
+      "phase_match": 1.0
+    },
+    "t_answer": 1792919390.572,
+    "t_alarm": null,
+    "alarms": 0,
+    "alarm_open": false,
+    "t_cleared": null,
+    "occurrences": 1,
+    "operator": "",
+    "merged_into": "cw-0001",
+    "clip": "20261025T090924572022_cw-0002-bin_pushed_over_onto_sidewalk",
+    "t_last": 1792919361.072,
+    "active": []
+  },
+  {
+    "id": "cw-0003",
+    "camera": "bin_pushed_over_onto_sidewalk",
+    "box": [
+      126,
+      312,
+      198,
+      342
+    ],
+    "t_change": 1792919360.772,
+    "t_report": 1792919362.472,
+    "state": "merged",
+    "category": "OBSTRUCTION",
+    "owner": "Street services",
+    "priority": "Medium",
+    "answer": {
+      "category": "OBSTRUCTION",
+      "standin": true,
+      "seen_s": 1.9,
+      "loop_start": 5.67,
+      "phase_match": 1.0
+    },
+    "t_answer": 1792919400.772,
+    "t_alarm": null,
+    "alarms": 0,
+    "alarm_open": false,
+    "t_cleared": null,
+    "occurrences": 1,
+    "operator": "",
+    "merged_into": "cw-0001",
+    "clip": "20261025T090925826987_cw-0003-bin_pushed_over_onto_sidewalk",
+    "t_last": 1792919362.472,
+    "active": []
+  },
+  {
+    "id": "cw-0004",
+    "camera": "bin_pushed_over_onto_sidewalk",
+    "box": [
+      20,
+      174,
+      300,
+      348
+    ],
+    "t_change": 1792919368.472,
+    "t_report": 1792919370.872,
+    "state": "merged",
+    "category": "OBSTRUCTION",
+    "owner": "Street services",
+    "priority": "Medium",
+    "answer": {
+      "category": "OBSTRUCTION",
+      "standin": true,
+      "seen_s": 3.2,
+      "loop_start": 5.67,
+      "phase_match": 1.0
+    },
+    "t_answer": 1792919411.372,
+    "t_alarm": null,
+    "alarms": 0,
+    "alarm_open": false,
+    "t_cleared": null,
+    "occurrences": 1,
+    "operator": "",
+    "merged_into": "cw-0001",
+    "clip": "20261025T090934348756_cw-0004-bin_pushed_over_onto_sidewalk",
+    "t_last": 1792919371.272,
+    "active": []
+  }
+]

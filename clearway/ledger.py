@@ -53,7 +53,9 @@ class Params:
     min_overlap: float = 0.3            # same spot: the overlap covers this share of the smaller box (containment,
                                         # not IoU: a thin strip inside an incident's grown box is the same spot)
     recurrence_window_s: float = 3600   # a cleared incident can recur (reopen) for this long
-    quiet_s: float = 300                # at most one alarm per incident this often (loops would raise one per replay)
+    close_after_s: float = 60.0         # an incident's alarm closes once it has stayed cleared this long (tick): a
+                                        # recurring incident keeps one open alarm instead of closing and reopening it
+                                        # with every occurrence (a loop recurs within 15 s); a closed one reopens
     keep_embs: int = 8                  # occurrences' looks kept per incident (the look can drift), kept diverse:
                                         # when full, the older of the two most alike goes (_remember)
     group_s: float = 5.0                # a change near an incident within this long of its last change is a piece of
@@ -79,8 +81,9 @@ class Incident:
     priority: str = ""
     answer: dict = field(default_factory=dict)
     t_answer: float | None = None
-    t_alarm: float | None = None        # last alarm raised
-    alarms: int = 0
+    t_alarm: float | None = None        # last alarm raised or reopened
+    alarms: int = 0                     # times raised or reopened
+    alarm_open: bool = False
     t_cleared: float | None = None
     occurrences: int = 1
     operator: str = ""                  # "confirmed" | "rejected"
@@ -200,7 +203,8 @@ class Ledger:
         return {"action": "ask", "incident": inc.id, "escalated": escalated_at is not None, "change": change_id}
 
     def tick(self, t: float) -> list[dict]:
-        """Call regularly (every frame or second). Asks about skipped changes that have stayed for escalate_s."""
+        """Call regularly (every second). Asks about skipped changes that have stayed for escalate_s ({"action":
+        "ask", ...}) and closes the alarms of incidents that have stayed cleared for close_after_s ({"close_alarm": ...})."""
         out = []
         for key, h in list(self.held.items()):
             if t - h["t_report"] >= self.p.escalate_s:
@@ -208,6 +212,9 @@ class Ledger:
                 self.stats["skipped"] -= 1
                 self.stats["escalated"] += 1
                 out.append(self._ask(key[0], key[1], h["t_change"], h["t_report"], h["box"], h["emb"], escalated_at=t))
+        for inc in self.incidents.values():
+            if inc.alarm_open and inc.state == "cleared" and t - inc.t_cleared >= self.p.close_after_s:
+                out += self._close_alarm(inc, t, "cleared")
         return out
 
     def _recur(self, inc: Incident, camera, change_id, t_change, t_report, emb, sim) -> dict:
@@ -221,14 +228,16 @@ class Ledger:
         if inc.state == "cleared":
             inc.state = "open"
             inc.t_cleared = None
-            actions = self._alarm(inc, t_report, recurrence=True)
+            actions = self._alarm(inc, t_report, recurrence=True, t_change=t_change)
         self._emit("recur", incident=inc.id, camera=camera, change=change_id, t_change=t_change, t=t_report,
                    similarity=round(sim, 3), occurrences=inc.occurrences, state=inc.state, emb=emb,
                    area=inc.active[change_id])
         return {"action": "recur", "incident": inc.id, "similarity": sim, "effects": actions}
 
     def on_answer(self, incident_id: str, category: str, answer: dict, t: float, clip: str = "") -> list[dict]:
-        """Hafnia's verdict on a pending incident. Returns effects: [{"alarm": ...}] or []."""
+        """Hafnia's verdict on a pending incident. Returns effects: [{"alarm": ...}] or []. An incident whose spot has
+        already cleared still raises its alarm (a person who left the tracks before the answer came is still news for
+        rail control); it closes after close_after_s like any other."""
         inc = self.incidents[incident_id]
         inc.answer, inc.t_answer, inc.clip = answer, t, clip or inc.clip
         if category in OWNERS:
@@ -240,7 +249,7 @@ class Ledger:
             inc.state = "open" if inc.active else "cleared"
             if not inc.active:
                 inc.t_cleared = t
-            effects = self._alarm(inc, t) if inc.state == "open" else []
+            effects = self._alarm(inc, t, t_change=inc.t_change)
         else:
             inc.state = "dismissed"
             self.rejections += [(inc.camera, inc.box, e) for e in inc.embs]
@@ -281,7 +290,7 @@ class Ledger:
         effects = []
         if inc.active and target.state == "cleared":
             target.state, target.t_cleared = "open", None
-            effects = self._alarm(target, t, recurrence=True)
+            effects = self._alarm(target, t, recurrence=True, t_change=inc.t_change)
         inc.state, inc.merged_into, inc.active = "merged", target.id, {}
         self._emit("merge", incident=inc.id, into=target.id, t=t, category=inc.category, answer=inc.answer,
                    occurrences=target.occurrences, state=target.state)
@@ -300,18 +309,27 @@ class Ledger:
             kept.pop(min(i, j))
         inc.embs = kept
 
-    def _alarm(self, inc: Incident, t: float, recurrence: bool = False) -> list[dict]:
-        if inc.t_alarm is not None and t - inc.t_alarm < self.p.quiet_s:
+    def _alarm(self, inc: Incident, t: float, recurrence: bool = False, t_change: float | None = None) -> list[dict]:
+        """Raise the incident's alarm, or reopen it if it was closed; nothing while it is open. t_change: when the
+        occurrence that raised it started changing (for the service's bookmark)."""
+        if inc.alarm_open:
             return []
-        inc.t_alarm = t
+        inc.alarm_open, inc.t_alarm = True, t
         inc.alarms += 1
         self._emit("alarm", incident=inc.id, t=t, owner=inc.owner, priority=inc.priority, recurrence=recurrence,
                    occurrences=inc.occurrences)
-        return [{"alarm": inc.id, "owner": inc.owner, "priority": inc.priority, "recurrence": recurrence}]
+        return [{"alarm": inc.id, "owner": inc.owner, "priority": inc.priority, "recurrence": recurrence,
+                 "reopen": inc.alarms > 1, "t": t, "t_change": t_change if t_change is not None else t}]
+
+    def _close_alarm(self, inc: Incident, t: float, reason: str) -> list[dict]:
+        inc.alarm_open = False
+        self._emit("alarm_closed", incident=inc.id, t=t, reason=reason)
+        return [{"close_alarm": inc.id, "reason": reason, "t": t, "t_cleared": inc.t_cleared}]
 
     def on_change_closed(self, camera: str, change_id: int, t: float, how: str) -> list[dict]:
         """Tier 0 saw the spot look as before (or the scene jumped). An incident clears when its largest active change
-        closes: a small piece that never looks quite as before must not keep it open forever."""
+        closes: a small piece that never looks quite as before must not keep it open forever. Its alarm closes later,
+        once it has stayed cleared for close_after_s (tick)."""
         self.held.pop((camera, change_id), None)
         incident_id = self.change_to_incident.pop((camera, change_id), None)
         if incident_id is None:
@@ -327,7 +345,7 @@ class Ledger:
             return []           # pending: the answer finds it already clear
         inc.state, inc.t_cleared = "cleared", t
         self._emit("clear", incident=inc.id, t=t, how=how, occurrences=inc.occurrences)
-        return [{"close_alarm": inc.id}]
+        return []
 
     def on_operator(self, incident_id: str, verdict: str, t: float) -> list[dict]:
         """An operator confirms or rejects a card. A rejection teaches the spot's look as harmless."""
@@ -336,9 +354,9 @@ class Ledger:
         effects = []
         if verdict == "rejected":
             self.rejections += [(inc.camera, inc.box, e) for e in inc.embs]
-            if inc.state == "open":
-                effects = [{"close_alarm": inc.id}]
             inc.state = "rejected"
+            self._emit("operator", incident=inc.id, t=t, verdict=verdict)
+            return self._close_alarm(inc, t, "rejected") if inc.alarm_open else []
         self._emit("operator", incident=inc.id, t=t, verdict=verdict)
         return effects
 
@@ -391,7 +409,9 @@ class Ledger:
                 inc.state, inc.merged_into, inc.active = "merged", target.id, {}
             elif k == "alarm":
                 inc = led.incidents[e["incident"]]
-                inc.t_alarm, inc.alarms = e["t"], inc.alarms + 1
+                inc.t_alarm, inc.alarms, inc.alarm_open = e["t"], inc.alarms + 1, True
+            elif k == "alarm_closed":
+                led.incidents[e["incident"]].alarm_open = False
             elif k == "clear":
                 inc = led.incidents[e["incident"]]
                 for c in inc.active:

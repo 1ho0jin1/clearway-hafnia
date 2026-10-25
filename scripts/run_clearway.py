@@ -2,6 +2,7 @@ r"""run_clearway.py - the Clearway service (clearway/service.py) on live cameras
 
     .venv\Scripts\python.exe scripts\run_clearway.py [--cameras ...] [--minutes 5] [--answers standin|hafnia]
                                                    [--max-requests 10] [--stop-at 450] [--no-lens] [--out DIR]
+                                                   [--alarms [--close-alarms-at-end] [--close-after S]]
 
 --answers standin (default): a dry run, no Hafnia requests. The offline replay's stand-in (scripts/eval_ledger.py)
 answers LATENCY_S after the lens clip has played: the camera's category when the clip (2 s before the change started
@@ -10,6 +11,10 @@ is in its loop is found by matching each frame to the clip's own frames (thumbna
 has no loop). Cameras without a known incident state are answered NONE.
 --answers hafnia: one request per question, on lens_1 over the clip's span (HafniaAnswers); at most --max-requests in
 this run, none once today's count reaches --stop-at. The planned count is printed before anything starts.
+--alarms: carry out the ledger's effects in XProtect (clearway/alarms.py: one alarm per incident on its camera,
+snapshot, bookmarks on the camera and on lens_1; closed once the incident stayed cleared); a dry run's alarms are
+named "[dry run] ...". --close-alarms-at-end (test harness) closes the alarms still open when the run ends;
+--close-after S (test harness) shortens the ledger's close_after_s (60 s), so that loops close and reopen alarms.
 Default cameras: the organizers' six incident cameras; --real cameras use the real-camera detector setting. Writes
 run\clearway-<dry|live>-<UTC>\ (ledger.jsonl, service.jsonl, incidents.json). Needs the lens (scripts\start_lens.ps1)
 unless --no-lens.
@@ -31,6 +36,7 @@ import numpy as np
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 sys.path.insert(0, str(REPO / "scripts"))
+from clearway.ledger import Params  # noqa: E402
 from clearway.service import HafniaAnswers, Question, Service  # noqa: E402
 from eval_change import CASES, frames  # noqa: E402
 from eval_ledger import LATENCY_S, TRUTH  # noqa: E402
@@ -135,6 +141,9 @@ def main() -> int:
     ap.add_argument("--stop-at", type=int, default=450, help="ask no more once today's count reaches this")
     ap.add_argument("--no-lens", dest="lens", action="store_false", help="do not play clips on lens_1 (stand-in only)")
     ap.add_argument("--out", type=Path)
+    ap.add_argument("--alarms", action="store_true", help="raise, reopen and close XProtect alarms and bookmarks")
+    ap.add_argument("--close-alarms-at-end", action="store_true", help="test harness: close open alarms at the end")
+    ap.add_argument("--close-after", type=float, help="test harness: the ledger's close_after_s")
     args = ap.parse_args()
     mode = "dry" if args.answers == "standin" else "live"
     out = args.out or REPO / "run" / f"clearway-{mode}-{dt.datetime.now(dt.timezone.utc):%Y%m%dT%H%M%SZ}"
@@ -169,8 +178,14 @@ def main() -> int:
         on_frame = answer.observe
         print(f"dry run: no Hafnia requests; stand-in for {sorted(answer.refs)}", flush=True)
     cameras = {c: ChangeParams.real() if c in args.real else ChangeParams.loops() for c in args.cameras}
-    Service(cameras, answer, out, lens=args.lens, on_frame=on_frame,
-            echo=lambda s: print(s, flush=True)).run(args.minutes)
+    params = Params() if args.close_after is None else Params(close_after_s=args.close_after)
+    service = Service(cameras, answer, out, lens=args.lens, params=params, on_frame=on_frame,
+                      echo=lambda s: print(s, flush=True), close_alarms_at_end=args.close_alarms_at_end)
+    if args.alarms:
+        from clearway.alarms import XProtectAlarms
+        service.alarms = XProtectAlarms(known, known.get("lens_1") if args.lens else None, service.log,
+                                        label="[dry run] " if mode == "dry" else "")
+    service.run(args.minutes)
     print(f"wrote {out}", flush=True)
     return 0
 

@@ -18,7 +18,8 @@ per camera):
    stand-in passed in by the caller;
 4. the answer goes back to the ledger. Closed changes go to the ledger too: an incident clears when its largest change
    closes.
-The ledger's effects (raise or close an alarm) are only logged here: XProtect alarms and bookmarks are F3.
+The ledger's effects (raise, reopen or close an incident's alarm) are carried out in XProtect by clearway/alarms.py
+(XProtectAlarms, F3: one alarm per incident, with a snapshot and bookmarks) when one is given, and logged.
 
 Writes <out>/ledger.jsonl (the ledger's event log; Ledger.replay rebuilds the state), <out>/service.jsonl (changes,
 questions, lens spans, answers, effects, health), <out>/changes.jsonl (every report with its look, and every closing:
@@ -46,7 +47,7 @@ import numpy as np
 from clearway.ledger import Ledger, Params
 from clearway.prompt import PROMPT, parse
 from incident.bridge import FrameBridge
-from lens.client import span, submit, wait, zoom
+from lens.client import mark, span, submit, wait, zoom
 from tier0.change import Change, ChangeDetector, ChangeParams
 from tier0.memory import Embedder, crop
 
@@ -146,11 +147,14 @@ def _json(o):
 class Service:
     def __init__(self, cameras: dict[str, ChangeParams], answer: Callable[[Question], dict], out: Path,
                  lens: bool = True, params: Params | None = None, workers: int = 32,
-                 on_frame: Callable[[str, float, np.ndarray], bool | None] | None = None, echo=print):
+                 on_frame: Callable[[str, float, np.ndarray], bool | None] | None = None, echo=print,
+                 alarms=None, close_alarms_at_end: bool = False):
         """cameras: name -> change detector setting. answer: Question -> {"category": ... or None, ...}, called on a
         worker thread after the clip has played. workers: questions in flight; each captures its clip as soon as its
         window has passed, so none may wait for a free worker (the frames are kept only KEEP_S). on_frame (camera,
-        frame time, 640-px frame), for test harnesses: returning False keeps that frame from the detector."""
+        frame time, 640-px frame), for test harnesses: returning False keeps that frame from the detector. alarms: an
+        XProtectAlarms (clearway/alarms.py) to carry out the ledger's effects; close_alarms_at_end (test harness):
+        close the alarms still open when the run ends."""
         from ultralytics import YOLO
         self.cameras, self.answer, self.out, self.lens = cameras, answer, out, lens
         self.on_frame, self.echo = on_frame, echo
@@ -168,6 +172,8 @@ class Service:
         self.yolo = YOLO(str(REPO / "models" / "yolo11m.pt"))
         self.pool = ThreadPoolExecutor(max_workers=workers)
         self.questions: list[Future] = []
+        self.alarms, self.close_alarms_at_end = alarms, close_alarms_at_end
+        self.evidence: dict[str, dict] = {}             # incident -> snapshot of the clip Hafnia judged, lens span
         self.now = 0.0                                  # the latest frame time, any camera
         self.closed = False                             # no more frames are coming
         self._log_lock = threading.Lock()
@@ -219,13 +225,18 @@ class Service:
                     self.log("error", camera=camera, error=repr(e))
 
     def _ticker(self) -> None:
-        """Every second: the ledger's held skips that stayed become questions."""
+        """Every second: the ledger's held skips that stayed become questions; alarms of incidents that stayed
+        cleared close."""
         while not self.closed:
             time.sleep(1.0)
             with self.lock:
-                qs = [self._question(d, self.now) for d in self.ledger.tick(self.now)]
+                out = self.ledger.tick(self.now)
+                qs = [self._question(d, self.now) for d in out if d.get("action") == "ask"]
             for q in qs:
                 self._ask(q)
+            for e in out:
+                if e.get("action") != "ask":     # an alarm closing
+                    self._effect(e)
 
     def _on_report(self, camera: str, c: Change, frame: np.ndarray) -> None:
         with self.gpu:
@@ -256,7 +267,28 @@ class Service:
                 self._effect(e)
 
     def _effect(self, e: dict) -> None:
-        self.log("effect", **e)     # F3: raise or close the XProtect alarm here
+        self.log("effect", **e)
+        if self.alarms is None:
+            return
+        iid = e.get("alarm") or e.get("close_alarm")
+        with self.lock:
+            inc = self.ledger.incidents[iid].public()
+        ev = dict(self.evidence.get(iid, {}))
+        if "alarm" in e and (e.get("recurrence") or "jpeg" not in ev):
+            ev.update(self._snapshot(inc["camera"], inc["box"]))     # the spot as it is now
+        self.alarms.submit(e, inc, ev)
+
+    def _snapshot(self, camera: str, box, frame: np.ndarray | None = None) -> dict:
+        """A JPEG of the camera's frame (the latest one if none is given) with the spot boxed."""
+        if frame is None:
+            jpegs = self.recent[camera].window(self.recent[camera].latest(), float("inf"))
+            if not jpegs:
+                return {}
+            frame = cv2.imdecode(np.frombuffer(jpegs[-1], np.uint8), cv2.IMREAD_COLOR)
+        scale = frame.shape[1] / WORK_WIDTH
+        img = mark(frame, [tuple(v * scale for v in box)], width=3)
+        h, w = img.shape[:2]
+        return {"jpeg": cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 85])[1].tobytes(), "size": (w, h)}
 
     # --- questions -----------------------------------------------------------------------------------------------
     def _question(self, d: dict, t: float) -> Question:
@@ -285,12 +317,13 @@ class Service:
                 return
             scale = frames[0].shape[1] / WORK_WIDTH
             box = tuple(v * scale for v in q.box)
+            ev = self.evidence[q.incident] = self._snapshot(q.camera, q.box, frames[-1])   # the clip's last frame
             t0 = time.monotonic()
             if self.lens:
                 q.lens_job = submit(zoom(frames, box), f"{q.incident}-{q.camera}",
                                     meta={"incident": q.incident, "camera": q.camera})
                 n_frames, frames = len(frames), None     # written to the spool: free them while the lens plays
-                q.span = span(wait(q.lens_job, timeout=600))
+                q.span = ev["span"] = span(wait(q.lens_job, timeout=600))
                 self.log("lens", incident=q.incident, camera=q.camera, job=q.lens_job, span=q.span,
                          frames=n_frames, waited_s=round(time.monotonic() - t0, 1))
             result = self.answer(q)
@@ -375,6 +408,10 @@ class Service:
             for f in list(self.questions):
                 f.result()
             self.pool.shutdown()
+            if self.alarms is not None:
+                if self.close_alarms_at_end:
+                    self.alarms.close_all("Test run ended: closed by the test harness, not because the spot cleared.")
+                self.alarms.drain()
             incidents = self.ledger.snapshot()
             (self.out / "incidents.json").write_text(json.dumps(incidents, indent=2, default=_json), encoding="utf-8")
             self.log("end", ledger=dict(self.ledger.stats), cameras=self.stats,

@@ -1,12 +1,13 @@
 r"""report_clearway.py - one Clearway run (scripts\run_clearway.py) per camera, beside the offline replay.
 
-    .venv\Scripts\python.exe scripts\report_clearway.py run\clearway-dry-<UTC> [--replay run\ledger-F1]
+    .venv\Scripts\python.exe scripts\report_clearway.py run\clearway-dry-<UTC> [--replay run\ledger-F1] [--xprotect]
 
 Per camera: questions (start-up ones apart: reported within one loop after the detector's warm-up, which starts at
 the first loop start after the first frame; a real camera has no loop), answers, cards,
 occurrences on them, seconds from the change to its card (questions: until the answer; recurrences: at once), the
 lens's wait, frame rate. Live runs also score Hafnia's category against the stand-in's (answer["expected"]). The
-offline replay's "no guard" ledger (run/ledger-F1/results.json, about 5 min per camera) is shown beside it.
+offline replay's "no guard" ledger (run/ledger-F1/results.json, about 5 min per camera) is shown beside it. With
+--xprotect, the run's XProtect alarms (F3) are read back: name, priority, state against the last action logged.
 Writes <run>\summary.json. No requests.
 """
 from __future__ import annotations
@@ -38,6 +39,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("run", type=Path)
     ap.add_argument("--replay", type=Path, default=REPO / "run" / "ledger-F1")
+    ap.add_argument("--xprotect", action="store_true", help="read the run's alarms back from XProtect")
     args = ap.parse_args()
     svc = read(args.run / "service.jsonl")
     led = read(args.run / "ledger.jsonl") if (args.run / "ledger.jsonl").exists() else []
@@ -126,6 +128,32 @@ def main() -> int:
             if not s["agree"]:
                 print(f"  {s['incident']}: Hafnia {s['hafnia']}, expected {s['expected']}: {s['summary'][:150]}")
     out["totals"] = tot
+    actions = [e for e in svc if e["kind"] == "xprotect"]
+    if actions:
+        n = {a: sum(e.get("action") == a for e in actions) for a in ("raise", "reopen", "close")}
+        marks = sum(len(e.get("bookmarks", [])) for e in actions)
+        errs = [e for e in svc if e["kind"] == "xprotect_error"] + [e for e in actions if e.get("errors")]
+        secs = [e["seconds"] for e in actions if "seconds" in e]
+        print(f"XProtect: {n['raise']} alarms raised, {n['reopen']} reopened, {n['close']} closed, {marks} bookmarks, "
+              f"{sum(bool(e.get('snapshot')) for e in actions)} snapshots, {len(errs)} errors; "
+              f"seconds per action: median {med(secs)}, max {max(secs, default=None)}")
+        out["xprotect"] = {**n, "bookmarks": marks, "errors": [e.get("error") or e.get("errors") for e in errs]}
+        if args.xprotect:
+            from hafnia.xprotect_rest import XProtect, _unwrap
+            xp, last = XProtect(), {}
+            for e in actions:
+                if e.get("alarm"):
+                    last[e["alarm"]] = e["action"]
+            checked = []
+            for alarm, action in last.items():
+                a = _unwrap(xp.call("GET", f"/alarms/{alarm}"))
+                want = "Closed" if action == "close" else "New"
+                checked.append({"alarm": alarm, "name": a["name"], "priority": a["priority"]["name"],
+                                "state": a["state"]["name"], "expected": want, "ok": a["state"]["name"] == want})
+                print(f"  {a['name'][:52]:52} {a['priority']['name']:6} {a['state']['name']:8} "
+                      f"(expected {want}) {a.get('sourceName', '')}")
+            print(f"  {sum(c['ok'] for c in checked)} of {len(checked)} alarms in the expected state")
+            out["xprotect"]["checked"] = checked
     (args.run / "summary.json").write_text(json.dumps(out, indent=2), encoding="utf-8")
     print(f"wrote {args.run / 'summary.json'}")
     return 0

@@ -42,7 +42,9 @@ stopped twice by Claude Code for low machine memory; all 15 clips' event streams
 
 - **Six incident cameras, five minutes each: 9 requests and one card per incident**, against 190 if every change were
   asked. Every later occurrence (5 to 24 per camera) is recognised as the same incident: no request, a card in 1.4–2.6 s
-  instead of about 8 s. One alarm per incident (quiet period 5 min); the card reopens on each occurrence.
+  instead of about 8 s. One alarm per incident; the card reopens on each occurrence. (Then a 5-min quiet period
+  between alarms; since 2026-10-25 an incident's alarm stays open while it recurs and closes once it has stayed
+  cleared for 60 s, F3: the same counts on this replay.)
 - **No incident change lost** (0 of 191 without a card), with the stand-in.
 - **Real footage costs more.** On `test_11` the ledger saves little (18 of 21): its changes are small and the crops
   mostly road, so the verdict memory's skips are made provisional (below) and long-lasting ones are asked after all.

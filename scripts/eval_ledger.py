@@ -11,7 +11,8 @@ r"""eval_ledger.py - the ledger (clearway/ledger.py) replayed offline on every c
      ask_all      every change is a request (no memory, no ledger)
      memory       skip look-alikes of rejected changes at the same spot (run/memory-compare's rule)
      ledger       also recognise recurrences of a known incident (no request, instant card)
-Counts per clip: requests, cards (incidents opened), occurrences, alarms (at most one per incident per quiet_s),
+Counts per clip: requests, cards (incidents opened), occurrences, alarms (raised or reopened: an incident's alarm
+closes once it has stayed cleared for close_after_s),
 incident changes never carded (skipped and gone before escalation, or joined to a dismissed incident), seconds from
 change to card. No Hafnia requests. Each clip's event stream is saved (events-<clip>.pkl) as soon as it is recorded;
 --from-events replays saved streams without the detector.
@@ -120,6 +121,8 @@ def replay(name: str, events: list[dict], policy: str, guard: bool = True) -> di
             t_tick += 1.0
             answer_until(t_tick)
             for d in led.tick(t_tick):
+                if d.get("action") != "ask":
+                    continue                 # an alarm closing
                 joined[d["change"]] = (d["incident"], t_tick)
                 asked(d, t_tick)
         answer_until(e["t"])
