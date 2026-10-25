@@ -20,7 +20,9 @@ per camera):
 4. the answer goes back to the ledger. Closed changes go to the ledger too: an incident clears when its largest change
    closes.
 The ledger's effects (raise, reopen or close an incident's alarm) are carried out in XProtect by clearway/alarms.py
-(XProtectAlarms, F3: one alarm per incident, with a snapshot and bookmarks) when one is given, and logged.
+(XProtectAlarms, F3: one alarm per incident, with a snapshot and bookmarks) when one is given, and logged. Operators'
+verdicts on the cards (F7: confirm or reject on the board, clearway/board.py) arrive in <out>/operator.jsonl, which
+the board appends to and the service reads every second (Ledger.on_operator).
 
 Writes <out>/ledger.jsonl (the ledger's event log; Ledger.replay rebuilds the state), <out>/service.jsonl (changes,
 questions, lens spans, answers, effects, health), <out>/changes.jsonl (every report with its look, and every closing:
@@ -184,6 +186,7 @@ class Service:
         self.now = 0.0                                  # the latest frame time, any camera
         self.closed = False                             # no more frames are coming
         self._log_lock = threading.Lock()
+        self._verdicts_read = 0                         # bytes of operator.jsonl taken in
 
     # --- logging -------------------------------------------------------------------------------------------------
     def log(self, kind: str, **fields) -> None:
@@ -240,7 +243,7 @@ class Service:
 
     def _ticker(self) -> None:
         """Every second: the ledger's held skips that stayed become questions; alarms of incidents that stayed
-        cleared close."""
+        cleared close; operators' verdicts from the board are taken in."""
         while not self.closed:
             time.sleep(1.0)
             with self.lock:
@@ -251,6 +254,36 @@ class Service:
             for e in out:
                 if e.get("action") != "ask":     # an alarm closing
                     self._effect(e)
+            self._verdicts()
+
+    def _verdicts(self) -> None:
+        """The verdicts the board appended to <out>/operator.jsonl since the last look, into the ledger."""
+        path = self.out / "operator.jsonl"
+        if not path.exists():
+            return
+        with path.open("rb") as f:
+            f.seek(self._verdicts_read)
+            data = f.read()
+        end = data.rfind(b"\n")
+        if end < 0:
+            return
+        self._verdicts_read += end + 1
+        for line in data[:end].decode("utf-8").splitlines():
+            if not line.strip():
+                continue
+            v: dict = {}
+            try:
+                v = d if isinstance(d := json.loads(line), dict) else {}
+                with self.lock:
+                    effects = self.ledger.on_operator(v["incident"], v["verdict"], self.now)
+            except Exception as e:           # a verdict that does not apply (or a bad line) must not stop the ticker
+                self.log("operator", incident=v.get("incident"), verdict=v.get("verdict"), applied=False,
+                         reason=str(e))
+                continue
+            self.log("operator", incident=v["incident"], verdict=v["verdict"], applied=True,
+                     since_click_s=round(time.time() - v["wall"], 1) if "wall" in v else None)
+            for e in effects:
+                self._effect(e)
 
     def _on_report(self, camera: str, c: Change, frame: np.ndarray, source: str = "detector") -> None:
         """A change from the detector, or a zone occupation (tier0.zones.Occupation, shaped alike)."""
@@ -285,7 +318,7 @@ class Service:
         self.log("effect", **e)
         if self.alarms is None:
             return
-        iid = e.get("alarm") or e.get("close_alarm")
+        iid = e.get("alarm") or e.get("close_alarm") or e.get("confirm_alarm")
         with self.lock:
             inc = self.ledger.incidents[iid].public()
         ev = dict(self.evidence.get(iid, {}))

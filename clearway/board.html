@@ -82,6 +82,14 @@
   .summary { margin: 0; padding: 8px 10px 4px; line-height: 1.4; font-size: 13px; }
   .ai { display: inline-block; font-size: 10px; letter-spacing: .4px; text-transform: uppercase; color: var(--muted);
         border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; margin-right: 6px; vertical-align: 1px; }
+  .actions { display: flex; gap: 8px; align-items: center; padding: 4px 10px 2px; }
+  .verdict { font-size: 12px; color: var(--muted); margin-right: auto; }
+  .verdict.ok { color: var(--ok); } .verdict.err { color: var(--high); }
+  .btn { font: inherit; font-size: 12px; padding: 3px 10px; border-radius: 6px; border: 1px solid var(--line);
+         background: var(--card-hi); color: var(--text); cursor: pointer; white-space: nowrap; }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .btn.confirm:hover:enabled { border-color: var(--ok); color: var(--ok); }
+  .btn.reject:hover:enabled, .btn.reject.armed { border-color: var(--high); color: var(--high); }
   .c-foot { display: flex; gap: 10px; align-items: center; padding: 4px 10px 9px; font-size: 12px; color: var(--muted); }
   .c-foot .id { margin-left: auto; color: var(--faint); }
   .alarm-on { color: var(--text); }
@@ -131,6 +139,7 @@ const CATEGORY = { PERSON_ON_TRACKS: "Person on the tracks", COLLISION: "Collisi
                    OBSTRUCTION: "Obstruction", DAMAGE: "Damage", TAMPERING: "Tampering" };
 let offset = 0;            // server clock minus browser clock, seconds
 let firstRender = true;
+let taking = false;        // the service is running: cards take verdicts
 const columns = new Map(); // owner -> {el, list, count}
 const cards = new Map();   // incident id -> {el, refs}
 
@@ -181,12 +190,63 @@ function makeCard(c) {
     media.append(ctx);
   }
   refs.summary = el("p", "summary");
+  const card = { el: e, refs, data: c, sending: "", error: "", armed: null };
+  refs.actions = el("div", "actions");
+  refs.verdict = el("span", "verdict");
+  refs.confirm = el("button", "btn confirm", "Confirm");
+  refs.reject = el("button", "btn reject", "Reject");
+  refs.confirm.type = refs.reject.type = "button";
+  refs.confirm.title = "It is an incident: the alarm goes to In progress, and later changes here that look like it join this card";
+  refs.reject.title = "Not an incident: the alarm closes, and later changes here that look like it are skipped";
+  refs.confirm.addEventListener("click", () => send(card, "confirmed"));
+  refs.reject.addEventListener("click", () => armReject(card));
+  refs.actions.append(refs.verdict, refs.confirm, refs.reject);
   const foot = el("div", "c-foot");
   refs.rec = el("span", "rec"); refs.alarm = el("span", "alarm"); refs.id = el("span", "id", c.id);
   foot.append(refs.rec, refs.alarm, refs.id);
-  e.append(head, refs.cam, media, refs.summary, foot);
+  e.append(head, refs.cam, media, refs.summary, refs.actions, foot);
   if (!firstRender) e.classList.add("new");
-  return { el: e, refs, data: c };
+  return card;
+}
+
+function updateVerdict(card) {
+  const c = card.data, r = card.refs;
+  const pending = card.sending || c.verdict_pending;
+  let text = "", cls = "verdict";
+  if (pending) text = pending === "rejected" ? "Rejecting…" : "Confirming…";
+  else if (card.error) { text = card.error; cls += " err"; }
+  else if (c.verdict_refused) { text = `Not applied: ${c.verdict_refused}`; cls += " err"; }
+  else if (c.operator === "confirmed") { text = "✓ Confirmed by the operator"; cls += " ok"; }
+  else if (c.operator === "rejected") text = "Rejected by the operator: look-alikes here are skipped";
+  r.verdict.textContent = text; r.verdict.className = cls;
+  const votes = taking && (c.state === "open" || c.state === "cleared");
+  r.confirm.hidden = !votes || c.operator === "confirmed";
+  r.reject.hidden = !votes;
+  r.confirm.disabled = r.reject.disabled = !!pending;
+  r.actions.hidden = !text && r.confirm.hidden && r.reject.hidden;
+}
+function disarm(card) {
+  clearTimeout(card.armed); card.armed = null;
+  card.refs.reject.classList.remove("armed"); card.refs.reject.textContent = "Reject";
+}
+function armReject(card) {   // two clicks: a rejection closes the alarm and teaches the spot
+  if (card.armed) { disarm(card); send(card, "rejected"); return; }
+  card.refs.reject.classList.add("armed"); card.refs.reject.textContent = "Not an incident? Click again";
+  card.armed = setTimeout(() => disarm(card), 4000);
+}
+async function send(card, verdict) {
+  card.sending = verdict; card.error = ""; updateVerdict(card);
+  try {
+    const r = await fetch("/api/operator", { method: "POST", headers: { "Content-Type": "application/json" },
+                                              body: JSON.stringify({ incident: card.data.id, verdict }) });
+    if (r.ok) card.data = { ...card.data, verdict_pending: verdict, verdict_refused: "" };   // until the next poll
+    else card.error = (await r.json().catch(() => ({}))).error || `HTTP ${r.status}`;
+  } catch (e) {
+    card.error = "The board server did not answer";
+  }
+  card.sending = "";
+  if (card.error) setTimeout(() => { card.error = ""; updateVerdict(card); }, 8000);
+  updateVerdict(card);
 }
 function posterImg(src) { const i = el("img", "poster"); i.src = src; i.alt = ""; return i; }
 
@@ -201,8 +261,9 @@ function updateCard(card, c) {
   else { r.summary.append(el("span", "ai", c.standin ? "dry run" : "no summary"),
                          document.createTextNode(c.standin ? "Answered by the test stand-in, not by Hafnia." : "")); }
   r.rec.textContent = c.occurrences > 1 ? `${ordinal(c.occurrences)} time at this spot` : "first time at this spot";
-  r.alarm.textContent = c.state === "rejected" ? "rejected" : (c.alarm_open ? "alarm open" : "alarm closed");
+  r.alarm.textContent = c.alarm_open ? "alarm open" : "alarm closed";
   r.alarm.className = c.alarm_open ? "alarm alarm-on" : "alarm";
+  updateVerdict(card);
   tickCard(card);
 }
 function tickCard(card) {
@@ -214,6 +275,7 @@ function tickCard(card) {
 
 function render(s) {
   offset = s.ended ? s.ended - Date.now() / 1000 : s.now - Date.now() / 1000;
+  taking = !!s.verdicts;
   document.body.classList.remove("stale");
   const openEl = $("st-open");
   openEl.querySelector(".v").textContent = s.counts.open;

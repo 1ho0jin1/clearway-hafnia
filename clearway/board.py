@@ -12,6 +12,11 @@ page in an HTML page view item (F4); a browser on the machine works too.
     /api/board      cards by owner, changes being checked, counts, camera health (JSON)
     /clips/<id>.mp4 the lens clip Hafnia judged, made from the lens spool on first request (H.264, cached in <run>/clips)
     /snaps/<id>.jpg the camera's frame at the end of that clip, the spot boxed (written by the service)
+    POST /api/operator  {"incident": "cw-0003", "verdict": "confirmed" | "rejected"}: an operator's verdict on a card
+                    (F7), checked against the ledger and appended to <run>/operator.jsonl, which the running service
+                    reads (clearway/service.py); the card shows it as pending until the ledger has it. Only from the
+                    board's own page: JSON only, and Host and Origin must be this server (another web page open on the
+                    machine could otherwise post here).
 """
 from __future__ import annotations
 
@@ -33,6 +38,7 @@ PAGE = Path(__file__).with_name("board.html")
 OWNER_ORDER = list(dict.fromkeys(owner for owner, _ in OWNERS.values()))
 PRIORITY = {owner: prio for owner, prio in OWNERS.values()}
 INCIDENT_ID = re.compile(r"^cw-\d{4,}$")
+SERVICE_QUIET_S = 60        # no line in service.jsonl for this long (health is every 15 s): the service is not running
 
 
 class _Tail:
@@ -61,21 +67,31 @@ class RunFollower:
         self.run = run
         self.ledger = Ledger(None)
         self.ledger_tail, self.service_tail = _Tail(run / "ledger.jsonl"), _Tail(run / "service.jsonl")
+        self.verdicts_tail = _Tail(run / "operator.jsonl")
         self.health: dict = {}
         self.answers: dict[str, dict] = {}
         self.spans: dict[str, list[str]] = {}
         self.not_asked: set[str] = set()           # stopped by the run cap, failed or errored: no answer is coming
+        self.requested: dict[str, str] = {}        # incident -> the verdict last sent from the board
+        self.refused: dict[str, str] = {}          # incident -> why the service did not apply it
         self.requests = 0
         self.standin = False
         self.started = self.ended = None
+        self.last_wall = 0.0                       # the service's latest log line
         self.lock = threading.Lock()
 
     def refresh(self) -> None:
         with self.lock:
             for e in self.ledger_tail.lines():
                 self.ledger.apply(e)
+            for v in self.verdicts_tail.lines():   # before the service's log: a refusal follows its request
+                self.requested[v["incident"]] = v["verdict"]
+                self.refused.pop(v["incident"], None)
             for e in self.service_tail.lines():
                 k = e["kind"]
+                self.last_wall = e["wall"]
+                if k == "operator" and not e.get("applied") and e.get("incident"):
+                    self.refused[e["incident"]] = e.get("reason") or "not applied"
                 if k == "start":
                     self.started = e["wall"]
                 elif k == "end":
@@ -111,6 +127,7 @@ class RunFollower:
             return {
                 "run": self.run.name, "now": time.time(), "started": self.started, "ended": self.ended,
                 "mode": "dry" if self.standin or self.run.name.startswith("clearway-dry") else "live",
+                "verdicts": self._service_running(),
                 "owners": owners, "checking": checking,
                 "counts": {"open": sum(c["state"] == "open" for c in cards), "cards": len(cards),
                            "checking": len(checking), "questions": len(incs),   # each question opens an incident
@@ -119,15 +136,42 @@ class RunFollower:
                 "cameras": {c: {"fps": h.get("fps"), "lag_s": h.get("lag_s")} for c, h in self.health.items()},
             }
 
+    def _service_running(self) -> bool:
+        return self.started is not None and self.ended is None and time.time() - self.last_wall < SERVICE_QUIET_S
+
+    def take_verdict(self, incident: str, verdict: str) -> str | None:
+        """An operator's verdict from the board, passed on to the service (<run>/operator.jsonl); returns why not, or
+        None."""
+        self.refresh()
+        with self.lock:
+            if not self._service_running():
+                return "the service is not running: this run has ended"
+            if problem := self.ledger.verdict_problem(incident, verdict):
+                return problem
+            if self.requested.get(incident) == verdict and incident not in self.refused:
+                return f"{incident}: already sent, waiting for the service"
+            with (self.run / "operator.jsonl").open("a", encoding="utf-8") as f:
+                f.write(json.dumps({"incident": incident, "verdict": verdict, "wall": round(time.time(), 3),
+                                    "via": "board"}) + "\n")
+            self.requested[incident] = verdict       # the tail reads it back later; a second click meanwhile is refused
+            self.refused.pop(incident, None)
+        return None
+
     def _card(self, i) -> dict:
         a = i.answer or {}
+        asked = self.requested.get(i.id, "")
         return {"id": i.id, "camera": i.camera, "category": i.category, "owner": i.owner, "priority": i.priority,
                 "state": i.state, "operator": i.operator, "alarm_open": i.alarm_open,
+                "verdict_pending": asked if asked and asked != i.operator and i.id not in self.refused else "",
+                "verdict_refused": self.refused.get(i.id, ""),
                 "t_change": i.t_change, "t_occurrence": i.t_occurrence or i.t_change, "t_cleared": i.t_cleared,
                 "t_answer": i.t_answer, "occurrences": i.occurrences,
                 "summary": a.get("summary") or "", "object": a.get("object") or "", "standin": bool(a.get("standin")),
-                "clip": f"/clips/{i.id}.mp4" if i.clip else None,
-                "snap": f"/snaps/{i.id}.jpg" if (self.run / "snaps" / f"{i.id}.jpg").exists() else None}
+                # ?run=: incident ids start again in every run and these are cached for an hour, so a browser showed
+                # the previous run's snapshot under the same id after the board switched runs (2026-10-25)
+                "clip": f"/clips/{i.id}.mp4?run={self.run.name}" if i.clip else None,
+                "snap": f"/snaps/{i.id}.jpg?run={self.run.name}" if (self.run / "snaps" / f"{i.id}.jpg").exists()
+                else None}
 
     def clip(self, incident: str) -> Path | None:
         """The incident's lens clip as MP4, made from the spool's AVI on first request."""
@@ -215,8 +259,40 @@ def make_handler(board: Board):
             else:
                 self._send(HTTPStatus.OK, data, ctype, {"Accept-Ranges": "bytes"})
 
+        def _json(self, status: int, obj: dict) -> None:
+            self._send(status, json.dumps(obj).encode(), "application/json")
+
         def do_HEAD(self) -> None:
             self.do_GET()
+
+        def do_POST(self) -> None:
+            try:
+                if self.path.split("?")[0] != "/api/operator":
+                    return self._json(HTTPStatus.NOT_FOUND, {"error": "not found"})
+                port = self.server.server_address[1]
+                ours = {f"127.0.0.1:{port}", f"localhost:{port}"}
+                origin = self.headers.get("Origin")
+                if self.headers.get("Host") not in ours or (origin and origin not in {f"http://{h}" for h in ours}):
+                    return self._json(HTTPStatus.FORBIDDEN, {"error": "only from the board's own page"})
+                if self.headers.get_content_type() != "application/json":
+                    return self._json(HTTPStatus.UNSUPPORTED_MEDIA_TYPE, {"error": "send JSON"})
+                n = int(self.headers.get("Content-Length") or 0)
+                if not 0 < n <= 1024:
+                    return self._json(HTTPStatus.BAD_REQUEST, {"error": "empty or too long"})
+                body = json.loads(self.rfile.read(n))
+                incident, verdict = body.get("incident"), body.get("verdict")
+                if not isinstance(incident, str) or not INCIDENT_ID.match(incident) or verdict not in (
+                        "confirmed", "rejected"):
+                    return self._json(HTTPStatus.BAD_REQUEST, {"error": "incident and verdict (confirmed|rejected)"})
+                problem = board.current().take_verdict(incident, verdict)
+                if problem:
+                    return self._json(HTTPStatus.CONFLICT, {"error": problem})
+                self._json(HTTPStatus.ACCEPTED, {"ok": True, "incident": incident, "verdict": verdict})
+            except (BrokenPipeError, ConnectionResetError):
+                pass
+            except Exception as e:              # the board must keep serving
+                self._json(HTTPStatus.BAD_REQUEST if isinstance(e, (ValueError, AttributeError))
+                           else HTTPStatus.INTERNAL_SERVER_ERROR, {"error": repr(e)})
 
         def do_GET(self) -> None:
             path = self.path.split("?")[0]

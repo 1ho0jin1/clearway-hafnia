@@ -1,0 +1,173 @@
+{
+  "run": "clearway-dry-20261025T132833Z-operator-inflight",
+  "minutes": 5.0,
+  "cameras": {
+    "vehicle_breakdown_traffic_queue": {
+      "fps": 9.6,
+      "dropped": 0,
+      "questions": 1,
+      "startup_questions": 1,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "STALLED_VEHICLE": 1
+      },
+      "cards": 1,
+      "occurrences_on_cards": 19,
+      "dismissed": 0,
+      "merged": 0,
+      "to_card_s_asked_median": 22.9,
+      "to_card_s_recurrence_median": 2.3,
+      "lens_wait_s_median": 9.7,
+      "hafnia_s_median": null,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 2,
+        "cards": 1
+      }
+    },
+    "bin_pushed_over_onto_sidewalk": {
+      "fps": 9.6,
+      "dropped": 0,
+      "questions": 6,
+      "startup_questions": 4,
+      "escalated": 1,
+      "unanswered": [],
+      "answers": {
+        "OBSTRUCTION": 6
+      },
+      "cards": 3,
+      "occurrences_on_cards": 23,
+      "dismissed": 0,
+      "merged": 3,
+      "to_card_s_asked_median": 122.2,
+      "to_card_s_recurrence_median": 1.7,
+      "lens_wait_s_median": 110.6,
+      "hafnia_s_median": null,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 3,
+        "cards": 1
+      }
+    },
+    "escooter_left_across_sidewalk": {
+      "fps": 9.5,
+      "dropped": 0,
+      "questions": 2,
+      "startup_questions": 2,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "OBSTRUCTION": 2
+      },
+      "cards": 1,
+      "occurrences_on_cards": 12,
+      "dismissed": 0,
+      "merged": 1,
+      "to_card_s_asked_median": 37.5,
+      "to_card_s_recurrence_median": 2.3,
+      "lens_wait_s_median": 58.9,
+      "hafnia_s_median": null,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 2,
+        "cards": 1
+      }
+    },
+    "school_gate_break_in_night": {
+      "fps": 9.5,
+      "dropped": 0,
+      "questions": 5,
+      "startup_questions": 5,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "TAMPERING": 5
+      },
+      "cards": 1,
+      "occurrences_on_cards": 48,
+      "dismissed": 0,
+      "merged": 4,
+      "to_card_s_asked_median": 47.5,
+      "to_card_s_recurrence_median": 1.6,
+      "lens_wait_s_median": 79.7,
+      "hafnia_s_median": null,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 2,
+        "cards": 2
+      }
+    },
+    "person_on_railway_tracks": {
+      "fps": 9.5,
+      "dropped": 0,
+      "questions": 2,
+      "startup_questions": 2,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "PERSON_ON_TRACKS": 2
+      },
+      "cards": 1,
+      "occurrences_on_cards": 15,
+      "dismissed": 0,
+      "merged": 1,
+      "to_card_s_asked_median": 31.7,
+      "to_card_s_recurrence_median": 1.0,
+      "lens_wait_s_median": 31.8,
+      "hafnia_s_median": null,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 1,
+        "cards": 1
+      }
+    },
+    "graffiti_on_standing_train": {
+      "fps": 9.6,
+      "dropped": 0,
+      "questions": 1,
+      "startup_questions": 1,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "DAMAGE": 1
+      },
+      "cards": 1,
+      "occurrences_on_cards": 19,
+      "dismissed": 0,
+      "merged": 0,
+      "to_card_s_asked_median": 67.0,
+      "to_card_s_recurrence_median": 1.4,
+      "lens_wait_s_median": 53.4,
+      "hafnia_s_median": null,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 1,
+        "cards": 1
+      }
+    }
+  },
+  "totals": {
+    "questions": 17,
+    "startup_questions": 15,
+    "cards": 8
+  },
+  "xprotect": {
+    "raise": 8,
+    "reopen": 1,
+    "close": 9,
+    "confirm": 1,
+    "bookmarks": 17,
+    "errors": []
+  },
+  "operator": {
+    "confirmed": 1,
+    "rejected": 1,
+    "refused": 0,
+    "applied_s_median": 0.5,
+    "skipped_like_rejected": 18,
+    "still_skipped_at_end": 17,
+    "recurrences_on_confirmed": 6,
+    "hafnia_rejections_overruled": 0
+  }
+}

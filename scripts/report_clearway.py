@@ -8,6 +8,8 @@ occurrences on them, seconds from the change to its card (questions: until the a
 lens's wait, frame rate. Live runs also score Hafnia's category against the stand-in's (answer["expected"]). The
 offline replay's "no guard" ledger (run/ledger-F1/results.json, about 5 min per camera) is shown beside it. With
 --xprotect, the run's XProtect alarms (F3) are read back: name, priority, state against the last action logged.
+Operators' verdicts from the board (F7): how many, how fast the service applied them, and the later decisions they
+changed (changes skipped as like a rejected card, recurrences joining a confirmed one, Hafnia rejections overruled).
 Writes <run>\summary.json. No requests.
 """
 from __future__ import annotations
@@ -130,11 +132,12 @@ def main() -> int:
     out["totals"] = tot
     actions = [e for e in svc if e["kind"] == "xprotect"]
     if actions:
-        n = {a: sum(e.get("action") == a for e in actions) for a in ("raise", "reopen", "close")}
+        n = {a: sum(e.get("action") == a for e in actions) for a in ("raise", "reopen", "close", "confirm")}
         marks = sum(len(e.get("bookmarks", [])) for e in actions)
         errs = [e for e in svc if e["kind"] == "xprotect_error"] + [e for e in actions if e.get("errors")]
         secs = [e["seconds"] for e in actions if "seconds" in e]
-        print(f"XProtect: {n['raise']} alarms raised, {n['reopen']} reopened, {n['close']} closed, {marks} bookmarks, "
+        print(f"XProtect: {n['raise']} alarms raised, {n['reopen']} reopened, {n['close']} closed, "
+              f"{n['confirm']} confirmed, {marks} bookmarks, "
               f"{sum(bool(e.get('snapshot')) for e in actions)} snapshots, {len(errs)} errors; "
               f"seconds per action: median {med(secs)}, max {max(secs, default=None)}")
         out["xprotect"] = {**n, "bookmarks": marks, "errors": [e.get("error") or e.get("errors") for e in errs]}
@@ -143,17 +146,38 @@ def main() -> int:
             xp, last = XProtect(), {}
             for e in actions:
                 if e.get("alarm"):
-                    last[e["alarm"]] = e["action"]
+                    last[e["alarm"]] = e
             checked = []
-            for alarm, action in last.items():
+            for alarm, e in last.items():
                 a = _unwrap(xp.call("GET", f"/alarms/{alarm}"))
-                want = "Closed" if action == "close" else "New"
+                want = {"close": "Closed", "confirm": e.get("state")}.get(e["action"], "New")
                 checked.append({"alarm": alarm, "name": a["name"], "priority": a["priority"]["name"],
                                 "state": a["state"]["name"], "expected": want, "ok": a["state"]["name"] == want})
                 print(f"  {a['name'][:52]:52} {a['priority']['name']:6} {a['state']['name']:8} "
                       f"(expected {want}) {a.get('sourceName', '')}")
             print(f"  {sum(c['ok'] for c in checked)} of {len(checked)} alarms in the expected state")
             out["xprotect"]["checked"] = checked
+    verdicts = [e for e in led if e["kind"] == "operator"]
+    if verdicts or any(e["kind"] == "operator" for e in svc):
+        when = {e["incident"]: (e["verdict"], e["t"]) for e in verdicts}
+        skips = [e for e in led if e["kind"] == "skip" and e.get("by") == "operator"]
+        joined = [e for e in led if e["kind"] == "recur" and when.get(e["incident"], ("", 0))[0] == "confirmed"
+                  and e["t"] > when[e["incident"]][1]]
+        applied = [e for e in svc if e["kind"] == "operator"]
+        op = {"confirmed": sum(e["verdict"] == "confirmed" for e in verdicts),
+              "rejected": sum(e["verdict"] == "rejected" for e in verdicts),
+              "refused": sum(not e.get("applied") for e in applied),
+              "applied_s_median": med([e["since_click_s"] for e in applied if e.get("since_click_s") is not None]),
+              "skipped_like_rejected": len(skips),
+              "still_skipped_at_end": ((end or health[-1]).get("ledger") or {}).get("skipped_operator"),
+              "recurrences_on_confirmed": len(joined),
+              "hafnia_rejections_overruled": sum(e.get("overruled", 0) for e in verdicts)}
+        print(f"Operator: {op['confirmed']} confirmed, {op['rejected']} rejected, {op['refused']} refused; applied "
+              f"{op['applied_s_median']} s after the click (median). Later: {op['skipped_like_rejected']} changes "
+              f"skipped as like a rejected card ({op['still_skipped_at_end']} not asked about by the end), "
+              f"{op['recurrences_on_confirmed']} recurrences on confirmed cards, {op['hafnia_rejections_overruled']} "
+              f"of Hafnia's rejections overruled")
+        out["operator"] = op
     (args.run / "summary.json").write_text(json.dumps(out, indent=2), encoding="utf-8")
     print(f"wrote {args.run / 'summary.json'}")
     return 0

@@ -21,10 +21,13 @@ Matching a new change, in order:
    (the verdict memory of run/memory-compare). The skip is provisional: a skipped change still there after
    escalate_s is asked about anyway (`tick`). On a real highway a crashed car and a car that merely stopped at that
    spot looked alike to SigLIP (the road dominates a small crop; run/ledger-F1-real); harmless changes tend to leave,
-   a crash stays.
+   a crash stays. An operator's verdict (F7, `on_operator`) goes into the same memory: rejecting a card teaches its
+   looks as harmless at its spot; confirming one overrules Hafnia's rejections there that look like it.
 4. Otherwise a new pending incident and one Hafnia request. If Hafnia's answer names the category of an open or
    recently cleared incident at the same spot, the new one is merged into it (one card; the request was still spent:
-   the look had drifted too far, e.g. the breakdown's smoke, or the change straddled a loop restart).
+   the look had drifted too far, e.g. the breakdown's smoke, or the change straddled a loop restart). An answer about
+   what an operator rejected (asked before the verdict, or about a held look-alike of the card) joins the rejected
+   card instead when it names the same category: no card, no alarm.
 """
 from __future__ import annotations
 
@@ -87,6 +90,8 @@ class Incident:
     t_cleared: float | None = None
     occurrences: int = 1
     operator: str = ""                  # "confirmed" | "rejected"
+    t_verdict: float | None = None      # when the operator gave it
+    like: str = ""                      # asked after all about a change held as a look-alike of this rejected card
     merged_into: str = ""               # set when a later answer showed it is the same incident as another
     clip: str = ""
     t_last: float = 0.0                 # last change attached
@@ -128,10 +133,12 @@ class Ledger:
         self.log = log
         self.clock = clock
         self.incidents: dict[str, Incident] = {}
-        self.rejections: list[tuple[str, tuple, np.ndarray]] = []   # (camera, box, look)
+        # (camera, box, look, incident, "hafnia" | "operator"): what was rejected where, and by whom
+        self.rejections: list[tuple[str, tuple, np.ndarray, str, str]] = []
         self.change_to_incident: dict[tuple[str, int], str] = {}
         self.held: dict[tuple[str, int], dict] = {}   # skipped changes still open: escalated by tick() if they stay
-        self.stats = {"changes": 0, "asked": 0, "recurrences": 0, "fragments": 0, "skipped": 0, "escalated": 0}
+        self.stats = {"changes": 0, "asked": 0, "recurrences": 0, "fragments": 0, "skipped": 0, "escalated": 0,
+                      "skipped_operator": 0}    # of the skipped: like a card an operator rejected
         self._n = 0
 
     # --- event log -------------------------------------------------------------------------------------------------
@@ -178,29 +185,34 @@ class Ledger:
                       or (i.state == "cleared" and t_report - (i.t_cleared or 0) <= self.p.recurrence_window_s)]
         best = max(reopenable, key=look, default=None)
         s_inc = look(best) if best else 0.0
-        s_rej = max((float(emb @ e) for c, b, e in self.rejections
-                     if c == camera and _overlap(box, b) >= self.p.min_overlap), default=0.0)
+        s_rej, like, by = max(((float(emb @ e), i, by) for c, b, e, i, by in self.rejections
+                               if c == camera and _overlap(box, b) >= self.p.min_overlap), default=(0.0, "", ""))
 
         if best is not None and s_inc >= self.p.recur_sim and s_inc >= s_rej:
             return self._recur(best, camera, change_id, t_change, t_report, emb, s_inc)
         if s_rej >= self.p.recur_sim and s_rej > s_inc:
             self.stats["skipped"] += 1
-            self.held[(camera, change_id)] = {"t_change": t_change, "t_report": t_report, "box": box, "emb": emb}
-            self._emit("skip", camera=camera, change=change_id, t=t_report, box=box, similarity=round(s_rej, 3))
-            return {"action": "skip", "incident": None, "similarity": s_rej}
+            self.stats["skipped_operator"] += by == "operator"
+            self.held[(camera, change_id)] = {"t_change": t_change, "t_report": t_report, "box": box, "emb": emb,
+                                              "by": by, "like": like}
+            self._emit("skip", camera=camera, change=change_id, t=t_report, box=box, similarity=round(s_rej, 3),
+                       like=like, by=by)
+            return {"action": "skip", "incident": None, "similarity": s_rej, "like": like, "by": by}
         return self._ask(camera, change_id, t_change, t_report, box, emb)
 
-    def _ask(self, camera, change_id, t_change, t_report, box, emb, escalated_at: float | None = None) -> dict:
+    def _ask(self, camera, change_id, t_change, t_report, box, emb, escalated_at: float | None = None,
+             like: str = "") -> dict:
+        """like: the operator-rejected card an escalated change was held as a look-alike of."""
         self._n += 1
         t = t_report if escalated_at is None else escalated_at
         # t_last stays the change's own report time: an old change escalated now must not group with a new one
         inc = Incident(f"cw-{self._n:04d}", camera, box, t_change, t, t_last=t_report,
-                       active={change_id: _area(box)}, embs=[emb], t_occurrence=t_change)
+                       active={change_id: _area(box)}, embs=[emb], t_occurrence=t_change, like=like)
         self.incidents[inc.id] = inc
         self.change_to_incident[(camera, change_id)] = inc.id
         self.stats["asked"] += 1
         self._emit("ask", incident=inc.id, camera=camera, change=change_id, t_change=t_change, t=t, box=box,
-                   area=_area(box), emb=emb, escalated=escalated_at is not None)
+                   area=_area(box), emb=emb, escalated=escalated_at is not None, like=like)
         return {"action": "ask", "incident": inc.id, "escalated": escalated_at is not None, "change": change_id}
 
     def tick(self, t: float) -> list[dict]:
@@ -211,8 +223,10 @@ class Ledger:
             if t - h["t_report"] >= self.p.escalate_s:
                 del self.held[key]
                 self.stats["skipped"] -= 1
+                self.stats["skipped_operator"] -= h["by"] == "operator"
                 self.stats["escalated"] += 1
-                out.append(self._ask(key[0], key[1], h["t_change"], h["t_report"], h["box"], h["emb"], escalated_at=t))
+                out.append(self._ask(key[0], key[1], h["t_change"], h["t_report"], h["box"], h["emb"], escalated_at=t,
+                                     like=h["like"] if h["by"] == "operator" else ""))
         for inc in self.incidents.values():
             if inc.alarm_open and inc.state == "cleared" and t - inc.t_cleared >= self.p.close_after_s:
                 out += self._close_alarm(inc, t, "cleared")
@@ -253,7 +267,7 @@ class Ledger:
             effects = self._alarm(inc, t, t_change=inc.t_change)
         else:
             inc.state = "dismissed"
-            self.rejections += [(inc.camera, inc.box, e) for e in inc.embs]
+            self.rejections += [(inc.camera, inc.box, e, inc.id, "hafnia") for e in inc.embs]
             effects = []
         self._emit("answer", incident=inc.id, t=t, category=category or "NONE", state=inc.state, answer=answer,
                    clip=inc.clip, owner=inc.owner, priority=inc.priority)
@@ -272,12 +286,19 @@ class Ledger:
         self._emit("failed", incident=inc.id, t=t, reason=reason)
 
     def _same_incident(self, inc: Incident, t: float) -> Incident | None:
-        """An open or recently cleared incident with the same category at the same spot, if any."""
-        for o in self.incidents.values():
-            if (o is not inc and o.camera == inc.camera and o.category == inc.category and not o.merged_into
-                    and _overlap(o.box, inc.box) >= self.p.min_overlap
-                    and (o.state == "open" or (o.state == "cleared"
-                                               and t - (o.t_cleared or 0) <= self.p.recurrence_window_s))):
+        """The incident with the same category at the same spot that a new answer belongs to, if any: first a card the
+        operator rejected, when this question was asked before the verdict (a piece of what the operator judged, still
+        in the lens queue) or about a change held as a look-alike of that card; otherwise an open or recently cleared
+        one. Live, two pieces of the bin's first occurrence answered after its card was rejected and became new cards,
+        and a look-alike that stayed was asked about after all and reopened one (2026-10-25)."""
+        same = [o for o in self.incidents.values()
+                if o is not inc and o.camera == inc.camera and o.category == inc.category and not o.merged_into
+                and _overlap(o.box, inc.box) >= self.p.min_overlap]
+        for o in same:
+            if o.state == "rejected" and (inc.like == o.id or inc.t_report <= (o.t_verdict or 0)):
+                return o
+        for o in same:
+            if o.state == "open" or (o.state == "cleared" and t - (o.t_cleared or 0) <= self.p.recurrence_window_s):
                 return o
         return None
 
@@ -286,6 +307,8 @@ class Ledger:
             target.active[c] = area
             self.change_to_incident[(inc.camera, c)] = target.id
         self._remember(target, inc.embs)
+        if target.state == "rejected":      # following the operator: these looks are rejected at the spot too
+            self.rejections += [(inc.camera, inc.box, e, target.id, "operator") for e in inc.embs]
         target.box = _union(target.box, inc.box)
         target.occurrences += inc.occurrences
         effects = []
@@ -349,17 +372,49 @@ class Ledger:
         return []
 
     def on_operator(self, incident_id: str, verdict: str, t: float) -> list[dict]:
-        """An operator confirms or rejects a card. A rejection teaches the spot's look as harmless."""
+        """An operator's verdict on a card (F7, the board's buttons): "confirmed" or "rejected". Rejecting teaches the
+        card's looks as harmless at its spot (the next change there that looks like it is skipped, provisionally like
+        any skip) and closes its alarm. Confirming overrules Hafnia's rejections at the spot that look like the card,
+        so the next such change joins it instead of being skipped, and puts its alarm in progress. A card can be
+        rejected after it was confirmed, not the other way round. ValueError if the verdict does not apply."""
+        if problem := self.verdict_problem(incident_id, verdict):
+            raise ValueError(problem)
         inc = self.incidents[incident_id]
-        inc.operator = verdict
-        effects = []
+        overruled = self._verdict(inc, verdict, t)
+        self._emit("operator", incident=inc.id, t=t, verdict=verdict, overruled=overruled, state=inc.state)
+        if verdict == "confirmed":
+            return [{"confirm_alarm": inc.id, "t": t}]
+        return self._close_alarm(inc, t, "rejected") if inc.alarm_open else []
+
+    def verdict_problem(self, incident_id: str, verdict: str) -> str | None:
+        """Why an operator's verdict cannot apply to this incident now, or None (the board checks before passing one
+        on)."""
+        inc = self.incidents.get(incident_id)
+        if verdict not in ("confirmed", "rejected"):
+            return f"unknown verdict {verdict!r}"
+        if inc is None:
+            return f"no incident {incident_id}"
+        if not inc.category or inc.merged_into or inc.state not in ("open", "cleared"):
+            return f"{incident_id} cannot take a verdict (state {inc.state})"
+        if inc.operator == verdict:
+            return f"{incident_id} is already {verdict}"
+        return None
+
+    def _verdict(self, inc: Incident, verdict: str, t: float) -> int:
+        """The operator's verdict into the memory (live and in replays); returns how many of Hafnia's rejections at
+        the spot it overruled."""
+        inc.operator, inc.t_verdict = verdict, t
         if verdict == "rejected":
-            self.rejections += [(inc.camera, inc.box, e) for e in inc.embs]
             inc.state = "rejected"
-            self._emit("operator", incident=inc.id, t=t, verdict=verdict)
-            return self._close_alarm(inc, t, "rejected") if inc.alarm_open else []
-        self._emit("operator", incident=inc.id, t=t, verdict=verdict)
-        return effects
+            self.rejections += [(inc.camera, inc.box, e, inc.id, "operator") for e in inc.embs]
+            return 0
+        looks = np.stack(inc.embs)
+        kept = [r for r in self.rejections
+                if r[4] == "operator" or r[0] != inc.camera or _overlap(r[1], inc.box) < self.p.min_overlap
+                or float(np.max(looks @ r[2])) < self.p.recur_sim]
+        overruled = len(self.rejections) - len(kept)
+        self.rejections = kept
+        return overruled
 
     # --- reading -----------------------------------------------------------------------------------------------------
     def snapshot(self) -> list[dict]:
@@ -382,7 +437,7 @@ class Ledger:
             self._n = max(self._n, int(e["incident"].split("-")[1]))
             inc = Incident(e["incident"], e["camera"], tuple(e["box"]), e["t_change"], e["t"], t_last=e["t"],
                            active={e["change"]: e.get("area", 0)}, embs=[np.array(e["emb"], np.float32)],
-                           t_occurrence=e["t_change"])
+                           t_occurrence=e["t_change"], like=e.get("like", ""))
             self.incidents[inc.id] = inc
             self.change_to_incident[(e["camera"], e["change"])] = inc.id
         elif k in ("fragment", "recur"):
@@ -405,7 +460,7 @@ class Ledger:
             if inc.state == "cleared":
                 inc.t_cleared = e["t"]
             if inc.state == "dismissed":
-                self.rejections += [(inc.camera, inc.box, x) for x in inc.embs]
+                self.rejections += [(inc.camera, inc.box, x, inc.id, "hafnia") for x in inc.embs]
         elif k == "merge":
             inc, target = self.incidents[e["incident"]], self.incidents[e["into"]]
             inc.category, inc.answer, inc.t_answer = e["category"], e["answer"], e["t"]
@@ -414,6 +469,8 @@ class Ledger:
                 target.active[c] = area
                 self.change_to_incident[(inc.camera, c)] = target.id
             self._remember(target, inc.embs)
+            if target.state == "rejected":
+                self.rejections += [(inc.camera, inc.box, x, target.id, "operator") for x in inc.embs]
             target.box = _union(target.box, inc.box)
             if target.state == "cleared" and e["state"] == "open":
                 target.t_cleared, target.t_occurrence = None, inc.t_change
@@ -435,11 +492,7 @@ class Ledger:
                 self.change_to_incident.pop((inc.camera, c), None)
             inc.state, inc.active = "failed", {}
         elif k == "operator":
-            inc = self.incidents[e["incident"]]
-            inc.operator = e["verdict"]
-            if e["verdict"] == "rejected":
-                inc.state = "rejected"
-                self.rejections += [(inc.camera, inc.box, x) for x in inc.embs]
+            self._verdict(self.incidents[e["incident"]], e["verdict"], e["t"])
 
 def _jsonable(o):
     if isinstance(o, np.ndarray):

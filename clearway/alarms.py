@@ -9,7 +9,9 @@ APIs (hafnia/xprotect_rest.py), on one thread, in order:
 - reopen (a closed incident happened again): the same alarm back to New, with a comment, a snapshot and a bookmark
   on the new occurrence;
 - close (the incident stayed cleared for the ledger's close_after_s, or an operator rejected it): state Closed, the
-  reason in the comment (Reasons for Closing are off on the hackathon machines, so the comment carries it).
+  reason in the comment (Reasons for Closing are off on the hackathon machines, so the comment carries it);
+- confirm (an operator confirmed the card on the board, F7): state In progress with a comment (a closed alarm stays
+  closed and gets the comment).
 XProtect applies an update about a second later (2026-10-25), and update_alarm reads the alarm back for the fields it
 does not change, so every update here names the state and the priority it wants: a comment sent just after a close
 must not read the old state back and reopen the alarm.
@@ -66,6 +68,8 @@ class XProtectAlarms:
                 done = self._reopen(effect, inc, ev) if inc["id"] in self.alarm else self._raise(effect, inc, ev)
             elif "close_alarm" in effect:
                 done = self._close(inc["id"], self._close_comment(effect))
+            elif "confirm_alarm" in effect:
+                done = self._confirm(inc["id"])
             else:
                 return
             self.log("xprotect", incident=inc["id"], seconds=round(time.monotonic() - t0, 2), timing=self._timing,
@@ -104,6 +108,15 @@ class XProtectAlarms:
         self.is_open[incident_id] = False
         return {"action": "close", "alarm": alarm, "comment": comment}
 
+    def _confirm(self, incident_id: str) -> dict:
+        alarm = self.alarm.get(incident_id)
+        if alarm is None:
+            return {"action": "confirm", "alarm": None, "note": "no XProtect alarm for this incident"}
+        state = "In progress" if self.is_open[incident_id] else "Closed"
+        self._call("update", self.xp.update_alarm, alarm, "Confirmed by the operator on the Clearway board.",
+                   priority=self.priority[incident_id], state=state)
+        return {"action": "confirm", "alarm": alarm, "state": state}
+
     def close_all(self, comment: str) -> None:
         """Test harness: close every alarm still open (a test run's incidents are not real)."""
         for iid in [i for i, o in self.is_open.items() if o]:
@@ -131,7 +144,7 @@ class XProtectAlarms:
 
     def _close_comment(self, effect: dict) -> str:
         if effect.get("reason") == "rejected":
-            return "Rejected by the operator. Closed by Clearway."
+            return "Rejected by the operator on the Clearway board: not an incident. Closed by Clearway."
         since = f" since {_utc(effect['t_cleared']):%H:%M:%S} UTC" if effect.get("t_cleared") else ""
         return f"Cleared: the spot has looked as before{since}. Closed by Clearway (no request)."
 

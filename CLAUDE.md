@@ -143,13 +143,13 @@ diagram (Mermaid): `docs/PLAN-C.md`, "Pipeline".
 | `scripts/setup_lens.ps1`, `scripts/start_lens.ps1` | Install MediaMTX (pinned, SHA-256 checked) and camera `lens_1` (Universal 1 channel driver, our rule "Lens: record lens_1 always"); start MediaMTX and the publisher detached (logs in `run/lens/`) |
 | `scripts/lens_compare.py` | One looped event asked about plainly and through the lens (`--variants crop crop_slow2 crop_sr`, `--prompt classify|json`, `--asks N`): finds the event live by frame matching; (1 + variants) × asks requests |
 | `scripts/lens_pilot.py` | Plan C's lens pilot (M1): each synthetic incident camera, five views (full loop, event window, crop, crop + SR, BEFORE/AFTER), one JSON prompt (`clearway/prompt.py`); 5 requests per camera |
-| `clearway/ledger.py` | The ledger (product F1): incidents, pieces, recurrences (no request), provisional skips with escalation, same-category merge, one alarm per incident (closed once it stayed cleared 60 s, reopened when it recurs), clearing, failed questions; returns actions, logs events (JSONL), `Ledger.replay()` |
-| `clearway/alarms.py` | XProtect alarms and bookmarks for the ledger's incidents (F3): raise on the incident's camera (category priority, owner in the name, Hafnia's summary marked AI-generated, snapshot, bookmarks on the camera and on `lens_1`), reopen, close; one thread, in order |
-| `clearway/service.py`, `clearway/prompt.py` | The Clearway service (F2): FrameBridge → change detector (a thread per camera) → SigLIP look → ledger → lens clip → `HafniaAnswers` (run cap, daily count) → ledger; logs `service.jsonl`, `ledger.jsonl`, `changes.jsonl` (replayable). The JSON prompt and its parser |
-| `scripts/run_clearway.py`, `scripts/report_clearway.py` | Run the service on live cameras: `--answers standin` (dry run, no requests; loop phase by frame matching; detectors start at a loop start) or `--answers hafnia --max-requests N`; summarise a run per camera beside the offline replay, scoring Hafnia against the stand-in |
+| `clearway/ledger.py` | The ledger (product F1): incidents, pieces, recurrences (no request), provisional skips with escalation, same-category merge, one alarm per incident (closed once it stayed cleared 60 s, reopened when it recurs), clearing, failed questions, operators' verdicts (F7: a rejection teaches the card's looks as harmless at its spot, answers about what was rejected join the rejected card; a confirmation overrules Hafnia's rejections there); returns actions, logs events (JSONL), `Ledger.replay()` |
+| `clearway/alarms.py` | XProtect alarms and bookmarks for the ledger's incidents (F3): raise on the incident's camera (category priority, owner in the name, Hafnia's summary marked AI-generated, snapshot, bookmarks on the camera and on `lens_1`), reopen, close, confirm (In progress); one thread, in order |
+| `clearway/service.py`, `clearway/prompt.py` | The Clearway service (F2): FrameBridge → change detector (a thread per camera) → SigLIP look → ledger → lens clip → `HafniaAnswers` (run cap, daily count) → ledger; logs `service.jsonl`, `ledger.jsonl`, `changes.jsonl` (replayable); takes operators' verdicts from `operator.jsonl` (F7) every second. The JSON prompt and its parser |
+| `scripts/run_clearway.py`, `scripts/report_clearway.py` | Run the service on live cameras: `--answers standin` (dry run, no requests; loop phase by frame matching; detectors start at a loop start) or `--answers hafnia --max-requests N`; summarise a run per camera beside the offline replay, scoring Hafnia against the stand-in, with operators' verdicts and the later decisions they changed |
 | `scripts/eval_ledger.py` | The ledger replayed offline against a stand-in for Hafnia: requests, cards, occurrences, alarms, misses; saves each clip's event stream, `--from-events` replays them without the detector |
 | `tier0/change.py`, `tier0/memory.py` | Plan C tier 0: the change detector (`ChangeParams.loops()` / `.real()`) and the SigLIP 2 verdict memory (`Embedder`, `VerdictMemory`) |
-| `clearway/board.py`, `clearway/board.html` | The owner board (F4): a standard-library web server on 127.0.0.1:8765 following a run folder (`--latest` by default): cards by owner with the lens clip (MP4 made from the spool on first view), snapshot, summary, time open, recurrences, alarm state; JSON at `/api/board` |
+| `clearway/board.py`, `clearway/board.html` | The owner board (F4): a standard-library web server on 127.0.0.1:8765 following a run folder (`--latest` by default): cards by owner with the lens clip (MP4 made from the spool on first view), snapshot, summary, time open, recurrences, alarm state, Confirm / Reject (F7: `POST /api/operator`, board's own page only, appended to the run's `operator.jsonl`); JSON at `/api/board` |
 | `scripts/start_board.ps1`, `scripts/open_board.ps1` | Start the board detached (logs in `run/board/`); open it as an Edge app window beside Smart Client |
 | `scripts/start_smartclient.ps1` | Start Smart Client not elevated (Medium integrity) from the built-in Administrator; did not make HTML page items use Edge here |
 | `tier0/zones.py`, `config/zones.json` | Person triggers (F5): a person's feet inside a camera's danger-zone polygon for 1 s, reported to the ledger like a change; the polygons, by camera name, in image shares (the only per-camera setting) |
@@ -317,6 +317,18 @@ the view item (0 or 1, set with `Set-VmsView`), it still fell back. The WebView2
 group) and `New-VmsView`; an HTML page item's definition is `VideoOS.RemoteClient.Plugin.HtmlViewItem.HtmlViewItem`
 with `iteminfo url=...` and a `renderingEngine` property (the test view group Clearway › Board was removed again).
 The Web Client (port 8081) shows camera views only.
+
+**Operator verdicts (F7)** (`run/clearway-dry-20261025T133738Z-operator`, no requests): Confirm and Reject on each
+card; the board appends the verdict to the run's `operator.jsonl` (JSON from its own page only), the service reads it
+every second (applied 0.1-0.5 s after the click) and the ledger takes it. Reject: the alarm closes with the reason and
+the card's looks are rejected at its spot, so later look-alikes are skipped (26 on the bin in 3 min). Confirm: the
+alarm goes to In progress and Hafnia's rejections there that look like the card are overruled. First test
+(`run/clearway-dry-20261025T132833Z-operator-inflight`): the rejected bin card came back, because two pieces of its
+first occurrence were still in the lens queue and their answers became new cards. Answers about what the operator
+rejected (asked before the verdict, or about a held look-alike) now join the rejected card when they name the same
+category; another category still gets a card. Escalated look-alikes of a rejected card still cost a request each (2
+in 3 min on the bin). Verdicts live in the run's ledger: a new run starts without them. The board's media URLs carry
+the run (`?run=`): ids restart every run and the browser had shown a previous run's snapshot.
 
 **Crash category (gate G3)** (`run/lens-test_11-20261024T110155Z`, 3 requests): with COLLISION in the JSON prompt the
 cropped view of test_11's crash says COLLISION ("loses control … veers sharply"), the full frame STALLED_VEHICLE; the
