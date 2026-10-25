@@ -1,0 +1,238 @@
+{
+  "run": "clearway-live-20261025T083623Z",
+  "minutes": 5.0,
+  "cameras": {
+    "vehicle_breakdown_traffic_queue": {
+      "fps": 9.8,
+      "dropped": 0,
+      "questions": 1,
+      "startup_questions": 1,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "STALLED_VEHICLE": 1
+      },
+      "cards": 1,
+      "occurrences_on_cards": 22,
+      "dismissed": 0,
+      "merged": 0,
+      "to_card_s_asked_median": 75.6,
+      "to_card_s_recurrence_median": 2.5,
+      "lens_wait_s_median": 58.9,
+      "hafnia_s_median": 9.2,
+      "scored": [
+        {
+          "incident": "cw-0006",
+          "hafnia": "STALLED_VEHICLE",
+          "expected": "STALLED_VEHICLE",
+          "agree": true,
+          "summary": "A silver pickup truck is stopped in the middle of the lane with its driver-side door open; a person exits and stands beside the vehicle while traffic behind slows and stops."
+        }
+      ],
+      "replay_no_guard": {
+        "requests": 2,
+        "cards": 1
+      }
+    },
+    "bin_pushed_over_onto_sidewalk": {
+      "fps": 9.8,
+      "dropped": 0,
+      "questions": 5,
+      "startup_questions": 4,
+      "escalated": 0,
+      "unanswered": [
+        "run cap (10) reached",
+        "run cap (10) reached"
+      ],
+      "answers": {
+        "OBSTRUCTION": 3
+      },
+      "cards": 1,
+      "occurrences_on_cards": 18,
+      "dismissed": 0,
+      "merged": 2,
+      "to_card_s_asked_median": 55.8,
+      "to_card_s_recurrence_median": 1.4,
+      "lens_wait_s_median": 110.0,
+      "hafnia_s_median": 8.9,
+      "scored": [
+        {
+          "incident": "cw-0005",
+          "hafnia": "OBSTRUCTION",
+          "expected": "OBSTRUCTION",
+          "agree": true,
+          "summary": "A person pushes a green wheeled bin across the pavement, loses control, and it tips over onto its side, remaining there as the person walks away."
+        },
+        {
+          "incident": "cw-0009",
+          "hafnia": "OBSTRUCTION",
+          "expected": "OBSTRUCTION",
+          "agree": true,
+          "summary": "A green wheelie bin is lying on its side across the pavement, partially blocking the walkway as a pedestrian walks past it."
+        },
+        {
+          "incident": "cw-0011",
+          "hafnia": "OBSTRUCTION",
+          "expected": "OBSTRUCTION",
+          "agree": true,
+          "summary": "A green bin is positioned on the pavement, partially obstructing the walkway, and remains in place as a person walks past."
+        }
+      ],
+      "replay_no_guard": {
+        "requests": 3,
+        "cards": 1
+      }
+    },
+    "escooter_left_across_sidewalk": {
+      "fps": 9.8,
+      "dropped": 0,
+      "questions": 2,
+      "startup_questions": 2,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "OBSTRUCTION": 2
+      },
+      "cards": 1,
+      "occurrences_on_cards": 9,
+      "dismissed": 0,
+      "merged": 1,
+      "to_card_s_asked_median": 35.5,
+      "to_card_s_recurrence_median": 2.3,
+      "lens_wait_s_median": 45.1,
+      "hafnia_s_median": 15.4,
+      "scored": [
+        {
+          "incident": "cw-0001",
+          "hafnia": "OBSTRUCTION",
+          "expected": "OBSTRUCTION",
+          "agree": true,
+          "summary": "A black-and-white electric scooter lies on its side across the pavement, blocking the walkway as a pedestrian walks past it."
+        },
+        {
+          "incident": "cw-0007",
+          "hafnia": "OBSTRUCTION",
+          "expected": "OBSTRUCTION",
+          "agree": true,
+          "summary": "An electric scooter lies on its side across the pavement, partially blocking the lane, before a rider later enters the frame and rides past."
+        }
+      ],
+      "replay_no_guard": {
+        "requests": 2,
+        "cards": 1
+      }
+    },
+    "school_gate_break_in_night": {
+      "fps": 9.8,
+      "dropped": 0,
+      "questions": 5,
+      "startup_questions": 5,
+      "escalated": 0,
+      "unanswered": [
+        "run cap (10) reached",
+        "run cap (10) reached"
+      ],
+      "answers": {
+        "NONE": 1,
+        "TAMPERING": 1
+      },
+      "cards": 1,
+      "occurrences_on_cards": 24,
+      "dismissed": 1,
+      "merged": 0,
+      "to_card_s_asked_median": 85.0,
+      "to_card_s_recurrence_median": 1.7,
+      "lens_wait_s_median": 101.1,
+      "hafnia_s_median": 10.2,
+      "scored": [
+        {
+          "incident": "cw-0008",
+          "hafnia": "TAMPERING",
+          "expected": "TAMPERING",
+          "agree": true,
+          "summary": "A padlock is removed from the gate and falls to the pavement."
+        },
+        {
+          "incident": "cw-0010",
+          "hafnia": "NONE",
+          "expected": "TAMPERING",
+          "agree": false,
+          "summary": "A metallic fence with pointed tops remains stationary on the pavement throughout the video."
+        }
+      ],
+      "replay_no_guard": {
+        "requests": 2,
+        "cards": 2
+      }
+    },
+    "person_on_railway_tracks": {
+      "fps": 9.8,
+      "dropped": 0,
+      "questions": 1,
+      "startup_questions": 1,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "PERSON_ON_TRACKS": 1
+      },
+      "cards": 1,
+      "occurrences_on_cards": 2,
+      "dismissed": 0,
+      "merged": 0,
+      "to_card_s_asked_median": 49.0,
+      "to_card_s_recurrence_median": 1.6,
+      "lens_wait_s_median": 31.2,
+      "hafnia_s_median": 11.1,
+      "scored": [
+        {
+          "incident": "cw-0003",
+          "hafnia": "PERSON_ON_TRACKS",
+          "expected": "PERSON_ON_TRACKS",
+          "agree": true,
+          "summary": "A person in a red jacket sits on the railway tracks, then stands and walks away along the tracks, exiting the frame."
+        }
+      ],
+      "replay_no_guard": {
+        "requests": 1,
+        "cards": 1
+      }
+    },
+    "graffiti_on_standing_train": {
+      "fps": 9.9,
+      "dropped": 0,
+      "questions": 1,
+      "startup_questions": 1,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "DAMAGE": 1
+      },
+      "cards": 1,
+      "occurrences_on_cards": 20,
+      "dismissed": 0,
+      "merged": 0,
+      "to_card_s_asked_median": 67.7,
+      "to_card_s_recurrence_median": 1.4,
+      "lens_wait_s_median": 49.6,
+      "hafnia_s_median": 10.2,
+      "scored": [
+        {
+          "incident": "cw-0004",
+          "hafnia": "DAMAGE",
+          "expected": "DAMAGE",
+          "agree": true,
+          "summary": "A person applies colorful graffiti to the side of a stationary red train on the platform, then walks away as the train remains parked with the artwork visible."
+        }
+      ],
+      "replay_no_guard": {
+        "requests": 1,
+        "cards": 1
+      }
+    }
+  },
+  "totals": {
+    "questions": 15,
+    "startup_questions": 14,
+    "cards": 6
+  }
+}

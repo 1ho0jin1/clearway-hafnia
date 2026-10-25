@@ -67,7 +67,7 @@ flowchart TD
     PT --> CAND
     CAND --> MEM{"Verdict memory, SigLIP 2<br/>same spot and same look<br/>as a change Hafnia rejected?"}
     MEM -- "yes: skip" --> DROP(["not asked, no request"])
-    MEM -- no --> RT["Router<br/>one request per change, urgent first,<br/>daily cap from DailySummaryCount"]
+    MEM -- no --> RT["Router<br/>one request per question,<br/>run cap and daily cap from DailySummaryCount"]
     RT --> LENS["Lens renderer<br/>event window: 2 s before the change to 3 s after the report<br/>cropped to the spot"]
     LENS --> PUB["Lens publisher: ffmpeg to MediaMTX<br/>rtsp://127.0.0.1:8554/lens1"]
     PUB --> L1["XProtect records camera lens_1"]
@@ -83,27 +83,28 @@ flowchart TD
 
     classDef built fill:#d8f0d8,stroke:#2e7d32,color:#000
     classDef planned fill:#fff3cd,stroke:#b38600,color:#000
-    class CAM,FB,CD,MEM,DROP,LENS,PUB,L1,GW,ANS,REJ built
-    class SV,PT,CAND,RT,ITEM,ALARM,WATCH,CLOSE planned
+    class CAM,FB,CD,CAND,MEM,DROP,RT,LENS,PUB,L1,GW,ANS,REJ,ITEM,WATCH built
+    class SV,PT,ALARM,CLOSE planned
 ```
 
-Green: built and measured offline or in tests. Yellow: to build (the stalled-vehicle rules and the router exist from
-plan A and need plan C's keys; alarms and bookmarks exist in `hafnia/xprotect_rest.py`). Tested and **not** in the
+Green: built and measured (live since 2026-10-25: `clearway/service.py`, `run/clearway-live-20261025T083623Z`).
+Yellow: to build (the stalled-vehicle rules exist from plan A and need plan C's keys; alarms and bookmarks exist in
+`hafnia/xprotect_rest.py`, F3; the ledger already clears an incident when its spot looks as before). Tested and **not** in the
 default lens: super-resolution (`lens/enhance.py`) and BEFORE/AFTER stills (`lens.client.before_after`), both kept as
 options.
 
 ## Components
 
-| # | Component | Status (2026-10-24) | What |
+| # | Component | Status (2026-10-25) | What |
 |---|---|---|---|
 | 1 | Change detector (`tier0/change.py`) | **built, G1** | Dual-rate background (Porikli et al., 2008) with a median warm-up; per-pixel static time that pauses while something moves across a spot; people held back; whole-view changes ignored; each change closed when its spot matches its BEFORE snapshot. Two settings: `ChangeParams.loops()` (synthetic clips) and `.real()` (640 px, 0.15%, 15 s). |
 | 2 | Verdict memory (`tier0/memory.py`) | **built, offline** | SigLIP 2 (`google/siglip2-base-patch16-224`, Apache-2.0) embeddings of each changed spot, kept with Hafnia's verdict; a change at a rejected spot that looks like the rejection is not sent. 45% fewer requests, no incident skipped, against a stand-in for Hafnia (`run/memory-compare`). |
 | 3 | Stalled-vehicle trigger | to build | A vehicle track that was moving and has stood still for ≥ N s in a lane (`tier0/rules.py`, `sharp_decel`). Covers the breakdown and crash aftermaths. |
 | 4 | Person triggers | to build | A person's feet inside a danger-zone polygon for ≥ 1 s (tracks; one polygon per camera, the only per-camera setting); a person staying at one spot for ≥ N s (gate). YOLO's person box stood in for both in the pilot. |
-| 5 | Router | to adapt | `incident/router.py` keyed by camera and region; one request per change; urgent first; daily cap from `DailySummaryCount`. |
+| 5 | Router | **built, live** | In the service (`clearway/service.py`, `HafniaAnswers`): one request per ledger question, a run cap, none once today's `DailySummaryCount` reaches a limit. Not built: urgent first. The single lens camera is the bottleneck (first cards 36–85 s after the change when six incidents start within a minute). |
 | 6 | Lens | **built, M1** | `lens/` (publisher, client, `lens_1`): event window from 2 s before the change started to 3 s after it was reported, cropped to the spot. Options measured and left out of the default: Real-ESRGAN super-resolution (`lens/enhance.py`), BEFORE/AFTER stills (`before_after()`). |
-| 7 | Prompt and parser | **built, M1**; COLLISION to add | `scripts/lens_pilot.py` `PROMPT`: JSON with `category` (`COLLISION` to add, `PERSON_ON_TRACKS`, `STALLED_VEHICLE`, `OBSTRUCTION`, `DAMAGE`, `TAMPERING`, `NONE`, each defined), `object`, `where`, `still_present`, `summary`; parsed in code with a keyword fallback. Use the category and `still_present`; treat `object` details (tool types) as unreliable. |
-| 8 | Ledger and XProtect | to build | One JSONL item per change: open/closed times, category, owner, answer, alarm id, bookmark. Alarm priority by category, owner in the alarm text, the lens clip's span bookmarked; closed when tier 0 sees the spot restored. |
+| 7 | Prompt and parser | **built, M1, G3** | `clearway/prompt.py` `PROMPT`: JSON with `category` (`PERSON_ON_TRACKS`, `COLLISION`, `STALLED_VEHICLE`, `OBSTRUCTION`, `DAMAGE`, `TAMPERING`, `NONE`, each defined), `object`, `where`, `still_present`, `summary`; parsed in code with a keyword fallback. Use the category and `still_present`; treat `object` details (tool types) as unreliable. Live: 10 of 10 valid JSON, 6 of 6 incidents right. |
+| 8 | Ledger and XProtect | ledger **built, live** (F1, F2); XProtect to build (F3) | `clearway/ledger.py`: one record per incident (pieces, recurrences, provisional skips, merges, clearing, failed questions), event log replayable. To build: alarm priority by category, owner in the alarm text, the lens clip's span bookmarked; closed when the incident clears. |
 | 9 | Ledger page | to build | Open and closed items with thumbnails, time to open and to close, owner, requests used today (from `scripts/viz_pipeline.py`). |
 | 10 | Setup | partly | `scripts/setup_lens.ps1` exists; `setup.ps1` for a fresh machine; CC0 footage fetched by script from Wikimedia Commons. |
 

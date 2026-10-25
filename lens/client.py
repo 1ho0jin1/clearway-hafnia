@@ -103,11 +103,14 @@ def wait(job_id: str, timeout: float = 300, spool: Path = SPOOL) -> dict:
     """Block until the publisher has played the job; returns its done record (start, end, frames)."""
     done = spool / f"{job_id}.done.json"
     deadline = time.monotonic() + timeout
-    while not done.exists():
+    while True:
         if time.monotonic() > deadline:
             raise TimeoutError(f"lens job {job_id} not played within {timeout:.0f} s: is lens.publisher running?")
-        time.sleep(0.5)
-    record = json.loads(done.read_text(encoding="utf-8"))
+        try:
+            record = json.loads(done.read_text(encoding="utf-8"))
+            break
+        except (FileNotFoundError, PermissionError, json.JSONDecodeError):
+            time.sleep(0.5)     # not played yet, being renamed into place (Windows refuses the open), or half written
     if "error" in record:
         raise RuntimeError(f"lens job {job_id}: {record['error']}")
     return record

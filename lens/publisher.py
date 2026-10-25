@@ -115,7 +115,9 @@ class Job:
     def finish(self) -> dict:
         done = {"id": self.meta["id"], "start": iso(self.start or utc_now()), "end": iso(self.end or utc_now()),
                 "frames": self.frames, "fps": self.fps, "meta": self.meta.get("meta", {})}
-        self.spec.with_name(self.meta["id"] + ".done.json").write_text(json.dumps(done), encoding="utf-8")
+        tmp = self.spec.with_name(self.meta["id"] + ".done.json.tmp")
+        tmp.write_text(json.dumps(done), encoding="utf-8")
+        tmp.replace(self.spec.with_name(self.meta["id"] + ".done.json"))   # in one step: clients poll for it
         with (self.spec.parent.parent / "played.jsonl").open("a", encoding="utf-8") as f:
             f.write(json.dumps(done) + "\n")
         return done

@@ -25,7 +25,6 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
-import re
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -37,6 +36,7 @@ import numpy as np
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 sys.path.insert(0, str(REPO / "scripts"))
+from clearway.prompt import PROMPT, parse  # noqa: E402
 from eval_change import CASES, frames, person_finder  # noqa: E402
 from hafnia.gateway import Gateway  # noqa: E402
 from hafnia.xprotect_rest import XProtect  # noqa: E402
@@ -53,16 +53,6 @@ TRUTH = {"vehicle_breakdown_traffic_queue": "STALLED_VEHICLE", "bin_pushed_over_
          "person_on_railway_tracks": "PERSON_ON_TRACKS", "graffiti_on_standing_train": "DAMAGE"}
 PERSON_AT = {"person_on_railway_tracks": 6.5,     # seconds into the loop: sitting on the edge, legs on the track
              "school_gate_break_in_night": 11.0}  # crouched at the padlock with the cutters
-CATEGORIES = ("PERSON_ON_TRACKS", "COLLISION", "STALLED_VEHICLE", "OBSTRUCTION", "DAMAGE", "TAMPERING", "NONE")
-PROMPT = (
-    'Reply with JSON only, no other text: {"category": "...", "object": "...", "where": "...", "still_present": '
-    'true or false, "summary": "..."}. category is exactly one of: PERSON_ON_TRACKS (a person on railway tracks), '
-    'COLLISION (a vehicle hits another vehicle, a person, a barrier or an object, or spins out of control), '
-    'STALLED_VEHICLE (a vehicle stopped or broken down in a traffic lane), OBSTRUCTION (an object left lying across a '
-    'pavement, path or road), DAMAGE (property damaged or defaced, such as graffiti or broken glass), TAMPERING '
-    '(someone forcing a lock, gate or door), NONE (none of these). object: the main object or person involved, at most '
-    'four words. where: one of track, lane, pavement, platform, other. still_present: whether that object or person is '
-    'still there at the end of the video. summary: one sentence on what happens, in the order it happens.')
 VARIANTS = ["full_loop", "centred", "crop", "crop_sr", "before_after"]
 BEFORE_S = 2.0          # the window starts this long before the change started
 AFTER_S = 3.0           # ... and ends this long after it was reported
@@ -99,24 +89,6 @@ def locate(name: str, people) -> tuple[float, float, tuple[int, int, int, int], 
     first = found[0][0].t_detect
     c, start = max((x for x in found if x[0].t_detect - first <= 3.0), key=lambda x: x[0].area)
     return max(0.0, c.t_start - start), c.t_detect - start, c.box, "change detector"
-
-
-def parse(answer: str) -> dict:
-    """The JSON answer, or what can be recovered from it; category falls back to the first category word."""
-    m = re.search(r"\{.*\}", answer or "", re.S)
-    out = {}
-    if m:
-        try:
-            out = json.loads(m.group(0))
-        except json.JSONDecodeError:
-            out = {}
-    cat = str(out.get("category", "")).upper()
-    if cat not in CATEGORIES:
-        hits = [(answer.upper().find(c), c) for c in CATEGORIES if c in (answer or "").upper()]
-        cat = min(hits)[1] if hits else "UNPARSED"
-    out["category"] = cat
-    out["json_ok"] = bool(m) and "summary" in out
-    return out
 
 
 def main() -> int:

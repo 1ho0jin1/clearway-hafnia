@@ -71,6 +71,12 @@ class Change:
     closed_by: str = ""              # "restored" or "scene_jump"
 
 
+def _chmax(d: np.ndarray) -> np.ndarray:
+    """The largest channel per pixel: d.max(axis=2) exactly, several times faster (numpy reduces slowly over a short
+    last axis: 6.5 of the detector's 13 ms per frame, 2026-10-25)."""
+    return np.maximum(np.maximum(d[..., 0], d[..., 1]), d[..., 2])
+
+
 def _iou(a: tuple, b: tuple) -> float:
     ix = max(0, min(a[2], b[2]) - max(a[0], b[0]))
     iy = max(0, min(a[3], b[3]) - max(a[1], b[1]))
@@ -109,7 +115,8 @@ class ChangeDetector:
         self.fast = img.copy()
         self.slow = img.copy()
         self.prev_gray = gray
-        self.static_since = np.full(img.shape[:2], np.nan, np.float32)
+        # float64: live frame times are Unix seconds, where float32 steps by 128 s (2026-10-25)
+        self.static_since = np.full(img.shape[:2], np.nan, np.float64)
         self.static_time = np.zeros(img.shape[:2], np.float32)
 
     def update(self, t: float, frame: np.ndarray,
@@ -143,10 +150,12 @@ class ChangeDetector:
             return []
         self.prev_gray = gray
 
-        fg_fast = np.abs(img - self.fast).max(axis=2) > p.diff
-        fg_slow = np.abs(img - self.slow).max(axis=2) > p.diff
+        fg_fast = _chmax(cv2.absdiff(img, self.fast)) > p.diff
+        fg_slow = _chmax(cv2.absdiff(img, self.slow)) > p.diff
         self.fast += (1 - np.exp(-dt / p.fast_tau_s)) * (img - self.fast)
-        self.slow += np.where(~fg_fast[..., None], (1 - np.exp(-dt / p.slow_tau_s)) * (img - self.slow), 0)
+        step = (1 - np.exp(-dt / p.slow_tau_s)) * (img - self.slow)
+        step[fg_fast] = 0
+        self.slow += step
 
         static = fg_slow & ~fg_fast
         # Each pixel counts how long it has been static-changed. The count pauses while something moves across it (a
@@ -200,7 +209,7 @@ class ChangeDetector:
         p = self.p
         for cid, o in list(self.open.items()):
             x1, y1, x2, y2 = o.work_box
-            d = float(np.abs(img[y1:y2, x1:x2] - o.before).max(axis=2).mean())
+            d = float(_chmax(cv2.absdiff(img[y1:y2, x1:x2], o.before)).mean())
             if d > p.restored_diff:
                 o.restored_since = None
             elif o.restored_since is None:

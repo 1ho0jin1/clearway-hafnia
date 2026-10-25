@@ -142,8 +142,10 @@ diagram (Mermaid): `docs/PLAN-C.md`, "Pipeline".
 | `lens/` | The lens camera: `publisher.py` (one RTSP stream through ffmpeg to MediaMTX: idle frames, then each queued clip in real time, starting on a whole second; logs the UTC span each clip played), `client.py` (queue a clip; `crop`, `zoom`, `slow`, `mark`, `before_after`, `span`), `enhance.py` (Real-ESRGAN super-resolution via spandrel; measured, not in the default), `mediamtx.yml` (RTSP on 127.0.0.1:8554 only, TCP only) |
 | `scripts/setup_lens.ps1`, `scripts/start_lens.ps1` | Install MediaMTX (pinned, SHA-256 checked) and camera `lens_1` (Universal 1 channel driver, our rule "Lens: record lens_1 always"); start MediaMTX and the publisher detached (logs in `run/lens/`) |
 | `scripts/lens_compare.py` | One looped event asked about plainly and through the lens (`--variants crop crop_slow2 crop_sr`, `--prompt classify|json`, `--asks N`): finds the event live by frame matching; (1 + variants) × asks requests |
-| `scripts/lens_pilot.py` | Plan C's lens pilot (M1): each synthetic incident camera, five views (full loop, event window, crop, crop + SR, BEFORE/AFTER), one JSON prompt (`PROMPT`, `parse`); 5 requests per camera |
-| `clearway/ledger.py` | The ledger (product F1): incidents, pieces, recurrences (no request), provisional skips with escalation, same-category merge, alarms with a quiet period, clearing; returns actions, logs events (JSONL), `Ledger.replay()` |
+| `scripts/lens_pilot.py` | Plan C's lens pilot (M1): each synthetic incident camera, five views (full loop, event window, crop, crop + SR, BEFORE/AFTER), one JSON prompt (`clearway/prompt.py`); 5 requests per camera |
+| `clearway/ledger.py` | The ledger (product F1): incidents, pieces, recurrences (no request), provisional skips with escalation, same-category merge, alarms with a quiet period, clearing, failed questions; returns actions, logs events (JSONL), `Ledger.replay()` |
+| `clearway/service.py`, `clearway/prompt.py` | The Clearway service (F2): FrameBridge → change detector (a thread per camera) → SigLIP look → ledger → lens clip → `HafniaAnswers` (run cap, daily count) → ledger; logs `service.jsonl`, `ledger.jsonl`, `changes.jsonl` (replayable). The JSON prompt and its parser |
+| `scripts/run_clearway.py`, `scripts/report_clearway.py` | Run the service on live cameras: `--answers standin` (dry run, no requests; loop phase by frame matching; detectors start at a loop start) or `--answers hafnia --max-requests N`; summarise a run per camera beside the offline replay, scoring Hafnia against the stand-in |
 | `scripts/eval_ledger.py` | The ledger replayed offline against a stand-in for Hafnia: requests, cards, occurrences, alarms, misses; saves each clip's event stream, `--from-events` replays them without the detector |
 | `tier0/change.py`, `tier0/memory.py` | Plan C tier 0: the change detector (`ChangeParams.loops()` / `.real()`) and the SigLIP 2 verdict memory (`Embedder`, `VerdictMemory`) |
 | `scripts/eval_change.py`, `scripts/eval_memory.py` | Offline checks, no requests: the detector on every clip as its camera plays it (`--profile`, gate G1); the memory against a stand-in for Hafnia (`RULES`: none, spot, spot unless confirmed, appearance, SigLIP) |
@@ -266,6 +268,18 @@ change lost. On real `test_11` the memory once skipped the crash as a look-alike
 spot (similarity 0.947: the road dominates small crops); skips are now provisional (asked after 30 s if the change
 stays), so the crash is carded 60 s after it began and real footage saves little (18 of 21 requests). Long replays
 were stopped twice by Claude Code for low machine memory: event streams are saved per clip (`--from-events`).
+
+**Clearway service, live (F2)** (`run/clearway-live-20261025T083623Z/README.md`, 10 requests; dry run
+`run/clearway-dry-20261025T083035Z`): on the six incident cameras the whole pipeline runs live at 9.8–9.9 fps per
+camera (a thread each); one card per incident, all six categories right, Hafnia agreeing with the stand-in on 9 of 10
+answers (the tenth, a gate crop showing only the fence, is NONE: the gate needs its person trigger); later
+occurrences carded in 1.4–2.5 s without a request. First cards come 36–85 s after the change: Hafnia takes about
+10 s, the rest is the single lens camera playing every question's clip in turn. Fixed on the way: float32 times
+(steps of 128 s at Unix time) in the change detector, a 2× faster detector (identical reports), the ledger forgetting
+an incident's rarer spots (diverse looks; merges take the box), lens-client races on Windows, and a failed question
+leaving its incident pending (`Ledger.on_failed`). Test harness: looped cameras' detectors start at a loop start (a
+mid-loop start put part of the incident in the warm-up background); the gate's stream never delivers its loop's
+first 5 frames.
 
 **Crash category (gate G3)** (`run/lens-test_11-20261024T110155Z`, 3 requests): with COLLISION in the JSON prompt the
 cropped view of test_11's crash says COLLISION ("loses control … veers sharply"), the full frame STALLED_VEHICLE; the

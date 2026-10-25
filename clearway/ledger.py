@@ -54,7 +54,8 @@ class Params:
                                         # not IoU: a thin strip inside an incident's grown box is the same spot)
     recurrence_window_s: float = 3600   # a cleared incident can recur (reopen) for this long
     quiet_s: float = 300                # at most one alarm per incident this often (loops would raise one per replay)
-    keep_embs: int = 8                  # occurrences' looks kept per incident (the look can drift)
+    keep_embs: int = 8                  # occurrences' looks kept per incident (the look can drift), kept diverse:
+                                        # when full, the older of the two most alike goes (_remember)
     group_s: float = 5.0                # a change near an incident within this long of its last change is a piece of
     near: float = 0.5                   # it ("near": the boxes overlap once each grows by this share on every side);
                                         # the detector reports a tipped bin as its empty place, the bin and its base
@@ -71,7 +72,8 @@ class Incident:
     box: tuple[int, int, int, int]
     t_change: float                     # when the first occurrence started changing
     t_report: float                     # when the detector reported it
-    state: str = "pending"              # pending -> open | dismissed; open -> cleared -> (recurrence) open; rejected
+    state: str = "pending"              # pending -> open | dismissed | merged | failed (no answer will come);
+                                        # open -> cleared -> (recurrence) open; rejected
     category: str = ""
     owner: str = ""
     priority: str = ""
@@ -211,7 +213,7 @@ class Ledger:
     def _recur(self, inc: Incident, camera, change_id, t_change, t_report, emb, sim) -> dict:
         inc.active[change_id] = _area(tuple(inc.box))
         inc.t_last = t_report
-        inc.embs = (inc.embs + [emb])[-self.p.keep_embs:]
+        self._remember(inc, [emb])
         self.change_to_incident[(camera, change_id)] = inc.id
         inc.occurrences += 1
         self.stats["recurrences"] += 1
@@ -247,6 +249,18 @@ class Ledger:
                    clip=inc.clip, owner=inc.owner, priority=inc.priority)
         return effects
 
+    def on_failed(self, incident_id: str, t: float, reason: str) -> None:
+        """No answer will come for a pending incident (its clip or its request failed). It is dropped, so the next
+        change at the spot is asked about anew: live, the gate's first question was lost and its incident stayed
+        pending, gathering 39 occurrences that never got a card (2026-10-25)."""
+        inc = self.incidents[incident_id]
+        if inc.state != "pending":
+            return
+        for c in inc.active:
+            self.change_to_incident.pop((inc.camera, c), None)
+        inc.state, inc.active = "failed", {}
+        self._emit("failed", incident=inc.id, t=t, reason=reason)
+
     def _same_incident(self, inc: Incident, t: float) -> Incident | None:
         """An open or recently cleared incident with the same category at the same spot, if any."""
         for o in self.incidents.values():
@@ -261,7 +275,8 @@ class Ledger:
         for c, area in inc.active.items():
             target.active[c] = area
             self.change_to_incident[(inc.camera, c)] = target.id
-        target.embs = (target.embs + inc.embs)[-self.p.keep_embs:]
+        self._remember(target, inc.embs)
+        target.box = _union(target.box, inc.box)
         target.occurrences += inc.occurrences
         effects = []
         if inc.active and target.state == "cleared":
@@ -271,6 +286,19 @@ class Ledger:
         self._emit("merge", incident=inc.id, into=target.id, t=t, category=inc.category, answer=inc.answer,
                    occurrences=target.occurrences, state=target.state)
         return effects
+
+    def _remember(self, inc: Incident, embs: list[np.ndarray]) -> None:
+        """Add looks to an incident, keeping keep_embs of them and keeping them diverse: when full, the older of the two
+        most alike goes. Keeping only the latest forgot the looks of an incident's rarer spots: on the school gate,
+        live, 24 occurrences at one spot pushed out the others' and each was asked about again (2026-10-25)."""
+        kept = inc.embs + list(embs)
+        while len(kept) > self.p.keep_embs:
+            m = np.stack(kept)
+            sim = m @ m.T
+            np.fill_diagonal(sim, -np.inf)
+            i, j = np.unravel_index(int(np.argmax(sim)), sim.shape)
+            kept.pop(min(i, j))
+        inc.embs = kept
 
     def _alarm(self, inc: Incident, t: float, recurrence: bool = False) -> list[dict]:
         if inc.t_alarm is not None and t - inc.t_alarm < self.p.quiet_s:
@@ -340,7 +368,7 @@ class Ledger:
                 led.change_to_incident[(e["camera"], e["change"])] = inc.id
                 if k == "recur":
                     inc.occurrences, inc.state = e["occurrences"], e["state"]
-                    inc.embs = (inc.embs + [np.array(e["emb"], np.float32)])[-led.p.keep_embs:]
+                    led._remember(inc, [np.array(e["emb"], np.float32)])
             elif k == "answer":
                 inc = led.incidents[e["incident"]]
                 inc.state, inc.answer, inc.t_answer, inc.clip = e["state"], e["answer"], e["t"], e["clip"]
@@ -355,7 +383,8 @@ class Ledger:
                 for c, area in inc.active.items():
                     target.active[c] = area
                     led.change_to_incident[(inc.camera, c)] = target.id
-                target.embs = (target.embs + inc.embs)[-led.p.keep_embs:]
+                led._remember(target, inc.embs)
+                target.box = _union(target.box, inc.box)
                 target.occurrences, target.state = e["occurrences"], e["state"]
                 if target.state == "open":
                     target.t_cleared = None
@@ -368,6 +397,11 @@ class Ledger:
                 for c in inc.active:
                     led.change_to_incident.pop((inc.camera, c), None)
                 inc.state, inc.t_cleared, inc.active = "cleared", e["t"], {}
+            elif k == "failed":
+                inc = led.incidents[e["incident"]]
+                for c in inc.active:
+                    led.change_to_incident.pop((inc.camera, c), None)
+                inc.state, inc.active = "failed", {}
             elif k == "operator":
                 inc = led.incidents[e["incident"]]
                 inc.operator = e["verdict"]
