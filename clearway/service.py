@@ -28,8 +28,9 @@ the board appends to and the service reads every second (Ledger.on_operator).
 Writes <out>/ledger.jsonl (the ledger's event log; Ledger.replay rebuilds the state), <out>/service.jsonl (changes,
 questions, lens spans, answers, effects, health), <out>/changes.jsonl (every report with its look, and every closing:
 the ledger's input, so a live run can be replayed offline with a changed ledger), <out>/snaps/<incident>.jpg (the
-camera's frame at the end of each question's clip, the spot boxed; for the board, clearway/board.py) and, at the end,
-<out>/incidents.json. Times are frame times (Unix
+camera's frame at the end of each question's clip, the spot boxed; for the board, clearway/board.py),
+<out>/cameras/<camera>.jpg (the scene as the detector remembers it, every SCENE_EVERY_S and at the end: the backdrop
+of the shift summary's hotspots) and, at the end, <out>/incidents.json. Times are frame times (Unix
 seconds, UTC) unless named wall.
 """
 from __future__ import annotations
@@ -65,6 +66,7 @@ MAX_CLIP_S = 30.0   # a change reported long after it started (real cameras: at 
 KEEP_S = 90.0       # frames kept per camera: an escalated question (30 s after the report) still needs its clip
 QUEUE = 50          # frames waiting per camera (5 s); beyond that the oldest are dropped
 ZONE_EVERY = 2      # a camera with a danger zone looks for people on every 2nd frame (5 fps)
+SCENE_EVERY_S = 600.0   # each camera's scene image (the detector's slow background) is rewritten this often
 
 
 @dataclass
@@ -189,6 +191,7 @@ class Service:
         self.closed = False                             # no more frames are coming
         self._log_lock = threading.Lock()
         self._verdicts_read = 0                         # bytes of operator.jsonl taken in
+        self.scened = {c: float("-inf") for c in cameras}   # frame time of each camera's last scene image
 
     # --- logging -------------------------------------------------------------------------------------------------
     def log(self, kind: str, **fields) -> None:
@@ -236,12 +239,25 @@ class Service:
                     s["reports"] += 1
                     self._on_report(camera, c, frame)
                 self._closings(camera)       # changes and zone occupations alike
+                if det.slow is not None and t - self.scened[camera] >= SCENE_EVERY_S:
+                    self._scene(camera, t)
                 s["frames"] += 1
                 s["lag_s"] = round(time.time() - t, 2)
             except Exception as e:           # one bad frame must not stop the camera
                 s["errors"] += 1
                 if s["errors"] <= 5:
                     self.log("error", camera=camera, error=repr(e))
+
+    def _scene(self, camera: str, t: float) -> None:
+        """<out>/cameras/<camera>.jpg: the detector's slow background, the scene as it usually looks (it learns only
+        where nothing moves, over minutes, so a looped incident is not in it), at the detector's working size."""
+        img = self.detectors[camera].slow.clip(0, 255).astype(np.uint8)
+        folder = self.out / "cameras"
+        folder.mkdir(exist_ok=True)
+        tmp = folder / f"{camera}.jpg.tmp"
+        tmp.write_bytes(cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 90])[1].tobytes())
+        tmp.replace(folder / f"{camera}.jpg")          # the board may be reading the last one
+        self.scened[camera] = t
 
     def _ticker(self) -> None:
         """Every second: the ledger's held skips that stayed become questions; alarms of incidents that stayed
@@ -458,6 +474,12 @@ class Service:
                 self.inbox[c].put(None)      # each camera finishes the frames it has, then stops
             for th in threads[:-1]:
                 th.join()
+            for c, det in self.detectors.items():       # the scene as the shift ended
+                if det.slow is not None:
+                    try:
+                        self._scene(c, det.last_t or 0.0)
+                    except Exception as e:
+                        self.log("error", camera=c, error=f"scene image: {e!r}")
             self.closed = True
             threads[-1].join()
             for f in list(self.questions):

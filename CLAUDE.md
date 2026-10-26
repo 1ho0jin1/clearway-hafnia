@@ -150,7 +150,7 @@ diagram (Mermaid): `docs/PLAN-C.md`, "Pipeline".
 | `scripts/eval_ledger.py` | The ledger replayed offline against a stand-in for Hafnia: requests, cards, occurrences, alarms, misses; saves each clip's event stream, `--from-events` replays them without the detector |
 | `tier0/change.py`, `tier0/memory.py` | Plan C tier 0: the change detector (`ChangeParams.loops()` / `.real()`) and the SigLIP 2 verdict memory (`Embedder`, `VerdictMemory`) |
 | `clearway/board.py`, `clearway/board.html` | The owner board (F4): a standard-library web server on 127.0.0.1:8765 following a run folder (`--latest` by default): cards by owner with the lens clip (MP4 made from the spool on first view), snapshot, summary, time open, recurrences, alarm state, Confirm / Reject (F7: `POST /api/operator`, board's own page only, appended to the run's `operator.jsonl`); JSON at `/api/board` |
-| `clearway/summary.py`, `clearway/summary.html` | The shift summary (F8), from a run's logs (no requests): incidents by owner and category, false cards, change to card (first and repeat), card to XProtect alarm, alarm to clear, clear to alarm closed, time open and longest occurrence (the ledger's clearing rule replayed over its log and the detector's closings), recurring spots with snapshots, cost per camera-hour and cameras per 500-a-day allowance, operator verdicts; `shift.json` (written by the service at the end, or `python -m clearway.summary <run>`) and the board's `/summary` page |
+| `clearway/summary.py`, `clearway/summary.html` | The shift summary (F8), from a run's logs (no requests): incidents by owner and category, false cards, change to card (first and repeat), card to XProtect alarm, alarm to clear, clear to alarm closed, time open and longest occurrence (the ledger's clearing rule replayed over its log and the detector's closings), recurring spots with snapshots, cost per camera-hour and cameras per 500-a-day allowance, operator verdicts; hotspots (F9): per camera, the ledger's spots with their counts and the heat of every reported change over the camera's scene image (`<run>/cameras/`, the detector's slow background, written by the service every 10 min and at the end; the board serves it at `/cameras/<camera>.jpg`); `shift.json` (written by the service at the end, or `python -m clearway.summary <run>`) and the board's `/summary` page; logs are read incrementally |
 | `clearway/notify.py`, `config/owners.json` | Owner notifications: each ledger effect (opened, reopened, cleared, confirmed, rejected) as a JSON webhook (`clearway.notification/1`) to the incident's owner; targets per owner, real URLs and signing keys from environment variables (`url_env`, `secret_env`: HMAC-SHA256 in `X-Clearway-Signature`), a thread per target, retries; logged by target name, never URL; `run_clearway.py --notify` |
 | `scripts/owner_inbox.py`, `scripts/owner_inbox.html`, `scripts/start_inbox.ps1` | A stand-in for the owners' channels on 127.0.0.1:8770: receives the notifications (checks signatures with `CLEARWAY_HOOK_SECRET` set) and shows a feed per owner; keeps them in `run/inbox/` (git-ignored) |
 | `scripts/start_board.ps1`, `scripts/open_board.ps1` | Start the board detached (logs in `run/board/`); open it as an Edge app window beside Smart Client |
@@ -342,6 +342,17 @@ three runs fall at the end of a replayed occurrence (172) or inside one where tw
 whole run. On the loops a median occurrence lasts 7.6-11.8 s and a repeat is carded in 1.4 s; the first card takes
 38-62 s (median), the lens queue. The page names looped cameras and short runs, whose per-hour rates are a start-up
 burst's. The looks (768 numbers a line) are cut out before parsing: 0.03 s instead of 0.12 s for 5 min of logs.
+
+**Hotspots (F9) and eleven cameras** (`run/clearway-dry-20261026T140810Z-preflight11`, no requests): the summary page
+draws each camera's spots over its scene image: cards outlined in their owner's priority colour with their counts,
+what was not an incident (Hafnia's NONE, the operator's rejection, with the look-alikes the memory skipped) dashed
+grey, and the heat of every change the detector reported, card or not, on one scale for all cameras. The scene image
+is the detector's slow background, so a looped incident is not in it. Six category colours fail the all-pairs
+colour check (yellow and orange too close), so boxes take the owner's priority colour and the category is in the
+label. Eleven cameras at once: FrameBridge delivers 4.0-5.0 fps per camera (about 45 fps in all; 9.8-9.9 with six),
+and the service processes every frame; for the first 3 minutes, while everything starts, XProtect calls are slow
+(the first alarm took 116 s, later ones 0.2-0.3 s). The five street cameras at the real-camera setting report
+nothing: a change must last 15 s, longer than their 8-15.5 s loops.
 
 **Owner notifications (F12)** (`run/clearway-dry-20261025T144944Z-notify`, `...145829Z-notify-cycle`, no requests): the
 ledger's effects go to the incident's owner as JSON webhooks (`clearway/notify.py`) beside the XProtect alarms; the

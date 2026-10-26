@@ -67,13 +67,35 @@
 
   .times { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
   .times .tile { background: var(--card); }
-  .spots { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
-  .spot { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
-  .spot img, .spot .noimg { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: #000; }
-  .spot .noimg { display: flex; align-items: center; justify-content: center; color: var(--faint); font-size: 12px; }
-  .spot .cap { padding: 8px 10px; }
-  .spot .n { font-size: 20px; font-weight: 600; }
-  .spot .what { font-size: 12px; color: var(--muted); }
+  /* hotspots (F9): a camera's scene, its spots outlined in the owner's priority colour, the heat of every change */
+  .hot-head { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  .hot-ctl { margin-left: auto; display: flex; gap: 14px; font-size: 12px; color: var(--muted); }
+  .hot-ctl label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--muted); margin: 0 0 10px; align-items: center; }
+  .legend .k { display: inline-flex; align-items: center; gap: 6px; }
+  .legend .sw { width: 14px; height: 10px; border-radius: 2px; border: 2px solid; }
+  .legend .sw.not { border-style: dashed; border-color: var(--muted); }
+  .legend .ramp { width: 90px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, rgba(106, 95, 208, .18), rgb(201, 194, 255)); }
+  .cams { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 12px; }
+  .cam { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .view { position: relative; width: 100%; background: #000; overflow: hidden; }
+  .view img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; filter: grayscale(.5) brightness(.75); }
+  .heat-on .view img { filter: grayscale(.7) brightness(.5); }
+  .view canvas { position: absolute; left: 0; top: 0; width: 100%; pointer-events: none; }
+  .view svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+  .no-heat .view canvas, .no-spots .view svg, .no-spots .view .tag { display: none; }
+  .noimg { aspect-ratio: 16 / 9; display: flex; align-items: center; justify-content: center; color: var(--faint); font-size: 12px; }
+  .tag { position: absolute; transform: translateY(calc(-100% - 2px)); font-size: 11px; line-height: 1.35; white-space: nowrap;
+         background: rgba(13, 16, 21, .86); color: var(--text); border-left: 3px solid; border-radius: 3px; padding: 0 5px;
+         pointer-events: none; max-width: 70%; overflow: hidden; text-overflow: ellipsis; }
+  .tag.inside { transform: translateY(2px); }
+  .tag.not { color: var(--muted); border-left-style: dashed; border-left-color: var(--muted); }
+  .tip { position: absolute; z-index: 1; background: #0b0e12; border: 1px solid var(--line); border-radius: 6px;
+         padding: 6px 8px; font-size: 12px; line-height: 1.45; pointer-events: none; max-width: 260px; }
+  .tip .t { font-weight: 600; } .tip .m { color: var(--muted); }
+  .cam figcaption { padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; }
+  .cam .cname { font-weight: 600; font-size: 13px; }
+  .cam .cnote { font-size: 12px; color: var(--muted); }
   .facts { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 13px; }
   .facts .k { color: var(--muted); }
   .empty { color: var(--faint); font-size: 12px; padding: 8px 0; }
@@ -96,7 +118,17 @@
     <div class="panel"><h2>By owner</h2><div class="scroll"><table id="owners"></table></div></div>
     <div class="panel"><h2>How fast <span class="h-note">medians</span></h2><div class="times" id="times"></div></div>
   </section>
-  <section class="panel"><h2>Where it keeps happening <span class="h-note" id="spots-note"></span></h2><div class="spots" id="spots"></div></section>
+  <section class="panel" id="hot">
+    <div class="hot-head">
+      <h2>Where it keeps happening <span class="h-note" id="hot-note"></span></h2>
+      <div class="hot-ctl">
+        <label><input type="checkbox" id="show-spots" checked> Spots</label>
+        <label><input type="checkbox" id="show-heat" checked> Heat of all changes</label>
+      </div>
+    </div>
+    <div class="legend" id="hot-legend"></div>
+    <div class="cams" id="cams"></div>
+  </section>
   <section class="panel"><h2>Incidents</h2><div class="scroll"><table id="incidents"></table></div></section>
   <section class="row">
     <div class="panel"><h2>What it cost <span class="h-note" id="cost-note"></span></h2><div id="cost"></div></div>
@@ -191,16 +223,7 @@ function render(s) {
     tile("Occurrence", secs(t.occurrence.median), `${t.occurrence.n} that cleared`),
   );
 
-  $("spots-note").textContent = s.looped_cameras.length ? "on looped clips these are replays" : "";
-  $("spots").replaceChildren(...(s.recurring.length ? s.recurring.map(r => {
-    const d = el("div", "spot");
-    if (r.snap) { const i = el("img"); i.src = r.snap; i.alt = `${human(r.camera)}, the spot boxed`; d.append(i); }
-    else d.append(el("div", "noimg", "no snapshot in this run"));
-    const cap = el("div", "cap");
-    cap.append(el("div", "n", `${r.occurrences} times`), el("div", null, cat(r.category)), el("div", "what", `${human(r.camera)} · ${r.owner}`));
-    d.append(cap);
-    return d;
-  }) : [el("div", "empty", "Nothing happened twice at one spot.")]));
+  renderHotspots(s);
 
   table($("incidents"), [["Incident"], ["Camera"], ["Owner"], ["First seen", 1], ["Times", 1], ["To card", 1], ["Time open", 1], ["Longest", 1], [live ? "Now" : "At the end"], ["Hafnia said"]],
     s.list.map(x => {
@@ -236,6 +259,177 @@ function render(s) {
   $("operator").replaceChildren(of);
   return live;
 }
+
+// --- hotspots (F9) ---------------------------------------------------------------------------------------------
+const SVGNS = "http://www.w3.org/2000/svg";
+const HEAT_LO = [106, 95, 208], HEAT_HI = [201, 194, 255];   // one hue (violet), apart from the priority colours
+const LABELLED_NOT = 3;            // spots that were not incidents get a label on the image this many per camera
+const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+const spotColour = (sp) => sp.kind === "incident" ? `var(--${PRIORITY[sp.owner] || "faint"})` : "var(--muted)";
+
+function spotLabel(sp) {
+  if (sp.kind === "incident") return `${cat(sp.category)} ×${sp.count}`;
+  return `${sp.kind === "rejected" ? "rejected" : "not an incident"} ×${sp.count}`;
+}
+function spotTip(sp) {
+  const lines = [];
+  if (sp.kind === "incident") {
+    lines.push([cat(sp.category), "t"], [`${sp.owner} · happened ${plural(sp.occurrences, "time")}`]);
+    if (sp.operator === "confirmed") lines.push(["confirmed by the operator"]);
+  } else if (sp.kind === "rejected") {
+    lines.push([`${cat(sp.category)} card, rejected by the operator`, "t"],
+               [`happened ${plural(sp.occurrences, "time")}; ${plural(sp.skipped, "later look-alike")} skipped`]);
+  } else {
+    lines.push(["Not an incident, said Hafnia", "t"],
+               [`asked ${plural(sp.ids.length, "time")}; ${plural(sp.skipped, "later look-alike")} skipped without asking`]);
+  }
+  lines.push([sp.ids.join(", "), "m"]);
+  return lines;
+}
+function heatCanvas(c, h) {
+  const cv = document.createElement("canvas");
+  cv.width = c.cols; cv.height = c.rows;            // one pixel per cell, smoothed by the browser as it scales
+  cv.style.width = `${100 * c.cols * h.cell / c.size[0]}%`;
+  cv.style.height = `${100 * c.rows * h.cell / c.size[1]}%`;
+  const ctx = cv.getContext("2d"), img = ctx.createImageData(c.cols, c.rows);
+  c.heat.forEach((n, i) => {
+    if (!n) return;
+    const f = Math.sqrt(n / h.heat_max);               // the same scale on every camera
+    for (let k = 0; k < 3; k++) img.data[4 * i + k] = Math.round(HEAT_LO[k] + f * (HEAT_HI[k] - HEAT_LO[k]));
+    img.data[4 * i + 3] = Math.round(255 * (0.18 + 0.67 * f));
+  });
+  ctx.putImageData(img, 0, 0);
+  return cv;
+}
+function hover(ev, view, tip, c, h) {
+  const r = view.getBoundingClientRect(), [w, hh] = c.size;
+  const x = (ev.clientX - r.left) / r.width * w, y = (ev.clientY - r.top) / r.height * hh;
+  const area = (b) => (b[2] - b[0]) * (b[3] - b[1]);
+  let lines = null;
+  if (!document.body.classList.contains("no-spots")) {
+    const under = c.spots.filter(sp => x >= sp.box[0] && x <= sp.box[2] && y >= sp.box[1] && y <= sp.box[3])
+                         .sort((a, b) => area(a.box) - area(b.box));
+    if (under.length) lines = spotTip(under[0]);
+  }
+  if (!lines && c.heat && !document.body.classList.contains("no-heat")) {
+    const n = c.heat[Math.floor(y / h.cell) * c.cols + Math.floor(x / h.cell)] || 0;
+    if (n) lines = [[`${plural(n, "change")} reported here`, "t"], ["by the detector or a danger zone, card or not", "m"]];
+  }
+  if (!lines) { tip.hidden = true; return; }
+  tip.replaceChildren(...lines.map(([t, cls]) => el("div", cls || null, t)));
+  tip.hidden = false;
+  const px = ev.clientX - r.left, py = ev.clientY - r.top;
+  tip.style.left = `${Math.max(4, Math.min(px + 12, r.width - tip.offsetWidth - 4))}px`;
+  tip.style.top = `${py + 16 + tip.offsetHeight > r.height ? Math.max(4, py - tip.offsetHeight - 8) : py + 16}px`;
+}
+function camCard(c, h) {
+  const fig = el("figure", "cam");
+  if (!c.image) fig.append(el("div", "noimg", "no camera image in this run"));
+  else {
+    const [w, hh] = c.size, view = el("div", "view");
+    view.style.aspectRatio = `${w} / ${hh}`;
+    const img = el("img");
+    img.src = c.image; img.alt = `${human(c.camera)}: the scene`;
+    view.append(img);
+    if (c.heat) view.append(heatCanvas(c, h));
+    const svg = document.createElementNS(SVGNS, "svg");
+    svg.setAttribute("viewBox", `0 0 ${w} ${hh}`);
+    svg.setAttribute("preserveAspectRatio", "none");
+    for (const sp of [...c.spots].reverse()) {          // incidents come first: drawn last, on top
+      const [x1, y1, x2, y2] = sp.box;
+      for (const [stroke, width] of [["rgba(0, 0, 0, .6)", 4], [spotColour(sp), 2]]) {
+        const rect = document.createElementNS(SVGNS, "rect");
+        for (const [k, v] of Object.entries({ x: x1, y: y1, width: x2 - x1, height: y2 - y1, rx: 3, fill: "none",
+                                              "stroke-width": width, "vector-effect": "non-scaling-stroke" }))
+          rect.setAttribute(k, v);
+        rect.style.stroke = stroke;
+        if (sp.kind !== "incident" && width === 2) rect.setAttribute("stroke-dasharray", "5 4");
+        svg.append(rect);
+      }
+    }
+    view.append(svg);
+    let nots = 0;
+    for (const sp of c.spots) {
+      if (sp.kind !== "incident" && ++nots > LABELLED_NOT) continue;
+      const tag = el("div", "tag" + (sp.kind === "incident" ? "" : " not"), spotLabel(sp));
+      if (sp.box[0] / w > 0.55) tag.style.right = `${100 - 100 * sp.box[2] / w}%`;   // keep it inside the image
+      else tag.style.left = `${100 * sp.box[0] / w}%`;
+      tag.style.top = `${100 * sp.box[1] / hh}%`;
+      if (sp.box[1] / hh < 0.08) tag.classList.add("inside");
+      if (sp.kind === "incident") tag.style.borderLeftColor = spotColour(sp);
+      view.append(tag);
+    }
+    const tip = el("div", "tip");
+    tip.hidden = true;
+    view.append(tip);
+    view.addEventListener("mousemove", ev => hover(ev, view, tip, c, h));
+    view.addEventListener("mouseleave", () => { tip.hidden = true; });
+    fig.append(view);
+  }
+  const inc = c.spots.filter(sp => sp.kind === "incident").length, not = c.spots.length - inc;
+  const cap = el("figcaption");
+  cap.append(el("div", "cname", human(c.camera)),
+             el("div", "cnote", [plural(inc, "incident spot"), not ? `${not} not an incident` : null,
+                                 `${plural(c.changes, "change")} reported`].filter(Boolean).join(" · ")));
+  if (c.image_kind === "snapshot") cap.append(el("div", "cnote", "image: a question's snapshot (no scene image in this run)"));
+  fig.append(cap);
+  return fig;
+}
+function renderHotspots(s) {
+  const h = s.hotspots;
+  $("hot").hidden = !h;
+  if (!h) return;
+  $("hot-note").textContent = s.looped_cameras.length ? "on looped clips a count is replays of one incident" : "";
+  const byPriority = {};
+  for (const c of h.cameras) for (const sp of c.spots)
+    if (sp.kind === "incident") (byPriority[PRIORITY[sp.owner] || "faint"] ||= new Set()).add(sp.owner);
+  const key = (sw, text) => { const k = el("span", "k"); k.append(sw, document.createTextNode(text)); return k; };
+  const items = ["high", "medium", "low"].filter(p => byPriority[p]).map(p => {
+    const sw = el("span", "sw"); sw.style.borderColor = `var(--${p})`;
+    return key(sw, `${p[0].toUpperCase()}${p.slice(1)}: ${[...byPriority[p]].join(", ")}`);
+  });
+  if (h.cameras.some(c => c.spots.some(sp => sp.kind !== "incident")))
+    items.push(key(el("span", "sw not"), "not an incident (Hafnia or the operator)"));
+  const ramp = el("span", "k");
+  ramp.append(document.createTextNode("1"), el("span", "ramp"), document.createTextNode(`${h.heat_max} changes at one spot, every camera on this scale`));
+  items.push(ramp);
+  $("hot-legend").replaceChildren(...items);
+  $("cams").replaceChildren(...h.cameras.map(c => camCard(c, h)));
+  unstackAll();
+}
+function unstackAll() {            // a label that would cover an earlier one moves down below it
+  for (const view of document.querySelectorAll(".view")) {
+    const placed = [];
+    for (const tag of view.querySelectorAll(".tag")) {
+      tag.style.marginTop = "0px";
+      let r = tag.getBoundingClientRect();
+      for (let i = 0; i < 8 && r.width; i++) {
+        const hit = placed.find(p => r.left < p.right && r.right > p.left && r.top < p.bottom && r.bottom > p.top);
+        if (!hit) break;
+        tag.style.marginTop = `${parseFloat(tag.style.marginTop) + hit.bottom - r.top + 1}px`;
+        r = tag.getBoundingClientRect();
+      }
+      placed.push(r);
+    }
+  }
+}
+let resizing = 0;
+addEventListener("resize", () => { clearTimeout(resizing); resizing = setTimeout(unstackAll, 150); });
+function setToggles() {
+  const spots = $("show-spots").checked, heat = $("show-heat").checked;
+  document.body.classList.toggle("no-spots", !spots);
+  document.body.classList.toggle("no-heat", !heat);
+  document.body.classList.toggle("heat-on", heat);
+  try { localStorage.setItem("clearway.hotspots", JSON.stringify({ spots, heat })); } catch (e) { /* private window */ }
+  unstackAll();
+}
+try {
+  const saved = JSON.parse(localStorage.getItem("clearway.hotspots") || "null");
+  if (saved) { $("show-spots").checked = !!saved.spots; $("show-heat").checked = !!saved.heat; }
+} catch (e) { /* no storage: the defaults */ }
+$("show-spots").addEventListener("change", setToggles);
+$("show-heat").addEventListener("change", setToggles);
+setToggles();
 
 async function load() {
   let live = true;

@@ -19,6 +19,8 @@ run/*/frames/
 # The board's clips and snapshots (footage; clips are rebuilt from the lens spool)
 run/*/clips/
 run/*/snaps/
+# The service's scene images for the hotspots (footage too)
+run/*/cameras/
 
 # Raw and converted video (large; see data\README for where each clip comes from)
 data/*.mp4

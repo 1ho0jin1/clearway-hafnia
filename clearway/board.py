@@ -14,6 +14,7 @@ page in an HTML page view item (F4); a browser on the machine works too.
     /snaps/<id>.jpg the camera's frame at the end of that clip, the spot boxed (written by the service)
     /summary        the shift summary (F8, clearway/summary.html; /api/summary: clearway/summary.py on the same run,
                     recomputed at most every 10 s)
+    /cameras/<camera>.jpg  the camera's scene image, the backdrop of the summary's hotspots (F9; written by the service)
     POST /api/operator  {"incident": "cw-0003", "verdict": "confirmed" | "rejected"}: an operator's verdict on a card
                     (F7), checked against the ledger and appended to <run>/operator.jsonl, which the running service
                     reads (clearway/service.py); the card shows it as pending until the ledger has it. Only from the
@@ -336,6 +337,12 @@ def make_handler(board: Board):
                         self._file(snap, "image/jpeg")
                     else:
                         self._send(HTTPStatus.NOT_FOUND, b"no snapshot", "text/plain")
+                elif m := re.match(r"^/cameras/([A-Za-z0-9_-]+)\.jpg$", path):    # the hotspots' scene images
+                    scene = board.current().run / "cameras" / f"{m.group(1)}.jpg"
+                    if scene.exists():
+                        self._file(scene, "image/jpeg")
+                    else:
+                        self._send(HTTPStatus.NOT_FOUND, b"no scene image", "text/plain")
                 else:
                     self._send(HTTPStatus.NOT_FOUND, b"not found", "text/plain")
             except (BrokenPipeError, ConnectionResetError):

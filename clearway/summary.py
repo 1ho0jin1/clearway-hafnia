@@ -12,7 +12,10 @@ shift.json when it stops. In operator terms, as in the product plan:
 - how long: each incident's occurrences, by the ledger's clearing rule replayed over the ledger's log and the
   detector's closings (changes.jsonl): the ledger logs a clearing only for an open card, so on a looped clip an
   occurrence that cleared while its question waited for the lens would otherwise last the lens queue's minute;
-- where it keeps happening: incidents by occurrences, with the snapshot of the spot;
+- where it keeps happening: incidents by occurrences, with the snapshot of the spot; and per camera the hotspots
+  (F9): the ledger's spots (each card with its occurrences; what was not an incident, with the later changes the
+  verdict memory skipped as looking like it) and the heat of every change the detector reported, card or not, drawn
+  over the camera's scene image (<run>/cameras/, written by the service; older runs: a question's snapshot);
 - what it cost: Hafnia requests (questions on a dry run) per camera and per camera-hour, the changes decided without
   one, and how many cameras a 500-a-day allowance would cover at that rate.
 Cameras run with the looped-clip detector setting are named: their clips restart every 8-17 s, so an occurrence there
@@ -23,34 +26,121 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import math
 import statistics
+import threading
 import time
-from collections import defaultdict
+from collections import Counter, defaultdict
 from dataclasses import asdict
 from pathlib import Path
 
-from clearway.ledger import OWNERS, Ledger
+import cv2
+import numpy as np
+
+from clearway.ledger import OWNERS, Ledger, _overlap
 from tier0.change import ChangeParams
 
 ALLOWANCE = 500                 # Hafnia requests a day on the hackathon machines
 SHORT_RUN_H = 1.0               # below this the start-up burst (every incident asked at once) dominates the rate
 OWNER_ORDER = list(dict.fromkeys(owner for owner, _ in OWNERS.values()))
+WORK_WIDTH = 640                # the service's working frame (clearway/service.py): boxes are in its pixels
+CELL = 16                       # hotspot heat: changes counted per CELL x CELL pixels of the working frame
+_logs: dict[Path, tuple[int, list[dict]]] = {}      # path -> (bytes read, records): the logs only grow
+_logs_lock = threading.Lock()
 
 
 def _read(path: Path) -> list[dict]:
     """A JSONL log without its looks: each SigLIP look (768 numbers, most of every report's and question's line, about
     2 MB of changes.jsonl in 5 min) is cut to [0] before parsing; the summary never compares looks, and the ledger's
-    replay only needs a vector there."""
+    replay only needs a vector there. The board asks every few seconds while a run grows (a 4-hour shift's
+    changes.jsonl is some 100 MB), so only lines added since the last call are read."""
     if not path.exists():
         return []
-    out = []
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if not line.strip():
+    with _logs_lock:
+        done, out = _logs.get(path, (0, []))
+        if path.stat().st_size < done:           # rewritten: start again
+            done, out = 0, []
+        with path.open("rb") as f:
+            f.seek(done)
+            for raw in f:
+                if not raw.endswith(b"\n"):      # a line still being written
+                    break
+                done += len(raw)
+                line = raw.decode("utf-8")
+                if not line.strip():
+                    continue
+                if (i := line.find('"emb": [')) >= 0:
+                    line = line[:i] + '"emb": [0]' + line[line.index("]", i) + 1:]
+                out.append(json.loads(line))
+        _logs[path] = (done, out)
+        return list(out)
+
+
+def _scene(run: Path, camera: str, snaps: list[str]) -> dict:
+    """The image a camera's hotspots are drawn over, and the working frame's size: the service's scene image (the
+    detector's background, <run>/cameras/), else the newest snapshot of a question on the camera (runs before F9; its
+    spot is boxed)."""
+    scene = run / "cameras" / f"{camera}.jpg"
+    if scene.exists():
+        path, url = scene, f"/cameras/{camera}.jpg?run={run.name}&v={scene.stat().st_mtime_ns}"
+        kind = "scene"
+    else:
+        path = next((run / "snaps" / f"{i}.jpg" for i in reversed(snaps) if (run / "snaps" / f"{i}.jpg").exists()), None)
+        if path is None:
+            return {"image": None, "image_kind": None, "size": None}
+        url, kind = f"/snaps/{path.stem}.jpg?run={run.name}", "snapshot"
+    img = cv2.imread(str(path))
+    if img is None:
+        return {"image": None, "image_kind": None, "size": None}
+    h, w = img.shape[:2]
+    return {"image": url, "image_kind": kind, "size": [WORK_WIDTH, round(h * WORK_WIDTH / w)]}
+
+
+def _hotspots(run: Path, cameras: list[str], led: Ledger, events: list[dict], changes: list[dict]) -> dict:
+    """Per camera (F9): the spots, from the ledger's boxes: each card with its occurrences, and what was not an
+    incident (Hafnia's NONE, the operator's rejection) with the later changes the verdict memory skipped because they
+    looked like it, those at overlapping spots grouped; and the heat: every change the detector (or a danger zone)
+    reported, card or not, counted per CELL-pixel cell."""
+    asked_after_all = {(e["camera"], e["change"]) for e in events if e["kind"] == "ask" and e.get("escalated")}
+    like = Counter(e["like"] for e in events if e["kind"] == "skip" and e.get("like")
+                   and (e["camera"], e["change"]) not in asked_after_all)
+    spots: dict[str, list[dict]] = defaultdict(list)
+    snaps: dict[str, list[str]] = defaultdict(list)
+    for i in sorted(led.incidents.values(), key=lambda i: i.t_report):
+        snaps[i.camera].append(i.id)
+        if i.merged_into or i.state not in ("open", "cleared", "rejected", "dismissed"):
             continue
-        if (i := line.find('"emb": [')) >= 0:
-            line = line[:i] + '"emb": [0]' + line[line.index("]", i) + 1:]
-        out.append(json.loads(line))
-    return out
+        kind = {"rejected": "rejected", "dismissed": "harmless"}.get(i.state, "incident")
+        spot = {"kind": kind, "box": list(i.box), "count": i.occurrences + like[i.id], "occurrences": i.occurrences,
+                "skipped": like[i.id], "ids": [i.id], "category": i.category, "owner": i.owner,
+                "operator": i.operator}
+        group = next((g for g in spots[i.camera] if kind != "incident" and g["kind"] == kind
+                      and _overlap(g["box"], spot["box"]) >= led.p.min_overlap), None)
+        if group is None:
+            spots[i.camera].append(spot)
+        else:
+            for k in ("count", "occurrences", "skipped"):
+                group[k] += spot[k]
+            group["ids"].append(i.id)
+    boxes: dict[str, list] = defaultdict(list)
+    for e in changes:
+        if e["kind"] == "report":
+            boxes[e["camera"]].append(e["box"])
+    out, top = [], 1
+    for c in cameras:
+        cam = {"camera": c, **_scene(run, c, snaps[c]), "changes": len(boxes[c]),
+               "spots": sorted(spots[c], key=lambda s: (s["kind"] != "incident", -s["count"]))}
+        if cam["size"]:
+            w, h = cam["size"]
+            heat = np.zeros((math.ceil(h / CELL), math.ceil(w / CELL)), np.int32)
+            for x1, y1, x2, y2 in boxes[c]:          # every cell the box touches
+                heat[max(0, int(y1)) // CELL:(max(int(y1), int(y2) - 1) // CELL) + 1,
+                     max(0, int(x1)) // CELL:(max(int(x1), int(x2) - 1) // CELL) + 1] += 1
+            cam.update(rows=heat.shape[0], cols=heat.shape[1], heat=heat.ravel().tolist())
+            top = max(top, int(heat.max()))
+        out.append(cam)
+    out.sort(key=lambda c: (-sum(s["count"] for s in c["spots"] if s["kind"] == "incident"), -c["changes"]))
+    return {"cell": CELL, "heat_max": top, "cameras": out}
 
 
 def _med(xs: list[float]) -> float | None:
@@ -110,6 +200,9 @@ def _occurrences(timeline: list[tuple], began: dict, t_end: float) -> tuple[dict
 
 def summarise(run: Path, now: float | None = None) -> dict:
     """The run's summary; now (Unix seconds) ends a live run's open occurrences (default: the run's end, else now)."""
+    with _logs_lock:                              # the board moved on to another run: forget the last one's logs
+        for p in [p for p in _logs if p.parent != run]:
+            del _logs[p]
     svc, events, changes = _read(run / "service.jsonl"), _read(run / "ledger.jsonl"), _read(run / "changes.jsonl")
     start = next((e for e in svc if e["kind"] == "start"), None)
     end = next((e for e in svc if e["kind"] == "end"), None)
@@ -227,6 +320,7 @@ def summarise(run: Path, now: float | None = None) -> dict:
         "recurring": [{k: x[k] for k in ("id", "camera", "category", "owner", "occurrences", "snap")}
                       for x in sorted(incidents, key=lambda x: -x["occurrences"]) if x["occurrences"] > 1][:5],
         "list": incidents,
+        "hotspots": _hotspots(run, cameras, led, events, changes),
         "cost": {
             "kind": "questions" if dry else "Hafnia requests", "dry": dry,
             "by_camera": requests, "total": sum(requests.values()), "per_camera_hour": round(per_cam_h, 1),
