@@ -7,8 +7,8 @@ shift.json when it stops. In operator terms, as in the product plan:
 - incidents by owner and by category (the event counts of Hafnia's trained MonitoringSummary, from the ledger: no
   request), and the false cards: those an operator rejected (F7);
 - how fast: from the spot changing to its card (the first time it waits for the lens and Hafnia; a repeat is
-  recognised at once) and to the alarm in XProtect; from the alarm to the spot clearing; from clearing to the alarm
-  closing by itself;
+  recognised at once), to the alarm in XProtect and to the owner told (clearway/notify.py); from the alarm to the spot
+  clearing; from clearing to the alarm closing by itself;
 - how long: each incident's occurrences, by the ledger's clearing rule replayed over the ledger's log and the
   detector's closings (changes.jsonl): the ledger logs a clearing only for an open card, so on a looped clip an
   occurrence that cleared while its question waited for the lens would otherwise last the lens queue's minute;
@@ -21,6 +21,7 @@ is a replay of one incident, and the times are seconds (the honesty rule in docs
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import statistics
 import time
@@ -170,6 +171,10 @@ def summarise(run: Path, now: float | None = None) -> dict:
                    if e["kind"] == "xprotect" and e.get("action") == "raise" and "queued_s" in e
                    and "trigger" in e.get("timing", {})]
     occurrence_s = [b - a for x in incidents for a, b in spans.get(x["id"], []) if not last_open(x["id"], (a, b))]
+    # owners told (clearway/notify.py): from the spot changing to the owner's webhook answering
+    told = [e for e in svc if e["kind"] == "notify"]
+    to_owner = [e["wall"] - dt.datetime.fromisoformat(e["changed_at"]).timestamp() for e in told
+                if e.get("ok") and e.get("event") == "opened" and e.get("changed_at")]
 
     # cost
     kinds: dict[str, int] = defaultdict(int)
@@ -211,6 +216,7 @@ def summarise(run: Path, now: float | None = None) -> dict:
             "change_to_card_first": {"median": _med(first), "max": max(first, default=None), "n": len(first)},
             "change_to_card_repeat": {"median": _med(reopen_s), "n": len(reopen_s)},
             "card_to_xprotect_alarm": {"median": _med(to_xprotect), "n": len(to_xprotect)},
+            "change_to_owner_told": {"median": _med(to_owner), "n": len(to_owner)},
             "alarm_to_clear": {"median": _med(alarm_to_clear), "n": len(alarm_to_clear),
                                "cleared_before_alarm": cleared_first},
             "clear_to_alarm_closed": {"median": _med(closed_after), "n": len(closed_after)},
@@ -230,6 +236,9 @@ def summarise(run: Path, now: float | None = None) -> dict:
             "recurrences": kinds["recur"], "pieces": kinds["fragment"], "skipped": kinds["skip"] - escalated,
             "escalated": escalated,
         },
+        "notifications": {"sent": sum(bool(e.get("ok")) for e in told), "failed": sum(not e.get("ok") for e in told),
+                          "by_owner": {o: sum(e["owner"] == o and bool(e.get("ok")) for e in told)
+                                       for o in OWNER_ORDER if any(e["owner"] == o for e in told)}},
         "operator": {"confirmed": sum(e["verdict"] == "confirmed" for e in verdicts),
                      "rejected": sum(e["verdict"] == "rejected" for e in verdicts),
                      "skipped_like_rejected": sum(e["kind"] == "skip" and e.get("by") == "operator" for e in events),

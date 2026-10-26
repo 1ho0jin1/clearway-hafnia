@@ -1,0 +1,11 @@
+{
+  "_doc": "Owner notifications (clearway/notify.py): each owner's webhook targets. Here every owner goes to the stand-in inbox on this machine (scripts/owner_inbox.py, http://127.0.0.1:8770/). A real target names the environment variable that holds its URL instead of the URL: \"url_env\": \"CLEARWAY_HOOK_RAIL_CONTROL\" (webhook URLs usually carry a credential, which stays out of this file), and optionally \"secret_env\" for the signing key. \"snapshot\": true sends the JPEG of the spot along: camera footage leaves the machine with it.",
+  "public_base_url": "http://127.0.0.1:8765",
+  "owners": {
+    "Rail control": [{"name": "inbox-rail-control", "url": "http://127.0.0.1:8770/hook/rail-control", "snapshot": true}],
+    "Traffic operations": [{"name": "inbox-traffic-operations", "url": "http://127.0.0.1:8770/hook/traffic-operations", "snapshot": true}],
+    "Street services": [{"name": "inbox-street-services", "url": "http://127.0.0.1:8770/hook/street-services", "snapshot": true}],
+    "Asset owner": [{"name": "inbox-asset-owner", "url": "http://127.0.0.1:8770/hook/asset-owner", "snapshot": true}],
+    "Security": [{"name": "inbox-security", "url": "http://127.0.0.1:8770/hook/security", "snapshot": true}]
+  }
+}

@@ -2,7 +2,7 @@ r"""run_clearway.py - the Clearway service (clearway/service.py) on live cameras
 
     .venv\Scripts\python.exe scripts\run_clearway.py [--cameras ...] [--minutes 5] [--answers standin|hafnia]
                                                    [--max-requests 10] [--stop-at 450] [--no-lens] [--out DIR]
-                                                   [--alarms [--close-alarms-at-end] [--close-after S]]
+                                                   [--alarms [--close-alarms-at-end] [--close-after S]] [--notify [FILE]]
 
 --answers standin (default): a dry run, no Hafnia requests. The offline replay's stand-in (scripts/eval_ledger.py)
 answers LATENCY_S after the lens clip has played: the camera's category when the clip (2 s before the change started
@@ -16,6 +16,8 @@ snapshot, bookmarks on the camera and on lens_1; closed once the incident stayed
 named "[dry run] ...". --close-alarms-at-end (test harness) closes the alarms still open when the run ends;
 --close-after S (test harness) shortens the ledger's close_after_s (60 s), so that loops close and reopen alarms.
 --zones (default config\zones.json): danger zones for person triggers (tier0/zones.py).
+--notify [config\owners.json]: tell each incident's owner by webhook (clearway/notify.py; the stand-in inbox:
+scripts\start_inbox.ps1); a dry run's messages say so.
 Default cameras: the organizers' six incident cameras; --real cameras use the real-camera detector setting. Writes
 run\clearway-<dry|live>-<UTC>\ (ledger.jsonl, service.jsonl, incidents.json). Needs the lens (scripts\start_lens.ps1)
 unless --no-lens.
@@ -148,6 +150,8 @@ def main() -> int:
     ap.add_argument("--close-after", type=float, help="test harness: the ledger's close_after_s")
     ap.add_argument("--zones", type=Path, default=REPO / "config" / "zones.json",
                     help="danger zones per camera (person triggers); a missing file means none")
+    ap.add_argument("--notify", type=Path, nargs="?", const=REPO / "config" / "owners.json",
+                    help="owners' webhook targets (default config/owners.json): tell each incident's owner")
     args = ap.parse_args()
     mode = "dry" if args.answers == "standin" else "live"
     out = args.out or REPO / "run" / f"clearway-{mode}-{dt.datetime.now(dt.timezone.utc):%Y%m%dT%H%M%SZ}"
@@ -190,6 +194,13 @@ def main() -> int:
         from clearway.alarms import XProtectAlarms
         service.alarms = XProtectAlarms(known, known.get("lens_1") if args.lens else None, service.log,
                                         label="[dry run] " if mode == "dry" else "")
+    if args.notify:
+        from clearway.notify import OwnerNotifier, load_owners
+        owners, base_url, problems = load_owners(args.notify)
+        for p in problems:
+            print(f"notify: {p}", flush=True)
+        service.notifier = OwnerNotifier(owners, service.log, out.name, base_url, dry_run=mode == "dry")
+        print(f"notify: {sum(len(t) for t in owners.values())} targets for {sorted(owners)}", flush=True)
     service.run(args.minutes)
     print(f"wrote {out}", flush=True)
     return 0

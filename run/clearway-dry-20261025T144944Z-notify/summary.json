@@ -1,0 +1,223 @@
+{
+  "run": "clearway-dry-20261025T144944Z-notify",
+  "minutes": 5.0,
+  "cameras": {
+    "vehicle_breakdown_traffic_queue": {
+      "fps": 9.8,
+      "dropped": 0,
+      "questions": 1,
+      "startup_questions": 1,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "STALLED_VEHICLE": 1
+      },
+      "cards": 1,
+      "occurrences_on_cards": 20,
+      "dismissed": 0,
+      "merged": 0,
+      "to_card_s_asked_median": 62.3,
+      "to_card_s_recurrence_median": 2.3,
+      "lens_wait_s_median": 49.4,
+      "hafnia_s_median": null,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 2,
+        "cards": 1
+      }
+    },
+    "bin_pushed_over_onto_sidewalk": {
+      "fps": 9.8,
+      "dropped": 0,
+      "questions": 7,
+      "startup_questions": 4,
+      "escalated": 2,
+      "unanswered": [],
+      "answers": {
+        "OBSTRUCTION": 7
+      },
+      "cards": 1,
+      "occurrences_on_cards": 19,
+      "dismissed": 0,
+      "merged": 6,
+      "to_card_s_asked_median": 31.9,
+      "to_card_s_recurrence_median": 1.7,
+      "lens_wait_s_median": 27.8,
+      "hafnia_s_median": null,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 3,
+        "cards": 1
+      }
+    },
+    "escooter_left_across_sidewalk": {
+      "fps": 9.8,
+      "dropped": 0,
+      "questions": 2,
+      "startup_questions": 2,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "OBSTRUCTION": 2
+      },
+      "cards": 1,
+      "occurrences_on_cards": 15,
+      "dismissed": 0,
+      "merged": 1,
+      "to_card_s_asked_median": 92.7,
+      "to_card_s_recurrence_median": 2.3,
+      "lens_wait_s_median": 94.6,
+      "hafnia_s_median": null,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 2,
+        "cards": 1
+      }
+    },
+    "school_gate_break_in_night": {
+      "fps": 9.8,
+      "dropped": 0,
+      "questions": 5,
+      "startup_questions": 4,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "TAMPERING": 5
+      },
+      "cards": 1,
+      "occurrences_on_cards": 63,
+      "dismissed": 0,
+      "merged": 4,
+      "to_card_s_asked_median": 82.9,
+      "to_card_s_recurrence_median": 1.6,
+      "lens_wait_s_median": 118.3,
+      "hafnia_s_median": null,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 2,
+        "cards": 2
+      }
+    },
+    "person_on_railway_tracks": {
+      "fps": 9.8,
+      "dropped": 0,
+      "questions": 2,
+      "startup_questions": 2,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "PERSON_ON_TRACKS": 2
+      },
+      "cards": 1,
+      "occurrences_on_cards": 21,
+      "dismissed": 0,
+      "merged": 1,
+      "to_card_s_asked_median": 55.7,
+      "to_card_s_recurrence_median": 1.0,
+      "lens_wait_s_median": 66.0,
+      "hafnia_s_median": null,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 1,
+        "cards": 1
+      }
+    },
+    "graffiti_on_standing_train": {
+      "fps": 9.8,
+      "dropped": 0,
+      "questions": 1,
+      "startup_questions": 1,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "DAMAGE": 1
+      },
+      "cards": 1,
+      "occurrences_on_cards": 20,
+      "dismissed": 0,
+      "merged": 0,
+      "to_card_s_asked_median": 22.4,
+      "to_card_s_recurrence_median": 1.4,
+      "lens_wait_s_median": 9.5,
+      "hafnia_s_median": null,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 1,
+        "cards": 1
+      }
+    }
+  },
+  "totals": {
+    "questions": 18,
+    "startup_questions": 14,
+    "cards": 6
+  },
+  "xprotect": {
+    "raise": 6,
+    "reopen": 0,
+    "close": 6,
+    "confirm": 1,
+    "bookmarks": 12,
+    "errors": [],
+    "checked": [
+      {
+        "alarm": "0a6c8c5d-09d7-4d16-a54e-7232f1953d88",
+        "name": "[dry run] Clearway: DAMAGE, Asset owner",
+        "priority": "Low",
+        "state": "Closed",
+        "expected": "Closed",
+        "ok": true
+      },
+      {
+        "alarm": "5d1494ea-b966-42c9-90c7-3602fb27f1de",
+        "name": "[dry run] Clearway: OBSTRUCTION, Street services",
+        "priority": "Medium",
+        "state": "Closed",
+        "expected": "Closed",
+        "ok": true
+      },
+      {
+        "alarm": "3cbb8d38-83ad-4de6-96d2-6359a238f326",
+        "name": "[dry run] Clearway: PERSON_ON_TRACKS, Rail control",
+        "priority": "High",
+        "state": "Closed",
+        "expected": "Closed",
+        "ok": true
+      },
+      {
+        "alarm": "b70e48ed-a4ec-43dc-b7d9-f582ea7d57ec",
+        "name": "[dry run] Clearway: STALLED_VEHICLE, Traffic operations",
+        "priority": "High",
+        "state": "Closed",
+        "expected": "Closed",
+        "ok": true
+      },
+      {
+        "alarm": "dccebb4e-0419-4c09-ad18-b6ed017782be",
+        "name": "[dry run] Clearway: TAMPERING, Security",
+        "priority": "Low",
+        "state": "Closed",
+        "expected": "Closed",
+        "ok": true
+      },
+      {
+        "alarm": "3b8e19d5-0acc-46d3-aaeb-072950da0eb5",
+        "name": "[dry run] Clearway: OBSTRUCTION, Street services",
+        "priority": "Medium",
+        "state": "Closed",
+        "expected": "Closed",
+        "ok": true
+      }
+    ]
+  },
+  "operator": {
+    "confirmed": 1,
+    "rejected": 1,
+    "refused": 0,
+    "applied_s_median": 0.3,
+    "skipped_like_rejected": 34,
+    "still_skipped_at_end": 32,
+    "recurrences_on_confirmed": 4,
+    "hafnia_rejections_overruled": 0
+  }
+}

@@ -1,0 +1,308 @@
+{
+  "run": "clearway-dry-20261025T144944Z-notify",
+  "mode": "dry",
+  "started": 1792939817.426,
+  "ended": 1792940117.917,
+  "until": 1792940117.917,
+  "hours": 0.083,
+  "cameras": [
+    "vehicle_breakdown_traffic_queue",
+    "bin_pushed_over_onto_sidewalk",
+    "escooter_left_across_sidewalk",
+    "school_gate_break_in_night",
+    "person_on_railway_tracks",
+    "graffiti_on_standing_train"
+  ],
+  "looped_cameras": [
+    "vehicle_breakdown_traffic_queue",
+    "bin_pushed_over_onto_sidewalk",
+    "escooter_left_across_sidewalk",
+    "school_gate_break_in_night",
+    "person_on_railway_tracks",
+    "graffiti_on_standing_train"
+  ],
+  "incidents": 5,
+  "false_cards": 1,
+  "occurrences": 139,
+  "open_at_end": 4,
+  "by_owner": [
+    {
+      "owner": "Rail control",
+      "incidents": 1,
+      "occurrences": 21,
+      "open_at_end": 1,
+      "to_card_s_median": 55.7,
+      "open_s_total": 212.2,
+      "longest_s": 114.2
+    },
+    {
+      "owner": "Traffic operations",
+      "incidents": 1,
+      "occurrences": 20,
+      "open_at_end": 0,
+      "to_card_s_median": 62.3,
+      "open_s_total": 193.3,
+      "longest_s": 12.8
+    },
+    {
+      "owner": "Street services",
+      "incidents": 1,
+      "occurrences": 15,
+      "open_at_end": 1,
+      "to_card_s_median": 92.7,
+      "open_s_total": 262.9,
+      "longest_s": 140.5
+    },
+    {
+      "owner": "Asset owner",
+      "incidents": 1,
+      "occurrences": 20,
+      "open_at_end": 1,
+      "to_card_s_median": 22.4,
+      "open_s_total": 147.9,
+      "longest_s": 7.8
+    },
+    {
+      "owner": "Security",
+      "incidents": 1,
+      "occurrences": 63,
+      "open_at_end": 1,
+      "to_card_s_median": 82.9,
+      "open_s_total": 226.8,
+      "longest_s": 13.4
+    }
+  ],
+  "event_counts": {
+    "DAMAGE": 1,
+    "OBSTRUCTION": 1,
+    "PERSON_ON_TRACKS": 1,
+    "STALLED_VEHICLE": 1,
+    "TAMPERING": 1
+  },
+  "times_s": {
+    "change_to_card_first": {
+      "median": 62.3,
+      "max": 92.7,
+      "n": 5
+    },
+    "change_to_card_repeat": {
+      "median": 1.4,
+      "n": 65
+    },
+    "card_to_xprotect_alarm": {
+      "median": 2.5,
+      "n": 6
+    },
+    "change_to_owner_told": {
+      "median": 59.9,
+      "n": 6
+    },
+    "alarm_to_clear": {
+      "median": 47.8,
+      "n": 5,
+      "cleared_before_alarm": 1
+    },
+    "clear_to_alarm_closed": {
+      "median": null,
+      "n": 0
+    },
+    "occurrence": {
+      "median": 11.1,
+      "n": 66
+    }
+  },
+  "longest_open": [
+    {
+      "id": "cw-0008",
+      "camera": "escooter_left_across_sidewalk",
+      "category": "OBSTRUCTION",
+      "owner": "Street services",
+      "longest_s": 140.5,
+      "open_at_end": true
+    },
+    {
+      "id": "cw-0005",
+      "camera": "person_on_railway_tracks",
+      "category": "PERSON_ON_TRACKS",
+      "owner": "Rail control",
+      "longest_s": 114.2,
+      "open_at_end": true
+    },
+    {
+      "id": "cw-0009",
+      "camera": "school_gate_break_in_night",
+      "category": "TAMPERING",
+      "owner": "Security",
+      "longest_s": 13.4,
+      "open_at_end": true
+    }
+  ],
+  "recurring": [
+    {
+      "id": "cw-0009",
+      "camera": "school_gate_break_in_night",
+      "category": "TAMPERING",
+      "owner": "Security",
+      "occurrences": 63,
+      "snap": "/snaps/cw-0009.jpg?run=clearway-dry-20261025T144944Z-notify"
+    },
+    {
+      "id": "cw-0005",
+      "camera": "person_on_railway_tracks",
+      "category": "PERSON_ON_TRACKS",
+      "owner": "Rail control",
+      "occurrences": 21,
+      "snap": "/snaps/cw-0005.jpg?run=clearway-dry-20261025T144944Z-notify"
+    },
+    {
+      "id": "cw-0001",
+      "camera": "graffiti_on_standing_train",
+      "category": "DAMAGE",
+      "owner": "Asset owner",
+      "occurrences": 20,
+      "snap": "/snaps/cw-0001.jpg?run=clearway-dry-20261025T144944Z-notify"
+    },
+    {
+      "id": "cw-0006",
+      "camera": "vehicle_breakdown_traffic_queue",
+      "category": "STALLED_VEHICLE",
+      "owner": "Traffic operations",
+      "occurrences": 20,
+      "snap": "/snaps/cw-0006.jpg?run=clearway-dry-20261025T144944Z-notify"
+    },
+    {
+      "id": "cw-0008",
+      "camera": "escooter_left_across_sidewalk",
+      "category": "OBSTRUCTION",
+      "owner": "Street services",
+      "occurrences": 15,
+      "snap": "/snaps/cw-0008.jpg?run=clearway-dry-20261025T144944Z-notify"
+    }
+  ],
+  "list": [
+    {
+      "id": "cw-0001",
+      "camera": "graffiti_on_standing_train",
+      "category": "DAMAGE",
+      "owner": "Asset owner",
+      "priority": "Low",
+      "state": "open",
+      "operator": "",
+      "first_seen": 1792939830.44,
+      "occurrences": 20,
+      "to_card_s": 22.4,
+      "open_s": 147.9,
+      "longest_s": 7.8,
+      "open_at_end": true,
+      "summary": "",
+      "snap": "/snaps/cw-0001.jpg?run=clearway-dry-20261025T144944Z-notify"
+    },
+    {
+      "id": "cw-0005",
+      "camera": "person_on_railway_tracks",
+      "category": "PERSON_ON_TRACKS",
+      "owner": "Rail control",
+      "priority": "High",
+      "state": "open",
+      "operator": "",
+      "first_seen": 1792939840.623,
+      "occurrences": 21,
+      "to_card_s": 55.7,
+      "open_s": 212.2,
+      "longest_s": 114.2,
+      "open_at_end": true,
+      "summary": "",
+      "snap": "/snaps/cw-0005.jpg?run=clearway-dry-20261025T144944Z-notify"
+    },
+    {
+      "id": "cw-0006",
+      "camera": "vehicle_breakdown_traffic_queue",
+      "category": "STALLED_VEHICLE",
+      "owner": "Traffic operations",
+      "priority": "High",
+      "state": "cleared",
+      "operator": "",
+      "first_seen": 1792939844.365,
+      "occurrences": 20,
+      "to_card_s": 62.3,
+      "open_s": 193.3,
+      "longest_s": 12.8,
+      "open_at_end": false,
+      "summary": "",
+      "snap": "/snaps/cw-0006.jpg?run=clearway-dry-20261025T144944Z-notify"
+    },
+    {
+      "id": "cw-0008",
+      "camera": "escooter_left_across_sidewalk",
+      "category": "OBSTRUCTION",
+      "owner": "Street services",
+      "priority": "Medium",
+      "state": "open",
+      "operator": "confirmed",
+      "first_seen": 1792939844.796,
+      "occurrences": 15,
+      "to_card_s": 92.7,
+      "open_s": 262.9,
+      "longest_s": 140.5,
+      "open_at_end": true,
+      "summary": "",
+      "snap": "/snaps/cw-0008.jpg?run=clearway-dry-20261025T144944Z-notify"
+    },
+    {
+      "id": "cw-0009",
+      "camera": "school_gate_break_in_night",
+      "category": "TAMPERING",
+      "owner": "Security",
+      "priority": "Low",
+      "state": "open",
+      "operator": "",
+      "first_seen": 1792939844.987,
+      "occurrences": 63,
+      "to_card_s": 82.9,
+      "open_s": 226.8,
+      "longest_s": 13.4,
+      "open_at_end": true,
+      "summary": "",
+      "snap": "/snaps/cw-0009.jpg?run=clearway-dry-20261025T144944Z-notify"
+    }
+  ],
+  "cost": {
+    "kind": "questions",
+    "dry": true,
+    "by_camera": {
+      "vehicle_breakdown_traffic_queue": 1,
+      "bin_pushed_over_onto_sidewalk": 7,
+      "escooter_left_across_sidewalk": 2,
+      "school_gate_break_in_night": 5,
+      "person_on_railway_tracks": 2,
+      "graffiti_on_standing_train": 1
+    },
+    "total": 18,
+    "per_camera_hour": 35.9,
+    "cameras_per_allowance": 0.6,
+    "short_run": true,
+    "changes": 266,
+    "without_a_question": 250,
+    "recurrences": 140,
+    "pieces": 76,
+    "skipped": 32,
+    "escalated": 2
+  },
+  "notifications": {
+    "sent": 8,
+    "failed": 0,
+    "by_owner": {
+      "Rail control": 1,
+      "Traffic operations": 1,
+      "Street services": 4,
+      "Asset owner": 1,
+      "Security": 1
+    }
+  },
+  "operator": {
+    "confirmed": 1,
+    "rejected": 1,
+    "skipped_like_rejected": 34,
+    "false_cards_per_camera_hour": 2.0
+  }
+}

@@ -151,6 +151,8 @@ diagram (Mermaid): `docs/PLAN-C.md`, "Pipeline".
 | `tier0/change.py`, `tier0/memory.py` | Plan C tier 0: the change detector (`ChangeParams.loops()` / `.real()`) and the SigLIP 2 verdict memory (`Embedder`, `VerdictMemory`) |
 | `clearway/board.py`, `clearway/board.html` | The owner board (F4): a standard-library web server on 127.0.0.1:8765 following a run folder (`--latest` by default): cards by owner with the lens clip (MP4 made from the spool on first view), snapshot, summary, time open, recurrences, alarm state, Confirm / Reject (F7: `POST /api/operator`, board's own page only, appended to the run's `operator.jsonl`); JSON at `/api/board` |
 | `clearway/summary.py`, `clearway/summary.html` | The shift summary (F8), from a run's logs (no requests): incidents by owner and category, false cards, change to card (first and repeat), card to XProtect alarm, alarm to clear, clear to alarm closed, time open and longest occurrence (the ledger's clearing rule replayed over its log and the detector's closings), recurring spots with snapshots, cost per camera-hour and cameras per 500-a-day allowance, operator verdicts; `shift.json` (written by the service at the end, or `python -m clearway.summary <run>`) and the board's `/summary` page |
+| `clearway/notify.py`, `config/owners.json` | Owner notifications: each ledger effect (opened, reopened, cleared, confirmed, rejected) as a JSON webhook (`clearway.notification/1`) to the incident's owner; targets per owner, real URLs and signing keys from environment variables (`url_env`, `secret_env`: HMAC-SHA256 in `X-Clearway-Signature`), a thread per target, retries; logged by target name, never URL; `run_clearway.py --notify` |
+| `scripts/owner_inbox.py`, `scripts/owner_inbox.html`, `scripts/start_inbox.ps1` | A stand-in for the owners' channels on 127.0.0.1:8770: receives the notifications (checks signatures with `CLEARWAY_HOOK_SECRET` set) and shows a feed per owner; keeps them in `run/inbox/` (git-ignored) |
 | `scripts/start_board.ps1`, `scripts/open_board.ps1` | Start the board detached (logs in `run/board/`); open it as an Edge app window beside Smart Client |
 | `scripts/start_smartclient.ps1` | Start Smart Client not elevated (Medium integrity) from the built-in Administrator; did not make HTML page items use Edge here |
 | `tier0/zones.py`, `config/zones.json` | Person triggers (F5): a person's feet inside a camera's danger-zone polygon for 1 s, reported to the ledger like a change; the polygons, by camera name, in image shares (the only per-camera setting) |
@@ -340,6 +342,15 @@ three runs fall at the end of a replayed occurrence (172) or inside one where tw
 whole run. On the loops a median occurrence lasts 7.6-11.8 s and a repeat is carded in 1.4 s; the first card takes
 38-62 s (median), the lens queue. The page names looped cameras and short runs, whose per-hour rates are a start-up
 burst's. The looks (768 numbers a line) are cut out before parsing: 0.03 s instead of 0.12 s for 5 min of logs.
+
+**Owner notifications (F12)** (`run/clearway-dry-20261025T144944Z-notify`, `...145829Z-notify-cycle`, no requests): the
+ledger's effects go to the incident's owner as JSON webhooks (`clearway/notify.py`) beside the XProtect alarms; the
+stand-in owner inbox (`scripts/owner_inbox.py`, 127.0.0.1:8770) shows a feed per owner. Live: 8 messages (6 opened, a
+confirmed, a rejected), all delivered within 0.6 s of the effect; owners told 59.9 s after the spot changed (median),
+within a second of the card. With `--close-after 5` the looped bin sent cleared and reopened every 15 s, which is what
+the 60 s close prevents. Real webhook URLs and signing keys come from environment variables named in
+`config/owners.json`; deliveries are logged by target name, never URL. One-way while the board is reachable only on the
+machine; Teams and Slack formats are TODO.
 
 **Crash category (gate G3)** (`run/lens-test_11-20261024T110155Z`, 3 requests): with COLLISION in the JSON prompt the
 cropped view of test_11's crash says COLLISION ("loses control … veers sharply"), the full frame STALLED_VEHICLE; the

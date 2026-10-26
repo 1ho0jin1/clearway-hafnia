@@ -20,7 +20,8 @@ per camera):
 4. the answer goes back to the ledger. Closed changes go to the ledger too: an incident clears when its largest change
    closes.
 The ledger's effects (raise, reopen or close an incident's alarm) are carried out in XProtect by clearway/alarms.py
-(XProtectAlarms, F3: one alarm per incident, with a snapshot and bookmarks) when one is given, and logged. Operators'
+(XProtectAlarms, F3: one alarm per incident, with a snapshot and bookmarks) when one is given, and logged; each
+incident's owner is told by webhook (clearway/notify.py, OwnerNotifier) when one is given. Operators'
 verdicts on the cards (F7: confirm or reject on the board, clearway/board.py) arrive in <out>/operator.jsonl, which
 the board appends to and the service reads every second (Ledger.on_operator).
 
@@ -154,14 +155,15 @@ class Service:
     def __init__(self, cameras: dict[str, ChangeParams], answer: Callable[[Question], dict], out: Path,
                  lens: bool = True, params: Params | None = None, workers: int = 32,
                  on_frame: Callable[[str, float, np.ndarray], bool | None] | None = None, echo=print,
-                 alarms=None, close_alarms_at_end: bool = False, zones: dict[str, list[Zone]] | None = None):
+                 alarms=None, close_alarms_at_end: bool = False, zones: dict[str, list[Zone]] | None = None,
+                 notifier=None):
         """cameras: name -> change detector setting. answer: Question -> {"category": ... or None, ...}, called on a
         worker thread after the clip has played. workers: questions in flight; each captures its clip as soon as its
         window has passed, so none may wait for a free worker (the frames are kept only KEEP_S). on_frame (camera,
         frame time, 640-px frame), for test harnesses: returning False keeps that frame from the detector. alarms: an
         XProtectAlarms (clearway/alarms.py) to carry out the ledger's effects; close_alarms_at_end (test harness):
         close the alarms still open when the run ends. zones: {camera name: [Zone, ...]}, the danger zones
-        (tier0/zones.load_zones)."""
+        (tier0/zones.load_zones). notifier: an OwnerNotifier (clearway/notify.py) to tell each incident's owner."""
         from ultralytics import YOLO
         self.cameras, self.answer, self.out, self.lens = cameras, answer, out, lens
         self.on_frame, self.echo = on_frame, echo
@@ -181,7 +183,7 @@ class Service:
         self.yolo = YOLO(str(REPO / "models" / "yolo11m.pt"))
         self.pool = ThreadPoolExecutor(max_workers=workers)
         self.questions: list[Future] = []
-        self.alarms, self.close_alarms_at_end = alarms, close_alarms_at_end
+        self.alarms, self.close_alarms_at_end, self.notifier = alarms, close_alarms_at_end, notifier
         self.evidence: dict[str, dict] = {}             # incident -> snapshot of the clip Hafnia judged, lens span
         self.now = 0.0                                  # the latest frame time, any camera
         self.closed = False                             # no more frames are coming
@@ -315,8 +317,10 @@ class Service:
                 self._effect(e)
 
     def _effect(self, e: dict) -> None:
+        """One of the ledger's effects, to each output: XProtect alarms (control room), owner notifications."""
         self.log("effect", **e)
-        if self.alarms is None:
+        outputs = [o for o in (self.alarms, self.notifier) if o is not None]
+        if not outputs:
             return
         iid = e.get("alarm") or e.get("close_alarm") or e.get("confirm_alarm")
         with self.lock:
@@ -324,7 +328,8 @@ class Service:
         ev = dict(self.evidence.get(iid, {}))
         if "alarm" in e and (e.get("recurrence") or "jpeg" not in ev):
             ev.update(self._snapshot(inc["camera"], inc["box"]))     # the spot as it is now
-        self.alarms.submit(e, inc, ev)
+        for o in outputs:
+            o.submit(e, inc, ev)
 
     def _snapshot(self, camera: str, box, frame: np.ndarray | None = None) -> dict:
         """A JPEG of the camera's frame (the latest one if none is given) with the spot boxed."""
@@ -462,6 +467,8 @@ class Service:
                 if self.close_alarms_at_end:
                     self.alarms.close_all("Test run ended: closed by the test harness, not because the spot cleared.")
                 self.alarms.drain()
+            if self.notifier is not None:
+                self.notifier.drain()
             incidents = self.ledger.snapshot()
             (self.out / "incidents.json").write_text(json.dumps(incidents, indent=2, default=_json), encoding="utf-8")
             self.log("end", ledger=dict(self.ledger.stats), cameras=self.stats,

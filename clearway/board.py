@@ -79,6 +79,7 @@ class RunFollower:
         self.not_asked: set[str] = set()           # stopped by the run cap, failed or errored: no answer is coming
         self.requested: dict[str, str] = {}        # incident -> the verdict last sent from the board
         self.refused: dict[str, str] = {}          # incident -> why the service did not apply it
+        self.told: dict[str, dict[str, bool]] = {}  # incident -> {owner's target: its latest news delivered}
         self.requests = 0
         self.standin = False
         self.started = self.ended = None
@@ -97,6 +98,8 @@ class RunFollower:
                 self.last_wall = e["wall"]
                 if k == "operator" and not e.get("applied") and e.get("incident"):
                     self.refused[e["incident"]] = e.get("reason") or "not applied"
+                if k == "notify" and e.get("event") in ("opened", "reopened"):
+                    self.told.setdefault(e["incident"], {})[e["target"]] = bool(e.get("ok"))
                 if k == "start":
                     self.started = e["wall"]
                 elif k == "end":
@@ -169,6 +172,7 @@ class RunFollower:
                 "state": i.state, "operator": i.operator, "alarm_open": i.alarm_open,
                 "verdict_pending": asked if asked and asked != i.operator and i.id not in self.refused else "",
                 "verdict_refused": self.refused.get(i.id, ""),
+                "told": "" if i.id not in self.told else "sent" if all(self.told[i.id].values()) else "failed",
                 "t_change": i.t_change, "t_occurrence": i.t_occurrence or i.t_change, "t_cleared": i.t_cleared,
                 "t_answer": i.t_answer, "occurrences": i.occurrences,
                 "summary": a.get("summary") or "", "object": a.get("object") or "", "standin": bool(a.get("standin")),

@@ -40,3 +40,6 @@ run/board/
 
 # Candidate footage downloaded for evaluation (licences per source in docs/PLAN-near-miss.md)
 data/footage/
+
+# Owner inbox (scripts/owner_inbox.py): received notifications carry snapshots (camera footage)
+run/inbox/

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Owner inbox</title>
+<style>
+  :root {
+    --bg: #0f1216; --panel: #161b22; --msg: #1d232c; --line: #2a323d;
+    --text: #e7eaef; --muted: #939ca8; --faint: #5e6773;
+    --high: #ef4d55; --medium: #f0a33b; --low: #4b9ef3; --ok: #39c98a;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-size: 14px; }
+  body { display: flex; flex-direction: column; }
+  .top { padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--panel); display: flex; gap: 16px;
+         align-items: baseline; flex-wrap: wrap; }
+  .top .name { font-weight: 650; font-size: 17px; }
+  .top .sub { color: var(--muted); font-size: 12px; }
+  .top .count { margin-left: auto; color: var(--muted); font-size: 12px; }
+  .channels { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(5, minmax(240px, 1fr)); gap: 12px;
+              padding: 12px 16px 16px; overflow-x: auto; }
+  .ch { display: flex; flex-direction: column; min-height: 0; background: var(--panel); border: 1px solid var(--line);
+        border-radius: 10px; }
+  .ch-head { padding: 10px 12px; border-bottom: 1px solid var(--line); display: flex; gap: 8px; align-items: center; }
+  .ch-head .bar { width: 4px; height: 18px; border-radius: 2px; }
+  .ch-head .hash { font-weight: 600; }
+  .ch-head .n { margin-left: auto; color: var(--muted); font-size: 12px; }
+  .feed { flex: 1; min-height: 0; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+  .empty { color: var(--faint); font-size: 12px; text-align: center; padding: 18px 6px; }
+  .m { background: var(--msg); border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; flex: none; }
+  .m.fresh { animation: arrive 2.5s ease-out; }
+  @keyframes arrive { from { box-shadow: 0 0 0 2px var(--ok) inset; } to { box-shadow: none; } }
+  .m-head { display: flex; gap: 8px; align-items: baseline; }
+  .ev { font-size: 10px; letter-spacing: .5px; text-transform: uppercase; font-weight: 700; padding: 1px 6px; border-radius: 4px;
+        border: 1px solid currentColor; }
+  .ev.opened, .ev.reopened { color: var(--high); } .ev.cleared { color: var(--ok); }
+  .ev.confirmed { color: var(--text); } .ev.rejected { color: var(--muted); }
+  .when { margin-left: auto; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .title { font-weight: 600; margin-top: 6px; }
+  .m img { width: 100%; border-radius: 6px; margin-top: 8px; display: block; }
+  .text { margin: 6px 0 0; line-height: 1.4; font-size: 13px; color: var(--text); }
+  .meta { margin-top: 6px; color: var(--faint); font-size: 11px; display: flex; gap: 8px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<header class="top">
+  <span class="name">Owner inbox</span>
+  <span class="sub">A stand-in for each owner's own channel (their chat, phone or work-order system): what Clearway sends them.</span>
+  <span class="count" id="count"></span>
+</header>
+<main class="channels" id="channels"></main>
+<script>
+"use strict";
+const OWNERS = [["Rail control", "high"], ["Traffic operations", "high"], ["Street services", "medium"],
+                ["Asset owner", "low"], ["Security", "low"]];
+const CATEGORY = { PERSON_ON_TRACKS: "Person on the tracks", COLLISION: "Collision", STALLED_VEHICLE: "Stalled vehicle",
+                   OBSTRUCTION: "Obstruction", DAMAGE: "Damage", TAMPERING: "Tampering" };
+const $ = (id) => document.getElementById(id);
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+const hms = (t) => new Date(t * 1000).toISOString().slice(11, 19);
+const channels = new Map();
+let after = 0, first = true, signing = false;
+
+for (const [owner, prio] of OWNERS) channel(owner, prio);
+function channel(owner, prio) {
+  if (channels.has(owner)) return channels.get(owner);
+  const ch = el("section", "ch"), head = el("div", "ch-head"), bar = el("span", "bar");
+  bar.style.background = `var(--${prio || "faint"})`;
+  const n = el("span", "n");
+  head.append(bar, el("span", "hash", "# " + owner.toLowerCase().replace(/ /g, "-")), n);
+  const feed = el("div", "feed");
+  feed.append(el("div", "empty", "No messages yet"));
+  ch.append(head, feed);
+  $("channels").append(ch);
+  const c = { feed, n, count: 0 };
+  channels.set(owner, c);
+  return c;
+}
+
+function message(m) {
+  const d = el("article", "m" + (first ? "" : " fresh")), head = el("div", "m-head");
+  head.append(el("span", "ev " + m.event, m.event), el("span", "when", `${hms(m.received)} UTC`));
+  d.append(head, el("div", "title", `${CATEGORY[m.category] || m.category} · ${m.camera.replace(/_/g, " ")}`));
+  if (m.has_snap) { const i = el("img"); i.src = `/snap/${m.n}.jpg`; i.alt = "the spot, boxed"; d.append(i); }
+  d.append(el("p", "text", m.text));
+  const meta = el("div", "meta");
+  meta.append(el("span", null, m.incident), el("span", null, `occurrence ${m.occurrences}`));
+  if (m.dry_run) meta.append(el("span", null, "dry run"));
+  meta.append(el("span", null, m.signed ? "signature checked" : "unsigned"));
+  d.append(meta);
+  return d;
+}
+
+async function poll() {
+  try {
+    const r = await fetch(`/api/messages?after=${after}`, { cache: "no-store" });
+    const s = await r.json();
+    signing = s.signing;
+    for (const m of s.messages) {
+      const c = channel(m.owner);
+      if (!c.count) c.feed.replaceChildren();
+      c.feed.prepend(message(m));
+      c.count += 1;
+      c.n.textContent = String(c.count);
+      after = Math.max(after, m.n);
+    }
+    $("count").textContent = `${after} messages · ${signing ? "signatures checked" : "unsigned accepted"}`;
+    first = false;
+  } catch (e) {
+    $("count").textContent = "the inbox server did not answer";
+  } finally {
+    setTimeout(poll, 2000);
+  }
+}
+poll();
+</script>
+</body>
+</html>

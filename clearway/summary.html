@@ -184,6 +184,8 @@ function render(s) {
     tile("Change to card, first time", secs(t.change_to_card_first.median), `max ${secs(t.change_to_card_first.max)}: the lens queue and Hafnia`),
     tile("Change to card, repeat", secs(t.change_to_card_repeat.median), `${t.change_to_card_repeat.n} repeats, no request`),
     tile("Card to XProtect alarm", secs(t.card_to_xprotect_alarm.median), t.card_to_xprotect_alarm.n ? `${t.card_to_xprotect_alarm.n} alarms raised` : "no alarms in this run"),
+    tile("Change to owner told", secs(t.change_to_owner_told.median),
+      s.notifications.sent || s.notifications.failed ? `${s.notifications.sent} messages sent, ${s.notifications.failed} failed` : "no owner notifications in this run"),
     tile("Alarm to clear", secs(t.alarm_to_clear.median), `${t.alarm_to_clear.n} alarms; ${t.alarm_to_clear.cleared_before_alarm} cleared before theirs`),
     tile("Clear to alarm closed", secs(t.clear_to_alarm_closed.median), t.clear_to_alarm_closed.n ? `${t.clear_to_alarm_closed.n} closed by themselves` : "none closed by themselves"),
     tile("Occurrence", secs(t.occurrence.median), `${t.occurrence.n} that cleared`),

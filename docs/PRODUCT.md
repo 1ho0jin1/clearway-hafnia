@@ -88,6 +88,7 @@ embeddings), drawn over the camera image: "e-scooters left here 6 times this shi
 | F9 | Hotspots | P1 | ledger boxes, memory embeddings | Per-camera overlay of where incidents recur, with counts. |
 | F10 | Map | P2 | camera positions | First a half-day check of XProtect's Smart Map: can cameras get positions from a script (MilestonePSTools) and do our alarms show on it? If yes, native. If not, a small map panel on the board with camera positions. |
 | F11 | Person staying at a spot (gate) | P2 | YOLO person tracks | Footnote incident (tampering); only if time allows. |
+| F12 | Owner notifications (**built 2026-10-25**, `clearway/notify.py`, `config/owners.json`; stand-in inbox `scripts/owner_inbox.py`) | P1 | ledger effects | The owners do not sit at the VMS: each incident's news (opened, reopened, cleared, confirmed, rejected) goes to its owner as a JSON webhook, beside the XProtect alarm for the control room. One-way: owners cannot answer from the message while the board is reachable only on the machine. TODO: Teams and Slack formats. |
 
 **Cut** from plan C, to make room: injecting the CC0 street clips (and its Recording Server restart); M4 on real
 footage shrinks to `test_11` alone (internal only, licence not cleared, so not shown in the demo). Super-resolution and

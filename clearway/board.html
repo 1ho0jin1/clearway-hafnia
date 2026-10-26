@@ -96,6 +96,7 @@
   .c-foot { display: flex; gap: 10px; align-items: center; padding: 4px 10px 9px; font-size: 12px; color: var(--muted); }
   .c-foot .id { margin-left: auto; color: var(--faint); }
   .alarm-on { color: var(--text); }
+  .told-sent { color: var(--ok); } .told-failed { color: var(--high); }
   .stale .top { background: #2a1d10; }
 </style>
 </head>
@@ -206,8 +207,8 @@ function makeCard(c) {
   refs.reject.addEventListener("click", () => armReject(card));
   refs.actions.append(refs.verdict, refs.confirm, refs.reject);
   const foot = el("div", "c-foot");
-  refs.rec = el("span", "rec"); refs.alarm = el("span", "alarm"); refs.id = el("span", "id", c.id);
-  foot.append(refs.rec, refs.alarm, refs.id);
+  refs.rec = el("span", "rec"); refs.alarm = el("span", "alarm"); refs.told = el("span"); refs.id = el("span", "id", c.id);
+  foot.append(refs.rec, refs.alarm, refs.told, refs.id);
   e.append(head, refs.cam, media, refs.summary, refs.actions, foot);
   if (!firstRender) e.classList.add("new");
   return card;
@@ -267,6 +268,9 @@ function updateCard(card, c) {
   r.rec.textContent = c.occurrences > 1 ? `${ordinal(c.occurrences)} time at this spot` : "first time at this spot";
   r.alarm.textContent = c.alarm_open ? "alarm open" : "alarm closed";
   r.alarm.className = c.alarm_open ? "alarm alarm-on" : "alarm";
+  r.told.textContent = c.told === "sent" ? "owner told" : c.told === "failed" ? "owner not reached" : "";
+  r.told.className = c.told ? `told-${c.told}` : "";
+  r.told.title = c.told ? "the owner's webhook (clearway/notify.py)" : "";
   updateVerdict(card);
   tickCard(card);
 }
