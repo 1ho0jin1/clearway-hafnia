@@ -1,0 +1,54 @@
+# The demonstration video (required for the submission: 3-5 minutes)
+
+Status: **storyboard, 2026-10-27.** The portal closes 1 November 12:00 CET; the video is planned for Oct 29. Criteria it
+serves (the hackathon page): real-world value, use of Hafnia VLM and XProtect with results fed back into XProtect,
+technical execution, functionality, demo and user experience. The pitch is the one in `PRODUCT.md`, "What sells it
+against the field": optimization around the model, shown with numbers; the obstruction categories get one line.
+
+## Storyboard (about 4 minutes)
+
+| # | Time | On screen | Narration (draft) | Made from |
+|---|---|---|---|---|
+| 1 | 0:00-0:15 | Title card: **Clearway**. "What is blocking a public way right now, whose job is it, and how long has it been there?" | Clearway watches a city's XProtect cameras for things that block or endanger a public way, asks the Hafnia VLM once about each, and turns the answer into one alarm, one card for its owner, and one push to a phone. | card |
+| 2 | 0:15-0:35 | The eleven cameras in Smart Client (a view), then the service starting in a terminal: the planned request count printed before anything starts. | Eleven cameras, six of them with a staged incident each. The service announces what it will spend before it starts: at most this many requests of the day's five hundred. | screen capture |
+| 3 | 0:35-1:15 | The owner board filling: columns per owner, cards appearing 20 seconds after each change; one card opened: the clip Hafnia judged, its summary, the alarm state, the time open. | Within a minute every incident has a card in its owner's column: the stalled truck for traffic operations, the person on the tracks for rail control, the tipped bin for street services. Each card shows the exact clip Hafnia judged and its one-sentence verdict. | board footage (headless render, 1 frame per second) or screen capture |
+| 4 | 1:15-1:40 | Smart Client's Alarm Manager: the alarm named with the category, the owner and Hafnia's summary; the bookmark on the camera; the alarm closing by itself when the spot clears. | The same incident is an XProtect alarm, with a snapshot and a bookmark on the camera, closed by itself when the spot clears and reopened when it happens again. | screen capture (Smart Client) |
+| 5 | 1:40-2:00 | The phone: the push with the snapshot and Confirm / Reject; a tap; the board's card marked confirmed within a second. | The owner gets a push with two buttons. A tap reaches the ledger in under a second, and teaches it: a rejected look at that spot is not asked about again. | phone screen recording |
+| 6 | 2:00-2:50 | "How it decides": the change detector stills (something arrived and stopped; a person held back; fog and light not objects), the verdict memory, the lens: the 30-pixel crash the full frame called NONE and the crop named; the frame code strip and the measured time base; the fade replay (silent after 7 minutes, steady after the fix). | Nothing asks Hafnia on a timer. A change detector notices what stayed changed; a memory skips what was already judged; a small spot is cropped and enlarged on a lens camera of our own, and the lens frames carry a code that proves which seconds the recording holds. Every one of these was measured, and two of them were found wrong and fixed on the way. | stills from `docs/walkthrough/`, cards with numbers |
+| 7 | 2:50-3:30 | The numbers card: M3 three hours (33 requests, 11 cards, the 4 false traced to one cause), the clean run (14 requests, 7 cards, none false, 20-42 s), one request per camera-hour, every run folder with its README, one setup script. | Three hours on eleven cameras cost 33 requests, one per camera-hour. The four false cards it produced were traced to one cause and fixed; the next run had none. Everything is in the repository: the runs, their numbers, and a single setup script for a fresh machine. | card |
+| 8 | 3:30-3:50 | Close: the repository, what is next (owners' own channels, the application layer). | Clearway keeps public ways clear, and spends the model's attention only where it earns it. | card |
+
+## Production
+
+`scripts/make_video.py` holds the scene list (ids, narration, visuals, least lengths) and builds the video:
+
+```powershell
+.venv\Scripts\python.exe scripts\make_video.py --render-cards --tts --build    # cards, scratch narration, the cut
+.venv\Scripts\python.exe scripts\make_video.py --list                          # scenes, visuals, lengths
+```
+
+- **Cards** (`docs/video/cards/*.html`, committed; `card.css` uses fonts installed on Windows, so a render needs no
+  network): rendered to 1920x1080 PNG in `docs/video/render/` with Edge headless. `placeholder.html?t=...` stands in
+  for a capture that is not there yet.
+- **Board footage**: `scripts/record_board.py --minutes 10 --speed 4` beside a live run renders the board headless
+  once a second (no desktop session needed) and makes `docs/video/board/board.mp4`; copy it to
+  `docs/video/captures/board.mp4`. Without it the scene shows the board's final state (`render/board-final.png`,
+  from the board instance on port 8766 that shows the clean live run).
+- **Captures by hand**, into `docs/video/captures/`: `cameras.mp4` (Smart Client's view of the eleven cameras and the
+  terminal starting the service), `smartclient.mp4` (the Alarm Manager: the alarm, the bookmark, the close),
+  `phone.mp4` (the push, the tap, the card confirmed). `clip.mp4` is the stalled truck's clip as the board served it
+  (`/clips/cw-0003.mp4`), already there.
+- **Narration**: `docs/video/voice/<scene id>.wav` (the author's voice, one take per scene, the script in
+  `make_video.py`) takes precedence; otherwise Windows text-to-speech (`--tts`, Zira by default) into
+  `docs/video/audio/`. A scene lasts as long as its narration plus 0.8 s, at least its `min_s`.
+- **Assembly**: one segment per scene in `docs/video/segments/` (1920x1080, 30 fps, H.264, AAC), concatenated into
+  `docs/video/clearway.mp4`. A video shorter than its narration loops; a capture smaller than 1000 px wide is shown
+  at twice its size, not blown up. Everything but the cards and this file is git-ignored (camera footage).
+- **Footage shown**: only the organizers' cameras (on every machine) and our own pages; never `test_11` (the AI City
+  licence forbids redistribution).
+- **Requests**: the live run recorded for scenes 2-5 costs about 15 (today's count 41 of 500 after the day's work).
+
+**State (2026-10-27):** a first cut of 2.6 minutes exists with the scratch narration, the cards, the walkthrough
+stills, the stalled truck's clip, the board's and the summary's final state, and placeholders for the three captures
+by hand. Still to do: the recorded live run with the board filmed and the three captures, the author's narration,
+then the cut again (expected 3.5-4 minutes).

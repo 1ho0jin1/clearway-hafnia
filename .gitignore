@@ -47,3 +47,12 @@ data/footage/
 
 # Owner inbox (scripts/owner_inbox.py): received notifications carry snapshots (camera footage)
 run/inbox/
+
+# The demonstration video and its footage (scripts/make_video.py, record_board.py); the card pages are kept
+docs/video/board/
+docs/video/render/
+docs/video/audio/
+docs/video/voice/
+docs/video/segments/
+docs/video/captures/
+docs/video/*.mp4

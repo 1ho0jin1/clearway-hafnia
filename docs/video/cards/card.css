@@ -1,0 +1,35 @@
+/* Cards for the demonstration video: 1920x1080, the board's dark palette. Fonts installed on Windows only, so a
+   headless render needs no network: Bahnschrift (condensed display), Segoe UI, Cascadia Mono. */
+:root {
+  --bg: #0f141a; --surface: #1a2128; --ink: #e6ebf0; --muted: #9aa7b4; --rule: #2c3640;
+  --signal: #f0a530; --stop: #f07068; --go: #3fb950;
+  --display: "Bahnschrift SemiCondensed", "Bahnschrift", "Arial Narrow", sans-serif;
+  --body: "Segoe UI", system-ui, sans-serif;
+  --mono: "Cascadia Mono", Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--ink);
+  font-family: var(--body); }
+.card { width: 1920px; height: 1080px; padding: 96px 120px; display: flex; flex-direction: column; justify-content: center; gap: 28px; }
+.mark { display: flex; align-items: center; gap: 18px; color: var(--muted); font-size: 28px; letter-spacing: 0.02em; }
+.mark .dot { width: 34px; height: 34px; border-radius: 9px; background: var(--go); }
+h1 { font-family: var(--display); font-weight: 700; font-size: 150px; line-height: 0.95; margin: 0; letter-spacing: -0.01em; }
+h2 { font-family: var(--display); font-weight: 600; font-size: 84px; line-height: 1.0; margin: 0; }
+.question { font-size: 54px; line-height: 1.25; max-width: 1500px; color: var(--ink); }
+.sub { font-size: 36px; line-height: 1.4; color: var(--muted); max-width: 1560px; }
+.accent { color: var(--signal); }
+.panels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; margin-top: 12px; }
+.panels.two { grid-template-columns: repeat(2, 1fr); }
+.panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 18px; overflow: hidden; }
+.panel img { display: block; width: 100%; height: 400px; object-fit: cover; }
+.panel .cap { padding: 22px 26px 26px; font-size: 30px; line-height: 1.3; }
+.panel .cap b { display: block; font-family: var(--display); font-size: 40px; font-weight: 600; margin-bottom: 6px; }
+.numbers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; margin-top: 8px; }
+.num { background: var(--surface); border: 1px solid var(--rule); border-radius: 18px; padding: 34px 36px; }
+.num .big { font-family: var(--display); font-weight: 700; font-size: 120px; line-height: 1; }
+.num .big small { font-size: 56px; color: var(--muted); font-weight: 500; }
+.num .lbl { font-size: 32px; color: var(--muted); margin-top: 10px; line-height: 1.3; }
+.num .lbl b { color: var(--ink); font-weight: 600; }
+.foot { margin-top: 18px; font-size: 30px; color: var(--muted); }
+.mono { font-family: var(--mono); }
+.right { position: absolute; right: 120px; bottom: 84px; font-size: 28px; color: var(--muted); }

@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Placeholder</title><link rel="stylesheet" href="card.css"></head>
+<body><div class="card">
+  <div class="mark"><div class="dot"></div>Placeholder: a screen capture goes here</div>
+  <h2 id="t">Smart Client: the alarm, the bookmark, the close</h2>
+  <div class="sub" id="s">Captured by hand during the recorded live run.</div>
+</div>
+<script>
+  const p = new URLSearchParams(location.search);
+  if (p.get('t')) document.getElementById('t').textContent = p.get('t');
+  if (p.get('s')) document.getElementById('s').textContent = p.get('s');
+</script></body></html>
