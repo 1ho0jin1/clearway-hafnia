@@ -16,6 +16,25 @@ differ from both and are ignored. No object classes, no per-camera rules.
   camera: its objects simply return to their places, which closes the open changes.
 - Each changed region is reported once while it lasts, with the time it started (the centre for Hafnia's window). It
   keeps a snapshot of how the spot looked before; it is closed when the spot looks like that again.
+- While a change is open, the slow background does not learn its spot: a lasting obstruction stays a change. (Before
+  2026-10-27 it did, with the slow time constant, so within about ten minutes a lasting change stopped differing from
+  the background and the detector fell silent on it; M3's looped incidents were reported 27-37 times in the first
+  half hour and hardly after.) Nor does it learn pixels that are static-changed but not reported yet (an object
+  settling, a person standing still before the hold-back lets the report through) until they have stayed so for
+  learn_static_after_s: otherwise every later change at that spot keeps a faint ghost of its own precursor in its
+  "before" snapshot, and after enough repetitions the spot never matches its before again (the e-scooter loop fell
+  silent after 50 loops this way, 2026-10-27). A change the ledger judged harmless is released (release): the
+  background then takes the spot in, and when the spot looks as before again the background is set back to that
+  look, so the object's leaving is not reported as a change of its own.
+- "Restored" is judged against the change's own contrast: a spot much closer to its before than the change was
+  (restored_ratio) has gone back, even if the before is a little off (a ghost, lighting drift). The absolute
+  threshold alone left a change open for ever once its before had drifted, and an open change swallows whatever
+  happens at its spot next. Frames with something passing through the box (changed since the previous frame) count
+  for nothing; the fast background lags a cut by half a second and must not be the judge of that.
+- Off by default (changed_s): closing a change whose spot looks like neither its before nor the change for changed_s
+  and re-baselining the spot. Tried on 2026-10-27: a change that merely evolves (the rider stands, then the scooter
+  lies) is a "third look" too, so every state of an incident became a change of its own (3-6 reports per loop) and
+  a real incident that evolves would be closed; kept only as an option.
 Thresholds apply to the working image (default 320 px wide); boxes are returned in input-frame pixels.
 """
 from __future__ import annotations
@@ -32,8 +51,8 @@ class ChangeParams:
     work_width: int = 320
     warmup_s: float = 10.0           # backgrounds start as the median of this much video; no reports meanwhile
     fast_tau_s: float = 0.5          # time constant of the fast background
-    slow_tau_s: float = 600.0        # ... of the slow background (it learns only where nothing moves); minutes, as
-                                     # usual for abandoned-object detection: a looped incident must not be learnt
+    slow_tau_s: float = 600.0        # ... of the slow background (it learns only where nothing moves and no change
+                                     # is open); minutes, as usual for abandoned-object detection
     diff: float = 25.0               # per-pixel colour difference (max over channels, 0-255) that counts as different
     persist_s: float = 1.5           # a pixel must stay static-changed this long
     min_area: float = 0.005          # share of the frame: smaller blobs are noise
@@ -46,6 +65,17 @@ class ChangeParams:
     restored_diff: float = 12.0      # mean difference to the "before" snapshot below which the spot is restored
     close_s: float = 1.0             # restored this long: closed
     person_cover: float = 0.5        # a blob this much inside a person's box is held until they leave
+    freeze_open: bool = True         # open changes' spots are left out of the slow background (False: the behaviour
+                                     # before 2026-10-27, for comparison: a lasting change fades within minutes)
+    learn_static_after_s: float = 60.0   # static-changed pixels not reported (too small, held back, settling) are
+                                     # learnt only after this long (0: at once, as before 2026-10-27)
+    restored_ratio: float = 0.25     # ... or within this share of the change's own contrast to its before
+    changed_s: float = 0.0           # an open change's spot looking like neither its before nor the change for
+                                     # this long (nothing moving through) closes it as "changed" and re-baselines
+                                     # the spot (0: never; see the module docstring for why it is off)
+    moving_share: float = 0.2        # more of the box than this changed since the previous frame: something is
+                                     # passing, the restored and changed timers do not count the frame
+    seen_tau_s: float = 30.0         # how the change's own look is followed while it stays (lighting drift)
 
     @classmethod
     def loops(cls) -> "ChangeParams":
@@ -68,7 +98,7 @@ class Change:
     box: tuple[int, int, int, int]   # x1, y1, x2, y2 in input-frame pixels
     area: float                      # share of the frame
     t_closed: float | None = None
-    closed_by: str = ""              # "restored" or "scene_jump"
+    closed_by: str = ""              # "restored", "changed" (the spot went on to a third look) or "scene_jump"
 
 
 def _chmax(d: np.ndarray) -> np.ndarray:
@@ -90,7 +120,10 @@ class _Open:
     change: Change
     work_box: tuple[int, int, int, int]
     before: np.ndarray               # the slow background in the box when it was reported: the spot before
+    seen: np.ndarray                 # the spot as reported, followed slowly while the change stays
     restored_since: float | None = None
+    changed_since: float | None = None
+    learn: bool = False              # released: the slow background may take the spot in
 
 
 @dataclass
@@ -141,7 +174,8 @@ class ChangeDetector:
             return []
         dt = max(1e-3, t - self.last_t)
         self.last_t = t
-        if float((np.abs(gray - self.prev_gray) > 30).mean()) > p.jump_frac:   # the whole scene jumped
+        moving = np.abs(gray - self.prev_gray) > 30     # frame to frame: what is passing right now
+        if float(moving.mean()) > p.jump_frac:          # the whole scene jumped
             self.jumps.append(t)
             for o in self.open.values():
                 o.change.t_closed, o.change.closed_by = t, "scene_jump"
@@ -154,7 +188,17 @@ class ChangeDetector:
         fg_slow = _chmax(cv2.absdiff(img, self.slow)) > p.diff
         self.fast += (1 - np.exp(-dt / p.fast_tau_s)) * (img - self.fast)
         step = (1 - np.exp(-dt / p.slow_tau_s)) * (img - self.slow)
-        step[fg_fast] = 0
+        # The slow background learns where nothing moves and nothing has changed: not the moving foreground, not
+        # static-changed pixels until they have persisted learn_static_after_s, not an open change's spot unless
+        # it was released.
+        hold = fg_fast | (fg_slow & (self.static_time < p.learn_static_after_s))
+        for o in self.open.values():
+            x1, y1, x2, y2 = o.work_box
+            if o.learn:
+                hold[y1:y2, x1:x2] = fg_fast[y1:y2, x1:x2]      # released: learnt, moving things apart
+            elif p.freeze_open:
+                hold[y1:y2, x1:x2] = True
+        step[hold] = 0
         self.slow += step
 
         static = fg_slow & ~fg_fast
@@ -172,7 +216,7 @@ class ChangeDetector:
             persistent[:] = False                           # light, fog, condensation: not an object
 
         reported = self._report(t, img, persistent, frame_area, people)
-        self._close(t, img)
+        self._close(t, img, dt, moving)
         return reported
 
     def _report(self, t, img, persistent, frame_area, people) -> list[Change]:
@@ -199,21 +243,54 @@ class ChangeDetector:
             c = Change(self._next_id, t, float(np.nanmedian(self.static_since[blob])),
                        tuple(int(round(v * self.scale)) for v in box), round(area / frame_area, 4))
             self._next_id += 1
-            self.open[c.id] = _Open(c, box, self.slow[box[1]:box[3], box[0]:box[2]].copy())
+            self.open[c.id] = _Open(c, box, self.slow[box[1]:box[3], box[0]:box[2]].copy(),
+                                    img[box[1]:box[3], box[0]:box[2]].copy())
             self.changes.append(c)
             reported.append(c)
         return reported
 
-    def _close(self, t: float, img: np.ndarray) -> None:
-        """A change is closed when its spot has looked as it did before for close_s."""
+    def release(self, change_id: int) -> None:
+        """Let the slow background take the change's spot in (over slow_tau_s): the ledger judged it harmless (a
+        dismissed or rejected incident), so its look is the scene now. The change stays open until the spot looks as
+        before, so the same spot is not reported again meanwhile; a later real change there is reported anew."""
+        if (o := self.open.get(change_id)) is not None:
+            o.learn = True
+
+    def _close(self, t: float, img: np.ndarray, dt: float, moving: np.ndarray) -> None:
+        """A change is closed when its spot has looked as it did before for close_s ("restored": within restored_diff,
+        or within restored_ratio of the change's own contrast; a released change's spot is then set back to its look
+        before in the slow background, which had taken the object in, so that the object's leaving is not a change
+        of its own), or, if changed_s is set, when it has looked like neither its before nor the change itself for
+        changed_s ("changed": the current look becomes the spot's baseline). Frames with something moving through
+        the box (moving: pixels that changed since the previous frame) count for neither; while the change stays,
+        its look is followed slowly."""
         p = self.p
         for cid, o in list(self.open.items()):
             x1, y1, x2, y2 = o.work_box
-            d = float(_chmax(cv2.absdiff(img[y1:y2, x1:x2], o.before)).mean())
-            if d > p.restored_diff:
-                o.restored_since = None
-            elif o.restored_since is None:
-                o.restored_since = t
-            elif t - o.restored_since >= p.close_s:
-                o.change.t_closed, o.change.closed_by = t, "restored"
-                del self.open[cid]
+            cur = img[y1:y2, x1:x2]
+            if float(moving[y1:y2, x1:x2].mean()) > p.moving_share:
+                continue                                   # something is passing: not this frame
+            d_before = float(_chmax(cv2.absdiff(cur, o.before)).mean())
+            d_seen = float(_chmax(cv2.absdiff(cur, o.seen)).mean())
+            contrast = float(_chmax(cv2.absdiff(o.seen, o.before)).mean())    # the change against its before
+            if d_before <= max(p.restored_diff, p.restored_ratio * contrast):
+                o.changed_since = None
+                if o.restored_since is None:
+                    o.restored_since = t
+                elif t - o.restored_since >= p.close_s:
+                    o.change.t_closed, o.change.closed_by = t, "restored"
+                    if o.learn:
+                        self.slow[y1:y2, x1:x2] = o.before
+                    del self.open[cid]
+                continue
+            o.restored_since = None
+            if d_seen <= p.restored_diff:                  # the change is still there: follow its look
+                o.changed_since = None
+                o.seen += (1 - np.exp(-dt / p.seen_tau_s)) * (cur - o.seen)
+            elif p.changed_s > 0:
+                if o.changed_since is None:
+                    o.changed_since = t
+                elif t - o.changed_since >= p.changed_s:
+                    o.change.t_closed, o.change.closed_by = t, "changed"
+                    self.slow[y1:y2, x1:x2] = cur          # the spot's new baseline
+                    del self.open[cid]

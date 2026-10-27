@@ -122,7 +122,7 @@ def run_case(name: str, loops: int, params: ChangeParams, sheet_dir: Path, peopl
             "false_reports": len(false), "false_per_hour": round(len(false) / total_s * 3600, 1),
             "false_at_loop_s": false[:20], "scene_jumps": len(det.jumps),
             "reports": [{"t_detect": round(c.t_detect, 1), "t_start": round(c.t_start, 1), "box": c.box,
-                         "area": c.area, "closed": c.closed_by} for c in det.changes][:200]}
+                         "area": c.area, "closed": c.closed_by} for c in det.changes][:2000]}
 
 
 def main() -> int:
@@ -135,11 +135,15 @@ def main() -> int:
     ap.add_argument("--persist", type=float, help="override ChangeParams.persist_s (seconds a change must last)")
     ap.add_argument("--work-width", type=int, help="override ChangeParams.work_width (pixels)")
     ap.add_argument("--min-area", type=float, help="override ChangeParams.min_area (share of the frame)")
+    ap.add_argument("--no-freeze", action="store_true",
+                    help="let the slow background learn open changes' spots (the detector before 2026-10-27)")
     ap.add_argument("--out", type=Path, default=REPO / "run" / f"change-{dt.datetime.now(dt.timezone.utc):%Y%m%dT%H%M%SZ}")
     args = ap.parse_args()
     (args.out / "frames").mkdir(parents=True, exist_ok=True)
     overrides = {k: v for k, v in (("persist_s", args.persist), ("work_width", args.work_width),
                                    ("min_area", args.min_area)) if v is not None}
+    if args.no_freeze:
+        overrides["freeze_open"] = False
     params = getattr(ChangeParams, args.profile)()
     for k, v in overrides.items():
         setattr(params, k, v)

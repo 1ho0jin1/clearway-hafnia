@@ -5,7 +5,8 @@ r"""report_clearway.py - one Clearway run (scripts\run_clearway.py) per camera, 
 Per camera: questions (start-up ones apart: reported within one loop after the detector's warm-up, which starts at
 the first loop start after the first frame; a real camera has no loop), answers, cards,
 occurrences on them, seconds from the change to its card (questions: until the answer; recurrences: at once), the
-lens's wait, frame rate. Live runs also score Hafnia's category against the stand-in's (answer["expected"]). The
+lens's wait, frame rate; then the lens's recorded time base as read back from the frame code (offset, drift,
+unverified or replayed clips). Live runs also score Hafnia's category against the stand-in's (answer["expected"]). The
 offline replay's "no guard" ledger (run/ledger-F1/results.json, about 5 min per camera) is shown beside it. With
 --xprotect, the run's XProtect alarms (F3) are read back: name, priority, state against the last action logged.
 Operators' verdicts from the board (F7): how many, how fast the service applied them, and the later decisions they
@@ -75,6 +76,14 @@ def main() -> int:
                 r["escalated"].append(e["incident"])
         elif e["kind"] == "lens":
             r["lens_wait_s"].append(e["waited_s"])
+            if e.get("offset_s") is not None:
+                r["lens_offset_s"].append(e["offset_s"])
+            if not e.get("verified"):
+                r["lens_unverified"].append(e["incident"])
+            if e.get("replayed"):
+                r["lens_replayed"].append(e["incident"])
+        elif e["kind"] == "direct":
+            r["direct"].append(e["incident"])
         elif e["kind"] == "answer":
             r["answers"].append(e["category"])
             if e["category"] in OWNERS and not e["merged_into"]:
@@ -97,7 +106,7 @@ def main() -> int:
         out["minutes"] = round((end["wall"] - start["wall"]) / 60, 1)
     print(f"{'camera':32} {'fps':>4} {'drop':>4} | {'questions':>9} {'start-up':>8} {'esc.':>4} | {'cards':>5} "
           f"{'occur.':>6} {'dismissed':>9} {'merged':>6} | {'to card s: asked':>16} {'recurrence':>10} | "
-          f"{'lens wait s':>11} | replay: req cards")
+          f"{'direct':>6} {'lens wait s':>11} | replay: req cards")
     for c in cameras:
         r = rows[c]
         cards = [i for i in incidents.values() if i["camera"] == c and i["category"] and not i["merged_into"]]
@@ -111,7 +120,10 @@ def main() -> int:
             "dismissed": sum(i["camera"] == c and i["state"] == "dismissed" for i in incidents.values()),
             "merged": sum(i["camera"] == c and bool(i["merged_into"]) for i in incidents.values()),
             "to_card_s_asked_median": med(r["to_card_s"]), "to_card_s_recurrence_median": med(r["recur_to_card_s"]),
+            "direct": len(r["direct"]), "lens": len(r["lens_wait_s"]),
             "lens_wait_s_median": med(r["lens_wait_s"]), "hafnia_s_median": med(r["hafnia_s"]),
+            "lens_offset_s_median": med(r["lens_offset_s"]), "lens_unverified": len(r["lens_unverified"]),
+            "lens_replayed": len(r["lens_replayed"]),
             "scored": r["scored"], "replay_no_guard": {k: replay[c][k] for k in ("requests", "cards")} if c in replay else None,
         }
         out["cameras"][c] = row
@@ -119,7 +131,8 @@ def main() -> int:
         print(f"{c[:32]:32} {row['fps']:>4} {row['dropped']:>4} | {row['questions']:>9} {row['startup_questions']:>8} "
               f"{row['escalated']:>4} | {row['cards']:>5} {row['occurrences_on_cards']:>6} {row['dismissed']:>9} "
               f"{row['merged']:>6} | {str(row['to_card_s_asked_median']):>16} {str(row['to_card_s_recurrence_median']):>10} | "
-              f"{str(row['lens_wait_s_median']):>11} | {rp.get('requests', '-'):>12} {rp.get('cards', '-'):>5}")
+              f"{row['direct']:>6} {str(row['lens_wait_s_median']):>11} | {rp.get('requests', '-'):>12} "
+              f"{rp.get('cards', '-'):>5}")
     tot = {k: sum(out["cameras"][c][k] for c in cameras) for k in ("questions", "startup_questions", "cards")}
     print(f"{'TOTAL':32} {'':>9} | {tot['questions']:>9} {tot['startup_questions']:>8} {'':>4} | {tot['cards']:>5}"
           f"   replay: {sum((out['cameras'][c]['replay_no_guard'] or {}).get('requests', 0) for c in cameras)} requests")
@@ -130,6 +143,31 @@ def main() -> int:
             if not s["agree"]:
                 print(f"  {s['incident']}: Hafnia {s['hafnia']}, expected {s['expected']}: {s['summary'][:150]}")
     out["totals"] = tot
+    lens_q = [e for e in svc if e["kind"] == "lens"]
+    if any("verified" in e for e in lens_q):   # the lens's recorded time base, read back from the frame code
+        # (lens/clock.py); runs before 2026-10-27 assumed it from the publisher's clock
+        offs = [e["offset_s"] for e in lens_q if e.get("offset_s") is not None]
+        clock = [h["lens"] for h in health if h.get("lens") and h["lens"].get("offset_s") is not None]
+        lens = {"questions": len(lens_q), "offset_s_median": med(offs),
+                "offset_s_min": min(offs, default=None), "offset_s_max": max(offs, default=None),
+                "drift_s_max": max((abs(e.get("drift_s") or 0) for e in lens_q), default=None),
+                "unverified": sum(not e.get("verified") for e in lens_q),
+                "assumed": sum(bool(e.get("assumed")) for e in lens_q),
+                "replayed": sum(bool(e.get("replayed")) for e in lens_q),
+                "foreign": sum(e.get("foreign") or 0 for e in lens_q),
+                "clock_offset_s_min": min((c["offset_min_s"] for c in clock if c.get("offset_min_s") is not None),
+                                          default=None),
+                "clock_offset_s_max": max((c["offset_max_s"] for c in clock if c.get("offset_max_s") is not None),
+                                          default=None),
+                "clock_readable": clock[-1]["decoded"] if clock else None,
+                "clock_frames": clock[-1]["frames"] if clock else None}
+        print(f"Lens: {lens['questions']} clips; recorded time minus the publisher's clock: median "
+              f"{lens['offset_s_median']} s ({lens['offset_s_min']} to {lens['offset_s_max']}), largest drift within "
+              f"a clip {lens['drift_s_max']} s; over the run the clock saw {lens['clock_offset_s_min']} to "
+              f"{lens['clock_offset_s_max']} s ({lens['clock_readable']} readable of {lens['clock_frames']} frames); "
+              f"{lens['unverified']} unverified ({lens['assumed']} assumed), {lens['replayed']} replayed, "
+              f"{lens['foreign']} neighbouring frames inside a span")
+        out["lens"] = lens
     actions = [e for e in svc if e["kind"] == "xprotect"]
     if actions:
         n = {a: sum(e.get("action") == a for e in actions) for a in ("raise", "reopen", "close", "confirm")}

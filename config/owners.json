@@ -1,11 +1,26 @@
 {
-  "_doc": "Owner notifications (clearway/notify.py): each owner's webhook targets. Here every owner goes to the stand-in inbox on this machine (scripts/owner_inbox.py, http://127.0.0.1:8770/). A real target names the environment variable that holds its URL instead of the URL: \"url_env\": \"CLEARWAY_HOOK_RAIL_CONTROL\" (webhook URLs usually carry a credential, which stays out of this file), and optionally \"secret_env\" for the signing key. \"snapshot\": true sends the JPEG of the spot along: camera footage leaves the machine with it.",
+  "_doc": "Owner notifications (clearway/notify.py): each owner's targets. Two kinds. \"webhook\" (default): a JSON POST; here every owner also goes to the stand-in inbox on this machine (scripts/owner_inbox.py, http://127.0.0.1:8770/). A real webhook names the environment variable that holds its URL instead of the URL: \"url_env\": \"CLEARWAY_HOOK_RAIL_CONTROL\" (webhook URLs usually carry a credential, which stays out of this file), and optionally \"secret_env\" for the signing key. \"ntfy\": a push notification on the owner's phone through an ntfy topic (scripts/setup_ntfy.ps1 creates the topic names and the secret, stored in user-scope environment variables): url_env holds the topic URL, reply_url_env the topic the phone's Confirm / Reject buttons post to, secret_env the key that signs those buttons' tokens. Here every owner pushes to the same topic (one phone shows everything, the owner is in the title); give an owner its own by naming another variable, for example \"url_env\": \"CLEARWAY_NTFY_URL_RAIL\". \"snapshot\": true sends the JPEG of the spot along: camera footage leaves the machine with it.",
   "public_base_url": "http://127.0.0.1:8765",
   "owners": {
-    "Rail control": [{"name": "inbox-rail-control", "url": "http://127.0.0.1:8770/hook/rail-control", "snapshot": true}],
-    "Traffic operations": [{"name": "inbox-traffic-operations", "url": "http://127.0.0.1:8770/hook/traffic-operations", "snapshot": true}],
-    "Street services": [{"name": "inbox-street-services", "url": "http://127.0.0.1:8770/hook/street-services", "snapshot": true}],
-    "Asset owner": [{"name": "inbox-asset-owner", "url": "http://127.0.0.1:8770/hook/asset-owner", "snapshot": true}],
-    "Security": [{"name": "inbox-security", "url": "http://127.0.0.1:8770/hook/security", "snapshot": true}]
+    "Rail control": [
+      {"name": "inbox-rail-control", "url": "http://127.0.0.1:8770/hook/rail-control", "snapshot": true},
+      {"name": "ntfy-rail-control", "type": "ntfy", "url_env": "CLEARWAY_NTFY_URL", "reply_url_env": "CLEARWAY_NTFY_REPLY_URL", "secret_env": "CLEARWAY_NTFY_SECRET", "snapshot": true}
+    ],
+    "Traffic operations": [
+      {"name": "inbox-traffic-operations", "url": "http://127.0.0.1:8770/hook/traffic-operations", "snapshot": true},
+      {"name": "ntfy-traffic-operations", "type": "ntfy", "url_env": "CLEARWAY_NTFY_URL", "reply_url_env": "CLEARWAY_NTFY_REPLY_URL", "secret_env": "CLEARWAY_NTFY_SECRET", "snapshot": true}
+    ],
+    "Street services": [
+      {"name": "inbox-street-services", "url": "http://127.0.0.1:8770/hook/street-services", "snapshot": true},
+      {"name": "ntfy-street-services", "type": "ntfy", "url_env": "CLEARWAY_NTFY_URL", "reply_url_env": "CLEARWAY_NTFY_REPLY_URL", "secret_env": "CLEARWAY_NTFY_SECRET", "snapshot": true}
+    ],
+    "Asset owner": [
+      {"name": "inbox-asset-owner", "url": "http://127.0.0.1:8770/hook/asset-owner", "snapshot": true},
+      {"name": "ntfy-asset-owner", "type": "ntfy", "url_env": "CLEARWAY_NTFY_URL", "reply_url_env": "CLEARWAY_NTFY_REPLY_URL", "secret_env": "CLEARWAY_NTFY_SECRET", "snapshot": true}
+    ],
+    "Security": [
+      {"name": "inbox-security", "url": "http://127.0.0.1:8770/hook/security", "snapshot": true},
+      {"name": "ntfy-security", "type": "ntfy", "url_env": "CLEARWAY_NTFY_URL", "reply_url_env": "CLEARWAY_NTFY_REPLY_URL", "secret_env": "CLEARWAY_NTFY_SECRET", "snapshot": true}
+    ]
   }
 }

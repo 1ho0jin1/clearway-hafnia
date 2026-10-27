@@ -4,8 +4,10 @@ The ledger decides (clearway/ledger.py: raise, reopen, close); XProtectAlarms ca
 APIs (hafnia/xprotect_rest.py), on one thread, in order:
 - raise: an alarm on the incident's camera, named for the category and the owner ("Clearway: OBSTRUCTION, Street
   services"), with the category's priority, Hafnia's summary in the message (marked as AI-generated), a snapshot of the
-  spot (the last frame of the clip Hafnia judged, the spot boxed), and two bookmarks: the event window on the camera
-  and the clip Hafnia judged on lens_1 (recorded always; the organizers' cameras record on motion);
+  spot (the last frame of the clip Hafnia judged, the spot boxed), and bookmarks: the event window on the camera
+  and, when the crop was shown on the lens, the clip Hafnia judged on lens_1 (recorded always; the organizers'
+  cameras record on motion). A large spot is asked about on the camera's own recording (clearway/service.py,
+  DIRECT_BELOW): then the camera's bookmark is the clip Hafnia judged;
 - reopen (a closed incident happened again): the same alarm back to New, with a comment, a snapshot and a bookmark
   on the new occurrence;
 - close (the incident stayed cleared for the ledger's close_after_s, or an operator rejected it): state Closed, the
@@ -32,6 +34,11 @@ def _utc(t: float) -> dt.datetime:
     return dt.datetime.fromtimestamp(t, dt.timezone.utc)
 
 
+def _by(via: str | None) -> str:
+    """Where the operator's verdict came from (operator.jsonl's "via": the board, or a phone's ntfy button)."""
+    return "from their phone (ntfy)" if via == "ntfy" else "on the Clearway board"
+
+
 class XProtectAlarms:
     def __init__(self, camera_ids: dict[str, str], lens_id: str | None, log: Callable[..., None],
                  xp: XProtect | None = None, label: str = ""):
@@ -48,7 +55,8 @@ class XProtectAlarms:
 
     def submit(self, effect: dict, incident: dict, evidence: dict) -> None:
         """effect: the ledger's {"alarm": ...} or {"close_alarm": ...}; incident: Incident.public(); evidence:
-        {"jpeg", "size", "span"} (snapshot, its size, lens_1's span of the clip Hafnia judged)."""
+        {"jpeg", "size", "span", "view"} (snapshot, its size, the span Hafnia judged and where: "lens" for lens_1,
+        "direct" for the camera's own recording)."""
         self.pending.append(self.pool.submit(self._run, {**effect, "submitted": time.time()}, incident, evidence))
 
     def _call(self, name: str, fn, *args, **kwargs):
@@ -69,7 +77,7 @@ class XProtectAlarms:
             elif "close_alarm" in effect:
                 done = self._close(inc["id"], self._close_comment(effect))
             elif "confirm_alarm" in effect:
-                done = self._confirm(inc["id"])
+                done = self._confirm(inc["id"], effect.get("via"))
             else:
                 return
             self.log("xprotect", incident=inc["id"], seconds=round(time.monotonic() - t0, 2), timing=self._timing,
@@ -108,12 +116,12 @@ class XProtectAlarms:
         self.is_open[incident_id] = False
         return {"action": "close", "alarm": alarm, "comment": comment}
 
-    def _confirm(self, incident_id: str) -> dict:
+    def _confirm(self, incident_id: str, via: str | None = None) -> dict:
         alarm = self.alarm.get(incident_id)
         if alarm is None:
             return {"action": "confirm", "alarm": None, "note": "no XProtect alarm for this incident"}
         state = "In progress" if self.is_open[incident_id] else "Closed"
-        self._call("update", self.xp.update_alarm, alarm, "Confirmed by the operator on the Clearway board.",
+        self._call("update", self.xp.update_alarm, alarm, f"Confirmed by the operator {_by(via)}.",
                    priority=self.priority[incident_id], state=state)
         return {"action": "confirm", "alarm": alarm, "state": state}
 
@@ -138,13 +146,15 @@ class XProtectAlarms:
         else:
             said = ""
         span = ev.get("span")
-        lens = f" Clip Hafnia judged: lens_1 {span[0]:%H:%M:%S}-{span[1]:%H:%M:%S} UTC." if span else ""
+        who = "the stand-in" if a.get("standin") else "Hafnia"
+        on = "lens_1" if ev.get("view") == "lens" else inc["camera"]
+        clip = f" Clip {who} judged: {on} {span[0]:%H:%M:%S}-{span[1]:%H:%M:%S} UTC." if span else ""
         return (f"{said} Incident {inc['id']} on {inc['camera']}: {inc['category']}, for {inc['owner']}. The spot "
-                f"changed at {_utc(inc['t_change']):%H:%M:%S} UTC.{lens}").strip()
+                f"changed at {_utc(inc['t_change']):%H:%M:%S} UTC.{clip}").strip()
 
     def _close_comment(self, effect: dict) -> str:
         if effect.get("reason") == "rejected":
-            return "Rejected by the operator on the Clearway board: not an incident. Closed by Clearway."
+            return f"Rejected by the operator {_by(effect.get('via'))}: not an incident. Closed by Clearway."
         since = f" since {_utc(effect['t_cleared']):%H:%M:%S} UTC" if effect.get("t_cleared") else ""
         return f"Cleared: the spot has looked as before{since}. Closed by Clearway (no request)."
 
@@ -165,7 +175,7 @@ class XProtectAlarms:
             begin, end = effect["t_change"] - BEFORE_S, effect["t"] + AFTER_S
         description = self._message(inc, ev if first else {})[:1000]
         marks = [(cam, f"Clearway {inc['category']} {inc['id']}", _utc(begin), _utc(end), _utc(effect["t_change"]))]
-        if first and self.lens_id and ev.get("span"):
+        if first and self.lens_id and ev.get("span") and ev.get("view") == "lens":
             s, e = ev["span"]
             marks.append((self.lens_id, f"Clearway lens {inc['category']} {inc['id']}", s, e, s))
         for device, header, b, e, trig in marks:

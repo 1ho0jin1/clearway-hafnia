@@ -1,14 +1,18 @@
 <#
 start_lens.ps1 - start the lens camera's video source: MediaMTX (RTSP on 127.0.0.1:8554 only) and lens\publisher.py.
 
-    powershell -NoProfile -ExecutionPolicy Bypass -File scripts\start_lens.ps1
+    powershell -NoProfile -ExecutionPolicy Bypass -File scripts\start_lens.ps1 [-PublisherArgs '--no-wallclock']
 
 Both run detached (they survive the Claude Code or PowerShell session) and log to run\lens\. Each is started only if
 it is not already running, so running this again changes nothing. After the publisher (re)starts, XProtect resumes
-recording lens_1 only about 10 s later (measured 2026-10-21): queue clips 15 s after a start, and keep it running. scripts\setup_lens.ps1 installs MediaMTX and adds
-the lens_1 camera; run it once first. Stop both with: Get-Process mediamtx | Stop-Process; and end the python.exe
-whose command line contains lens.publisher.
+recording lens_1 only about 10 s later (measured 2026-10-21): queue clips 15 s after a start, and keep it running.
+-PublisherArgs are passed to lens\publisher.py (for comparisons such as scripts\check_lens.py). scripts\setup_lens.ps1
+installs MediaMTX and adds the lens_1 camera; run it once first. Stop both with: Get-Process mediamtx | Stop-Process;
+and end the python.exe processes whose command line contains lens.publisher.
 #>
+param(
+    [string[]] $PublisherArgs = @()
+)
 $ErrorActionPreference = 'Stop'
 $Repo = Split-Path $PSScriptRoot -Parent
 $MediaMtx = 'C:\tools\mediamtx\v1.21.2\mediamtx.exe'
@@ -29,7 +33,7 @@ $publisher = Get-CimInstance Win32_Process -Filter "Name = 'python.exe'" | Where
 if ($publisher) {
     Write-Host "present: lens publisher (pid $($publisher.ProcessId -join ', '))"
 } else {
-    Start-Process -FilePath $Python -ArgumentList '-u', '-m', 'lens.publisher' -WorkingDirectory $Repo -WindowStyle Hidden `
+    Start-Process -FilePath $Python -ArgumentList (@('-u', '-m', 'lens.publisher') + $PublisherArgs) -WorkingDirectory $Repo -WindowStyle Hidden `
         -RedirectStandardOutput "$Log\publisher.out.log" -RedirectStandardError "$Log\publisher.err.log" | Out-Null
-    Write-Host 'started: lens publisher'
+    Write-Host "started: lens publisher $($PublisherArgs -join ' ')".TrimEnd()
 }

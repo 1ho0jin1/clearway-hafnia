@@ -1,0 +1,166 @@
+{
+  "run": "clearway-live-20261027T081803Z-direct",
+  "minutes": 4.0,
+  "cameras": {
+    "vehicle_breakdown_traffic_queue": {
+      "fps": 9.9,
+      "dropped": 0,
+      "questions": 1,
+      "startup_questions": 1,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "STALLED_VEHICLE": 1
+      },
+      "cards": 1,
+      "occurrences_on_cards": 15,
+      "dismissed": 0,
+      "merged": 0,
+      "to_card_s_asked_median": 21.8,
+      "to_card_s_recurrence_median": 2.3,
+      "direct": 0,
+      "lens": 1,
+      "lens_wait_s_median": 8.8,
+      "hafnia_s_median": 7.3,
+      "lens_offset_s_median": null,
+      "lens_unverified": 1,
+      "lens_replayed": 0,
+      "scored": [
+        {
+          "incident": "cw-0001",
+          "hafnia": "STALLED_VEHICLE",
+          "expected": "STALLED_VEHICLE",
+          "agree": true,
+          "summary": "A silver pickup truck is stopped in the middle of the lane with its driver-side door open and a person standing outside; traffic behind it slows and stops."
+        }
+      ],
+      "replay_no_guard": {
+        "requests": 2,
+        "cards": 1
+      }
+    },
+    "bin_pushed_over_onto_sidewalk": {
+      "fps": 9.9,
+      "dropped": 0,
+      "questions": 3,
+      "startup_questions": 3,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "OBSTRUCTION": 3
+      },
+      "cards": 1,
+      "occurrences_on_cards": 16,
+      "dismissed": 0,
+      "merged": 2,
+      "to_card_s_asked_median": 13.4,
+      "to_card_s_recurrence_median": 1.4,
+      "direct": 1,
+      "lens": 2,
+      "lens_wait_s_median": 31.4,
+      "hafnia_s_median": 5.5,
+      "lens_offset_s_median": null,
+      "lens_unverified": 2,
+      "lens_replayed": 0,
+      "scored": [
+        {
+          "incident": "cw-0003",
+          "hafnia": "OBSTRUCTION",
+          "expected": "OBSTRUCTION",
+          "agree": true,
+          "summary": "A person tips a green wheeled bin onto the pavement, leaving it lying on its side as they walk away."
+        },
+        {
+          "incident": "cw-0005",
+          "hafnia": "OBSTRUCTION",
+          "expected": "OBSTRUCTION",
+          "agree": true,
+          "summary": "A green wheelie bin is lying on its side across the pavement, partially blocking the walkway; a pedestrian walks around it and later places a small object on its lid."
+        },
+        {
+          "incident": "cw-0006",
+          "hafnia": "OBSTRUCTION",
+          "expected": "OBSTRUCTION",
+          "agree": true,
+          "summary": "A green bin is left lying across the pavement, partially blocking the walkway."
+        }
+      ],
+      "replay_no_guard": {
+        "requests": 3,
+        "cards": 1
+      }
+    },
+    "escooter_left_across_sidewalk": {
+      "fps": 9.9,
+      "dropped": 0,
+      "questions": 2,
+      "startup_questions": 2,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "OBSTRUCTION": 2
+      },
+      "cards": 1,
+      "occurrences_on_cards": 12,
+      "dismissed": 0,
+      "merged": 1,
+      "to_card_s_asked_median": 13.3,
+      "to_card_s_recurrence_median": 2.3,
+      "direct": 1,
+      "lens": 1,
+      "lens_wait_s_median": 14.8,
+      "hafnia_s_median": 6.3,
+      "lens_offset_s_median": null,
+      "lens_unverified": 1,
+      "lens_replayed": 0,
+      "scored": [
+        {
+          "incident": "cw-0002",
+          "hafnia": "OBSTRUCTION",
+          "expected": "OBSTRUCTION",
+          "agree": true,
+          "summary": "The electric scooter lies on its side on the pavement after the rider dismounts, blocking part of the sidewalk as the rider walks away."
+        },
+        {
+          "incident": "cw-0004",
+          "hafnia": "OBSTRUCTION",
+          "expected": "OBSTRUCTION",
+          "agree": true,
+          "summary": "An electric scooter lies on its side across the pavement, partially blocking the lane, before a rider later enters the frame and rides past."
+        }
+      ],
+      "replay_no_guard": {
+        "requests": 2,
+        "cards": 1
+      }
+    }
+  },
+  "totals": {
+    "questions": 6,
+    "startup_questions": 6,
+    "cards": 3
+  },
+  "lens": {
+    "questions": 4,
+    "offset_s_median": null,
+    "offset_s_min": null,
+    "offset_s_max": null,
+    "drift_s_max": 0,
+    "unverified": 4,
+    "assumed": 0,
+    "replayed": 0,
+    "foreign": 0,
+    "clock_offset_s_min": null,
+    "clock_offset_s_max": null,
+    "clock_readable": null,
+    "clock_frames": null
+  },
+  "xprotect": {
+    "raise": 3,
+    "reopen": 0,
+    "close": 3,
+    "confirm": 0,
+    "bookmarks": 4,
+    "errors": []
+  }
+}

@@ -13,7 +13,12 @@ research on Hafnia's trained formats, earlier and competing entries, and footage
 
 ## Project direction (decided 2026-10-22: plan C, right-of-way incidents)
 
-- Solo entry, submission around 2026-10-30.
+- Solo entry; the submission portal closes **2026-11-01 12:00 CET** (open from Oct 26; a demo video of 3-5 min is
+  required; see `docs/PRODUCT.md` for the criteria), plan to submit on Oct 30.
+- **Selling point (2026-10-27, after seeing the field):** optimization, not detection. Two public 2026 entries
+  (RoadWatch, Scene Contracts) ask Hafnia on a click or a timer and claim no accuracy; the README, video and pitch
+  lead with how Clearway decides when to ask, what to show, and measures and fixes the answers (`docs/PRODUCT.md`,
+  "What sells it against the field"). The obstruction categories get one line.
 - **Scope: right-of-way incidents**, things that block or endanger a public way, for city and transit operators: a
   person on the tracks, a vehicle stalled in a lane, an object lying across a pavement, damage to transit. Security
   (break-ins) is a footnote: Hafnia scored 0 of 8 on real crime CCTV (`run/bench-20261018`), although it reads the
@@ -137,21 +142,24 @@ diagram (Mermaid): `docs/PLAN-C.md`, "Pipeline".
 | `scripts/eval_tier0.py` | Offline tier 0 evaluation (recall on accident clips, false candidates on normal traffic); `--set`, `--imgsz`, `--conf`, `--cap-negatives` for tuning |
 | `bridge/FrameBridge/` | C# (.NET Framework 4.8, MIP SDK 26.1.*) live frame bridge; build: `dotnet build -c Release` in that folder (needs the .NET 8 SDK, installed 2026-10-18) |
 | `hafnia/xprotect_rest.py` | XProtect REST client (Windows-auth token via PowerShell): cameras, JpegGetLive, alarms (trigger, update, snapshot), bookmarks |
-| `incident/` | Live pipeline: `bridge.py` (read FrameBridge), `router.py` (cooldown, open incident, rejected spots, budget), `verify.py` (Hafnia check + description) |
+| `incident/` | Live pipeline: `bridge.py` (read FrameBridge; `width` asks the Recording Server for frames that wide, the service's `BRIDGE_WIDTH` 832), `router.py` (cooldown, open incident, rejected spots, budget), `verify.py` (Hafnia check + description) |
 | `scripts/run_live.py` | The end-to-end pipeline on live cameras; logs to `run/live-<UTC>/events.jsonl` |
-| `lens/` | The lens camera: `publisher.py` (one RTSP stream through ffmpeg to MediaMTX: idle frames, then each queued clip in real time, starting on a whole second; logs the UTC span each clip played), `client.py` (queue a clip; `crop`, `zoom`, `slow`, `mark`, `before_after`, `span`), `enhance.py` (Real-ESRGAN super-resolution via spandrel; measured, not in the default), `mediamtx.yml` (RTSP on 127.0.0.1:8554 only, TCP only) |
+| `lens/` | The lens camera: `publisher.py` (one RTSP stream through ffmpeg to MediaMTX, frames stamped with the wall clock: idle frames, then each queued clip in real time, starting on a whole second; every frame carries the frame code; logs the UTC span, job number and frames sent per clip), `code.py` (the frame code: 64 blocks in the bottom 16 px, job number, frame index, wall time, CRC; `stamp`, `read`), `clock.py` (`LensClock`: lens_1's recorded time base read back from its own frames through FrameBridge; `span_for` a played clip, `offset`, `stats`), `client.py` (queue a clip; `crop`, `zoom`, `slow`, `mark`, `before_after`, `replay`, `span` as the assumed fallback), `enhance.py` (Real-ESRGAN super-resolution via spandrel; measured, not in the default), `mediamtx.yml` (RTSP on 127.0.0.1:8554 only, TCP only) |
 | `scripts/setup_lens.ps1`, `scripts/start_lens.ps1` | Install MediaMTX (pinned, SHA-256 checked) and camera `lens_1` (Universal 1 channel driver, our rule "Lens: record lens_1 always"); start MediaMTX and the publisher detached (logs in `run/lens/`) |
+| `scripts/check_lens.py` | Measure `lens_1`'s recorded time base against the publisher's clock through the frame code (`--minutes`, `--clips` synthetic clips, `--export` reads the recording itself back with `export_window.ps1`); no requests |
+| `README.md`, `setup.ps1`, `scripts/check_setup.py` | The entry's README (what it is, the numbers, how to run and reproduce it); the one-script, idempotent setup of a hackathon machine from a fresh clone (Python 3.12, `.venv`, ffmpeg, the .NET 8 SDK and FrameBridge, MilestonePSTools, the lens camera, the model weights, the gateway password as a user-scope variable, `-Ntfy` for the phone, the board); its last step, a check at no request (cameras, `lens_1`, today's count) |
 | `scripts/lens_compare.py` | One looped event asked about plainly and through the lens (`--variants crop crop_slow2 crop_sr`, `--prompt classify|json`, `--asks N`): finds the event live by frame matching; (1 + variants) × asks requests |
 | `scripts/lens_pilot.py` | Plan C's lens pilot (M1): each synthetic incident camera, five views (full loop, event window, crop, crop + SR, BEFORE/AFTER), one JSON prompt (`clearway/prompt.py`); 5 requests per camera |
 | `clearway/ledger.py` | The ledger (product F1): incidents, pieces, recurrences (no request), provisional skips with escalation, same-category merge, one alarm per incident (closed once it stayed cleared 60 s, reopened when it recurs), clearing, failed questions, operators' verdicts (F7: a rejection teaches the card's looks as harmless at its spot, answers about what was rejected join the rejected card; a confirmation overrules Hafnia's rejections there); returns actions, logs events (JSONL), `Ledger.replay()` |
-| `clearway/alarms.py` | XProtect alarms and bookmarks for the ledger's incidents (F3): raise on the incident's camera (category priority, owner in the name, Hafnia's summary marked AI-generated, snapshot, bookmarks on the camera and on `lens_1`), reopen, close, confirm (In progress); one thread, in order |
-| `clearway/service.py`, `clearway/prompt.py` | The Clearway service (F2): FrameBridge → change detector (a thread per camera) → SigLIP look → ledger → lens clip → `HafniaAnswers` (run cap, daily count) → ledger; logs `service.jsonl`, `ledger.jsonl`, `changes.jsonl` (replayable); takes operators' verdicts from `operator.jsonl` (F7) every second. The JSON prompt and its parser |
+| `clearway/alarms.py` | XProtect alarms and bookmarks for the ledger's incidents (F3): raise on the incident's camera (category priority, owner in the name, Hafnia's summary marked AI-generated, snapshot, bookmarks on the camera and, for a crop shown on the lens, on `lens_1`), reopen, close, confirm (In progress); one thread, in order |
+| `clearway/service.py`, `clearway/prompt.py` | The Clearway service (F2): FrameBridge → change detector (a thread per camera) → SigLIP look → ledger → the crop (a spot the lens would magnify less than `DIRECT_BELOW` is asked about on its own camera's recording, the crop only stored for the board; a small one is played on the lens) → `HafniaAnswers` (run cap, daily count, `PARALLEL` requests at once; a failed direct ask is asked once more on the lens) → ledger; logs `service.jsonl`, `ledger.jsonl`, `changes.jsonl` (replayable); takes operators' verdicts from `operator.jsonl` (F7) every second. The JSON prompt and its parser |
 | `scripts/run_clearway.py`, `scripts/report_clearway.py` | Run the service on live cameras: `--answers standin` (dry run, no requests; loop phase by frame matching; detectors start at a loop start) or `--answers hafnia --max-requests N`; summarise a run per camera beside the offline replay, scoring Hafnia against the stand-in, with operators' verdicts and the later decisions they changed |
 | `scripts/eval_ledger.py` | The ledger replayed offline against a stand-in for Hafnia: requests, cards, occurrences, alarms, misses; saves each clip's event stream, `--from-events` replays them without the detector |
-| `tier0/change.py`, `tier0/memory.py` | Plan C tier 0: the change detector (`ChangeParams.loops()` / `.real()`) and the SigLIP 2 verdict memory (`Embedder`, `VerdictMemory`) |
+| `tier0/change.py`, `tier0/memory.py` | Plan C tier 0: the change detector (`ChangeParams.loops()` / `.real()`; an open change's spot is left out of the slow background so a lasting change does not fade, `release()` lets it in for a change the ledger judged harmless) and the SigLIP 2 verdict memory (`Embedder`, `VerdictMemory`) |
 | `clearway/board.py`, `clearway/board.html` | The owner board (F4): a standard-library web server on 127.0.0.1:8765 following a run folder (`--latest` by default): cards by owner with the lens clip (MP4 made from the spool on first view), snapshot, summary, time open, recurrences, alarm state, Confirm / Reject (F7: `POST /api/operator`, board's own page only, appended to the run's `operator.jsonl`); JSON at `/api/board` |
 | `clearway/summary.py`, `clearway/summary.html` | The shift summary (F8), from a run's logs (no requests): incidents by owner and category, false cards, change to card (first and repeat), card to XProtect alarm, alarm to clear, clear to alarm closed, time open and longest occurrence (the ledger's clearing rule replayed over its log and the detector's closings), recurring spots with snapshots, cost per camera-hour and cameras per 500-a-day allowance, operator verdicts; hotspots (F9): per camera, the ledger's spots with their counts and the heat of every reported change over the camera's scene image (`<run>/cameras/`, the detector's slow background, written by the service every 10 min and at the end; the board serves it at `/cameras/<camera>.jpg`); `shift.json` (written by the service at the end, or `python -m clearway.summary <run>`) and the board's `/summary` page; logs are read incrementally |
-| `clearway/notify.py`, `config/owners.json` | Owner notifications: each ledger effect (opened, reopened, cleared, confirmed, rejected) as a JSON webhook (`clearway.notification/1`) to the incident's owner; targets per owner, real URLs and signing keys from environment variables (`url_env`, `secret_env`: HMAC-SHA256 in `X-Clearway-Signature`), a thread per target, retries; logged by target name, never URL; `run_clearway.py --notify` |
+| `clearway/notify.py`, `config/owners.json` | Owner notifications: each ledger effect (opened, reopened, cleared, confirmed, rejected) to the incident's owner as a JSON webhook (`clearway.notification/1`) or as a push on their phone (`"type": "ntfy"`: title, text, priority from the incident's, the snapshot attached, Confirm / Reject buttons that post a signed verdict to a reply topic; `NtfyReplies` follows that topic, outbound only, and appends verdicts to the run's `operator.jsonl` like the board, F7; `max_per_hour` guard); targets per owner, real URLs and keys from environment variables (`url_env`, `reply_url_env`, `secret_env`: HMAC-SHA256 of the body for webhooks, of the verdict tokens for ntfy), a thread per target, retries; logged by target name, never URL; `run_clearway.py --notify`; self-test `python -m clearway.notify --test [--listen N]` |
+| `scripts/setup_ntfy.ps1` | Phone pushes: creates the ntfy topic, reply topic and verdict secret once (user-scope `CLEARWAY_NTFY_URL`, `CLEARWAY_NTFY_REPLY_URL`, `CLEARWAY_NTFY_SECRET`; the topic name is the credential: never in git, chat or slides), shows the topic to subscribe to in the ntfy app (`-Show`), sends a sample push (`-Test`, `-Listen N` waits for a tap) |
 | `scripts/owner_inbox.py`, `scripts/owner_inbox.html`, `scripts/start_inbox.ps1` | A stand-in for the owners' channels on 127.0.0.1:8770: receives the notifications (checks signatures with `CLEARWAY_HOOK_SECRET` set) and shows a feed per owner; keeps them in `run/inbox/` (git-ignored) |
 | `scripts/start_board.ps1`, `scripts/open_board.ps1` | Start the board detached (logs in `run/board/`); open it as an Edge app window beside Smart Client |
 | `scripts/start_smartclient.ps1` | Start Smart Client not elevated (Medium integrity) from the built-in Administrator; did not make HTML page items use Edge here |
@@ -170,6 +178,8 @@ do not inherit it, so load it first in the same command:
 
 ```powershell
 $env:HAFNIA_GW_PASSWORD = [Environment]::GetEnvironmentVariable('HAFNIA_GW_PASSWORD', 'User')
+foreach ($n in 'CLEARWAY_NTFY_URL', 'CLEARWAY_NTFY_REPLY_URL', 'CLEARWAY_NTFY_SECRET') {   # phone pushes (--notify)
+    Set-Item -Path "env:$n" -Value ([Environment]::GetEnvironmentVariable($n, 'User')) }
 py scripts\bench_hafnia.py --dry-run          # plan and allowance; costs nothing
 py scripts\bench_hafnia.py --run-dir run\<name> --label <tag> ...   # several runs can share one folder
 py scripts\report_bench.py run\<name>         # writes run\<name>\report.html
@@ -358,8 +368,10 @@ nothing: a change must last 15 s, longer than their 8-15.5 s loops.
 summaries, not yet audited against the frames): eleven cameras for 3 h, 11 cards, 4 of them false (0.12 per
 camera-hour), all from answers asked in the first 6 minutes, when 26 questions came at once; 24 of 32 answers fit the
 scene. Three wrong answers describe another camera's scene (the gate "walks along the railway tracks"), matching the
-clip the lens played about 10 s after the asked span: `lens_1`'s recording may lag the publisher under start-up load
-(unverified; recordings expire 24 h after). The looped object incidents faded: the detector reported them in the
+clip the lens played about 10 s after the asked span: `lens_1`'s recording lagged the publisher (confirmed 2026-10-27
+with exported frames, `run/lens-check-20261027`: recorded time 0.3-9.5 s behind the publisher's clock under load,
+1.5-2.2 s when quiet; four of the six wrong answers judged other cameras' clips and every lens answer lost its first
+1.5-3 s; see **Direct asks for large spots** and **Lens self-check**, which found the cause). The looped object incidents faded: the detector reported them in the
 first half hour and hardly after (the slow background, τ 600 s, probably takes in a state present for most of each
 loop), so their cards stayed open all shift and questions stopped after 70 minutes; the person triggers did not fade.
 XProtect was slow all shift with eleven cameras (35-62 s per alarm action, bookmarks about 30 s; a card's alarm 276 s
@@ -374,6 +386,111 @@ within a second of the card. With `--close-after 5` the looped bin sent cleared 
 the 60 s close prevents. Real webhook URLs and signing keys come from environment variables named in
 `config/owners.json`; deliveries are logged by target name, never URL. One-way while the board is reachable only on the
 machine; Teams and Slack formats are TODO.
+
+**Phone pushes (F12, ntfy)** (`run/clearway-dry-20261027T044611Z-ntfy`, no requests; self-test `run/notify-test`):
+each owner's news also goes to a phone through an ntfy topic (`clearway/notify.py` `"type": "ntfy"`,
+`scripts/setup_ntfy.ps1`): title, text, priority 5 for High (rings through), the snapshot attached, Confirm / Reject
+buttons that post a signed verdict to a reply topic the service follows (outbound only). Live on three cameras: three
+cards, each pushed 0.7 s after its effect with the snapshot (97-107 KB); a Reject tapped on a simulated phone reached
+the listener 0.7 s after the tap, the ledger 0.9 s, XProtect closed the alarm 1.2 s after the tap and the phone had
+the acknowledgement at 1.4 s; 13 later look-alikes at the spot were skipped. The listener refuses a wrong token and a
+message that is not a verdict. ntfy.sh's limits per IP (its Limitations table): 250 messages a day, 2 MB per
+attachment and 20 MB of attachments a day, 60 requests then one per 5 s; a message is kept 12 h, its attachment 3 h.
+Guards: one daily budget for all ntfy targets (past 170 only new and returning incidents go out, past 230 nothing),
+60 an hour per target, snapshots scaled to 640 px wide (about 40 KB). RFC 2047 headers carry the text with its line
+breaks and Hafnia's punctuation. The topic name is the credential: user-scope
+environment variables, never in git, chat or slides; `setup_ntfy.ps1 -Show` prints it for the phone.
+
+**Direct asks for large spots** (`run/clearway-live-20261027T081803Z-direct/README.md`, 6 requests; dry run
+`run/clearway-dry-20261027T081259Z-direct`): a spot the lens would magnify less than `DIRECT_BELOW` (2.5x; the
+pilot's full-frame answers were right down to 2.7x) is asked about on its own camera's recording over the event
+window (whole seconds, 3 s after the window's end); its crop is stored in the spool without a job file, for the
+board's card; the lens is kept for small spots (test_11's crash, about 6x). FrameBridge's frame times come from the
+Recording Server, so the camera's recording has the service's own time base: no offset and no queue; at most
+`PARALLEL` (3) requests at once. Live on three cameras: 2 of 6 questions direct (e-scooter 2.14x, bin 1.23x), Hafnia
+answered them in 5.3-5.5 s and their cards came 13.3-13.4 s after the change (lens questions 21.8-47.2 s; M3's median
+104 s); 6 of 6 categories as expected, both direct summaries right in every claim against the frames. On M3's 33
+questions the rule would have sent 13 direct, among them both wrong-scene answers that came from large spots (cw-0009,
+cw-0022). A failed direct ask (no recording over the window: the organizers' cameras record on motion) is asked once
+more on the lens while the window's frames are kept (not seen yet). Alarms: a direct card gets one bookmark, on its
+camera; the message names the camera and span Hafnia judged. `--direct-below 0` keeps every spot on the lens;
+`--no-lens` makes every question direct.
+
+**Lens self-check** (`run/lens-check-20261027T094716Z`: quiet machine, the recording read back;
+`run/lens-check-20261027T095146Z-load-wallclock/README.md`: the eleven-camera load, wall-clock against count
+stamping; no requests): every lens frame carries the frame code of `lens/code.py` (64 blocks in the bottom 16 px:
+job number, frame index, the publisher's wall time, CRC; readable at any width after H.264 and JPEG); `lens_1` is in
+the service's FrameBridge and `lens/clock.py` reads the code from its frames, whose times are the Recording Server's,
+so each clip's recorded span is measured from its own frames (a line through the frames seen, 0.3 s margin, whole
+seconds, neighbouring clips' frames checked) instead of assumed from the publisher's clock. The live feed's times
+are the recording's: frames exported from the recording decode to the same offset (+0.02 s on a quiet machine). The
+cause of M3's lag was found with it: ffmpeg stamped the raw frames by count, the publisher drops frames when the
+busy machine holds its loop, and XProtect records by the stream's time; under the eleven-camera load the recording
+fell to 9.4 s behind within four minutes with no frame discarded by MediaMTX, and recovered through the publisher's
+catch-up bursts (M3's unexplained recovery). The publisher now stamps frames with the wall clock
+(`-use_wallclock_as_timestamps 1`, the demuxer's `-framerate`, `-fps_mode cfr`; `--no-wallclock` for comparison):
+the same load gives +0.4 to +1.4 s (the delivery latency) and drift within a clip under 0.6 s. The service's live
+JPEG feed of `lens_1` carries only 12-42 % of the frames under that load while the recording takes the whole stream,
+so a clip is verified when frames were seen from its first and last quarters, the drift is under 1 s, no neighbour
+and no hole lie in the span (a hole: readable frames whose send times are more than 2 s apart, as MediaMTX's
+discards leave, and they are not recorded either); a clip with no frame seen or a hole of `REPLAY_HOLE_S` (1 s) is
+played once more. `lens` events log `offset_s`, `seen`, `sent`, `coverage`, `drift_s`, `hole_s`, `verified`; health
+logs the clock's stats; `scripts/report_clearway.py` prints the `lens` block; `scripts/check_lens.py` repeats the
+measurement (`--export` reads the recording back).
+
+**The fade** (`run/change-fade-before`, `-after`, `-after2`, `-after3/README.md`: 30-minute offline replays of the
+bin and e-scooter loops, no requests): the detector before 2026-10-27 caught 16 of 119 loops on both cameras and
+fell silent after seven minutes, which is M3's fade: the slow background (τ 600 s) learnt everywhere the fast
+foreground did not move, lasting changes included. Three general changes in `tier0/change.py`: an open change's spot
+is left out of the slow background (`freeze_open`); static-changed pixels not yet reported are not learnt until they
+have persisted `learn_static_after_s` (60 s), because the precursor of each loop's change (the rider standing before
+the hold-back let the report through) had left a growing ghost in the before snapshot until the empty spot no longer
+matched it (with the freeze alone the e-scooter stuck after 48 loops: one open change swallowed every later blob at
+its spot); and "restored" is judged within `restored_ratio` (0.25) of the change's own contrast as well as within
+`restored_diff`, with motion judged frame to frame (the fast background lags a cut by half a second). A fourth,
+closing a change whose spot looks like neither its before nor itself and re-baselining the spot (`changed_s`), is off:
+it split every evolving incident into its states (3-6 reports per loop) and would close a real incident that
+evolves. Final replay: 119 of 119 loops on both cameras, reports steady for 30 minutes (bin 3 per loop, e-scooter
+2: the pieces the ledger merges), all but 4-5 changes closed. The service releases a dismissed or rejected incident's
+changes (`ChangeDetector.release`), so their spots are learnt and set back to their before when restored.
+
+**Where the CPU goes with eleven cameras** (`run/clearway-dry-20261027T121705Z-width0/README.md` and
+`-122305Z-width832`, `-123136Z-detect2`: three 5-minute dry runs, no requests; the health record now carries the
+CPU shares of the machine, the Recording Server, FrameBridge and the service, from psutil): the Recording Server is
+not the bottleneck the investigation assumed (4.4): it uses under 2 % of the machine, because the MIP .NET library
+decodes the H.264 streams and makes the JPEGs inside FrameBridge (22-28 %), and the service's own work takes more
+than two of the four cores (56-62 %); the machine is at 100 %, so FrameBridge delivered 4.3-4.7 of each camera's 10
+fps and `lens_1`'s feed with it (M3's MediaMTX discards were the same saturation). `--width 832` (`BRIDGE_WIDTH`,
+the default: the incident cameras' own width) saves a quarter of FrameBridge's share and gains a tenth of the
+frames. `DETECT_EVERY` 2 (the detector sees every second frame; it waits persist_s before reporting anyway) gains
+far more: 7.5 frames per camera per second delivered, the lens feed's coverage 0.54 instead of 0.33 with no
+replay, its latency 0.23 s instead of 0.79, the service at 52 %. Still open: FrameBridge forwarding every second
+frame itself, the real-camera profile's 640-px working width.
+
+**Clean live run under the day's fixes** (`run/clearway-live-20261027T124112Z-clean/README.md`, 14 requests; eleven
+cameras, 20 minutes, alarms and phone pushes): 7 cards on the six incident cameras and none on the five street
+cameras (M3: 4 false), 12 of 14 categories as the stand-in expected (the graffiti described exactly but filed
+OBSTRUCTION; the gate's first lens clip NONE with a 0.7 s hole in its feed), cards 19.5-31 s after the change for
+direct asks and 42-72 s through the lens (M3 median 104 s), 331 recurrences carded without a request (79-83
+occurrences per card: the fade fix at work), lens offsets +0.29 to +0.47 s with 3 of 4 spans verified, no answer
+about another camera's scene. One wrong object with the right category: the lying scooter's crop called "a large
+tree branch". XProtect alarm actions still 14-71 s per raise (median 19 s): the API Gateway on a saturated machine;
+the service and FrameBridge now run below normal priority (`Service(below_normal=True)`, `--normal-priority` to
+compare) so XProtect's services are scheduled first: `run/clearway-dry-20261027T134043Z-priority/README.md`, the
+same eleven cameras, raises 0.16-0.23 s (median 0.2 s; M3's 35-62 s were this), our frame rate unchanged (7.0-7.7
+per camera), the lens recording's delivery latency gone (+0.01 s under load). The lens publisher stays at normal
+priority: it is a camera.
+
+**Prompt negatives** (`scripts/reask.py`; `run/clearway-live-20261027T124112Z-clean/reask-negatives.jsonl` and
+`reask-summary_first.jsonl`, 21 requests): the clean run's 14 spans asked again with two variants. With each
+category's definition saying what it is not (OBSTRUCTION "not someone painting, breaking or forcing something",
+DAMAGE "choose this even if the damaged thing is next to a path", NONE "ordinary traffic, people walking, parked
+vehicles, a stationary train", ...), the graffiti became DAMAGE, the twelve right answers stayed, the clip of the
+wrong seconds stayed NONE, and the ambiguous scooter crop went from a right label for a wrong object ("a large
+tree branch") to NONE: 13 of 14 as expected against 12. Asking for the summary before the category did not fix the
+graffiti and made that crop STALLED_VEHICLE. The negatives prompt is `clearway/prompt.py`'s since; `reask.py`
+keeps the original as a variant. The sample is one run's spans: the pilot's thirty answers (`run/pilot-*`) have
+expired from the recordings and were not re-checked.
 
 **Crash category (gate G3)** (`run/lens-test_11-20261024T110155Z`, 3 requests): with COLLISION in the JSON prompt the
 cropped view of test_11's crash says COLLISION ("loses control … veers sharply"), the full frame STALLED_VEHICLE; the

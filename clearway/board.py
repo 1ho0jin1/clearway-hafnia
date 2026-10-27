@@ -107,7 +107,7 @@ class RunFollower:
                     self.ended = e["wall"]
                 elif k == "health":
                     self.health = e.get("cameras", {})
-                elif k == "lens":
+                elif k in ("lens", "direct"):
                     self.spans[e["incident"]] = e["span"]
                 elif k in ("unanswered", "failed", "error") and e.get("incident"):
                     self.not_asked.add(e["incident"])
@@ -184,7 +184,8 @@ class RunFollower:
                 else None}
 
     def clip(self, incident: str) -> Path | None:
-        """The incident's lens clip as MP4, made from the spool's AVI on first request."""
+        """The incident's crop as MP4, made from the spool's AVI on first request (the clip Hafnia judged on the lens,
+        or the crop the service stored beside a direct ask on the camera's own recording)."""
         with self.lock:
             inc = self.ledger.incidents.get(incident)
             job = inc.clip if inc else ""

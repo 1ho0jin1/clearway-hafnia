@@ -13,10 +13,13 @@ HEADER = struct.Struct("<iqi")   # camera index, frame time (Unix ms, UTC), JPEG
 
 
 class FrameBridge:
-    def __init__(self, cameras: list[str], exe: Path = EXE, log=print):
+    def __init__(self, cameras: list[str], exe: Path = EXE, log=print, width: int = 0):
+        """width: the JPEG width the Recording Server transcodes each camera to (0: the camera's own). Every frame
+        of every camera is transcoded on the Recording Server, which also records and serves the gateway's exports:
+        at full resolution eleven cameras starved it (M3, 2026-10-26: lens frames discarded, 3-5 fps delivered)."""
         self.cameras = cameras
-        self.proc = subprocess.Popen([str(exe), *cameras], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE)
+        self.proc = subprocess.Popen([str(exe), "--width", str(width), *cameras], stdin=subprocess.PIPE,
+                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         threading.Thread(target=self._pump_log, args=(log,), daemon=True).start()
 
     def _pump_log(self, log) -> None:

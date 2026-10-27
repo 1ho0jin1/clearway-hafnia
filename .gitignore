@@ -16,6 +16,8 @@ obj/
 
 # Exported video frames (large; regenerate with scripts\export_frames.ps1)
 run/*/frames/
+# Frames read back from lens_1's recording (scripts\check_lens.py --export; regenerate)
+run/*/recorded/
 # The board's clips and snapshots (footage; clips are rebuilt from the lens spool)
 run/*/clips/
 run/*/snaps/

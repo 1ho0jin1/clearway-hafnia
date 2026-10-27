@@ -1,7 +1,8 @@
 r"""run_clearway.py - the Clearway service (clearway/service.py) on live cameras.
 
     .venv\Scripts\python.exe scripts\run_clearway.py [--cameras ...] [--minutes 5] [--answers standin|hafnia]
-                                                   [--max-requests 10] [--stop-at 450] [--no-lens] [--out DIR]
+                                                   [--max-requests 10] [--stop-at 450] [--parallel 3]
+                                                   [--direct-below 2.5] [--no-lens] [--width 832] [--out DIR]
                                                    [--alarms [--close-alarms-at-end] [--close-after S]] [--notify [FILE]]
 
 --answers standin (default): a dry run, no Hafnia requests. The offline replay's stand-in (scripts/eval_ledger.py)
@@ -9,8 +10,12 @@ answers LATENCY_S after the lens clip has played: the camera's category when the
 to 3 s after the report) overlaps the incident's lasting state by at least 1 s, NONE otherwise. Live, where the camera
 is in its loop is found by matching each frame to the clip's own frames (thumbnails; test harness only: a real camera
 has no loop). Cameras without a known incident state are answered NONE.
---answers hafnia: one request per question, on lens_1 over the clip's span (HafniaAnswers); at most --max-requests in
-this run, none once today's count reaches --stop-at. The planned count is printed before anything starts.
+--answers hafnia: one request per question (HafniaAnswers): on the camera's own recording over the event window when
+the lens would magnify the spot less than --direct-below times (clearway.service.DIRECT_BELOW; 0: every spot on the
+lens), else on lens_1 over the span its recording holds the crop in (read back from the frame code in lens_1's own
+frames, lens/clock.py); with --no-lens every question asks about its own camera. At most
+--max-requests in this run, none once today's count reaches --stop-at, at most --parallel at once. The planned count
+is printed before anything starts.
 --alarms: carry out the ledger's effects in XProtect (clearway/alarms.py: one alarm per incident on its camera,
 snapshot, bookmarks on the camera and on lens_1; closed once the incident stayed cleared); a dry run's alarms are
 named "[dry run] ...". --close-alarms-at-end (test harness) closes the alarms still open when the run ends;
@@ -40,7 +45,8 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 sys.path.insert(0, str(REPO / "scripts"))
 from clearway.ledger import Params  # noqa: E402
-from clearway.service import HafniaAnswers, Question, Service  # noqa: E402
+from clearway.service import (BRIDGE_WIDTH, DETECT_EVERY, DIRECT_BELOW, PARALLEL, HafniaAnswers, Question,  # noqa: E402
+                              Service)
 from eval_change import CASES, frames  # noqa: E402
 from eval_ledger import LATENCY_S, TRUTH  # noqa: E402
 from hafnia.xprotect_rest import XProtect  # noqa: E402
@@ -143,7 +149,18 @@ def main() -> int:
     ap.add_argument("--answers", choices=["standin", "hafnia"], default="standin")
     ap.add_argument("--max-requests", type=int, default=10, help="Hafnia requests in this run (--answers hafnia)")
     ap.add_argument("--stop-at", type=int, default=450, help="ask no more once today's count reaches this")
-    ap.add_argument("--no-lens", dest="lens", action="store_false", help="do not play clips on lens_1 (stand-in only)")
+    ap.add_argument("--parallel", type=int, default=PARALLEL, help="Hafnia requests at once")
+    ap.add_argument("--direct-below", type=float, default=DIRECT_BELOW,
+                    help="ask about the camera's own recording when the lens would magnify the spot less than this "
+                         "(0: every spot on the lens)")
+    ap.add_argument("--no-lens", dest="lens", action="store_false",
+                    help="do not play clips on lens_1: every question asks about its own camera")
+    ap.add_argument("--width", type=int, default=BRIDGE_WIDTH,
+                    help="frame width FrameBridge asks the Recording Server for (0: each camera's own)")
+    ap.add_argument("--detect-every", type=int, default=DETECT_EVERY,
+                    help="the change detector sees every n-th frame (the rest are kept for clips)")
+    ap.add_argument("--normal-priority", dest="below_normal", action="store_false",
+                    help="do not lower the service's and FrameBridge's process priority (for comparison)")
     ap.add_argument("--out", type=Path)
     ap.add_argument("--alarms", action="store_true", help="raise, reopen and close XProtect alarms and bookmarks")
     ap.add_argument("--close-alarms-at-end", action="store_true", help="test harness: close open alarms at the end")
@@ -162,8 +179,6 @@ def main() -> int:
         sys.exit(f"unknown cameras: {missing}")
     on_frame = None
     if args.answers == "hafnia":
-        if not args.lens:
-            sys.exit("--answers hafnia asks about the lens clip: drop --no-lens")
         from hafnia.gateway import Gateway
         from lens_compare import gateway_password
         gw = Gateway()
@@ -172,15 +187,19 @@ def main() -> int:
         if quota and quota["DailySummaryCount"] + args.max_requests > args.stop_at:
             sys.exit(f"today's count is {quota['DailySummaryCount']}: {args.max_requests} more would pass "
                      f"--stop-at {args.stop_at}")
-        hafnia = HafniaAnswers(gw, known["lens_1"], args.max_requests, args.stop_at)
+        hafnia = HafniaAnswers(gw, known, known.get("lens_1") if args.lens else None, args.max_requests,
+                               args.stop_at, parallel=args.parallel)
         shadow = LoopStandIn(args.cameras)
         on_frame = shadow.observe
 
         def answer(q: Question) -> dict:
             """Hafnia's answer, with what the stand-in expects (no request) to score it against."""
             return {**hafnia(q), "expected": shadow.judge(q)}
+        views = ("every question on its own camera (no lens)" if not args.lens else
+                 f"spots the lens would magnify less than {args.direct_below:g}x on their own camera, the rest on "
+                 f"lens_1 (spans read back from its frames)")
         print(f"live run: at most {args.max_requests} Hafnia requests (today's count "
-              f"{quota['DailySummaryCount'] if quota else 'unknown'})", flush=True)
+              f"{quota['DailySummaryCount'] if quota else 'unknown'}), {args.parallel} at once; {views}", flush=True)
     else:
         answer = LoopStandIn(args.cameras)
         on_frame = answer.observe
@@ -189,7 +208,8 @@ def main() -> int:
     params = Params() if args.close_after is None else Params(close_after_s=args.close_after)
     service = Service(cameras, answer, out, lens=args.lens, params=params, on_frame=on_frame,
                       echo=lambda s: print(s, flush=True), close_alarms_at_end=args.close_alarms_at_end,
-                      zones=load_zones(args.zones) if args.zones.exists() else None)
+                      zones=load_zones(args.zones) if args.zones.exists() else None, direct_below=args.direct_below,
+                      width=args.width, detect_every=args.detect_every, below_normal=args.below_normal)
     if args.alarms:
         from clearway.alarms import XProtectAlarms
         service.alarms = XProtectAlarms(known, known.get("lens_1") if args.lens else None, service.log,
@@ -199,8 +219,10 @@ def main() -> int:
         owners, base_url, problems = load_owners(args.notify)
         for p in problems:
             print(f"notify: {p}", flush=True)
-        service.notifier = OwnerNotifier(owners, service.log, out.name, base_url, dry_run=mode == "dry")
-        print(f"notify: {sum(len(t) for t in owners.values())} targets for {sorted(owners)}", flush=True)
+        service.notifier = OwnerNotifier(owners, service.log, out.name, base_url, dry_run=mode == "dry", out=out)
+        print(f"notify: {sum(len(t) for t in owners.values())} targets for {sorted(owners)}"
+              + (f"; following {len(service.notifier.listeners)} ntfy reply topic(s) for Confirm / Reject"
+                 if service.notifier.listeners else ""), flush=True)
     service.run(args.minutes)
     print(f"wrote {out}", flush=True)
     return 0

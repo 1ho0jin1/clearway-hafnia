@@ -13,6 +13,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import re
+import shutil
 import time
 from collections.abc import Sequence
 from pathlib import Path
@@ -81,8 +82,10 @@ def mark(frame: np.ndarray, boxes: Sequence[Sequence[float]], color=(0, 0, 255),
 
 
 def submit(frames: list[np.ndarray], label: str, fps: int = 10, tail_s: float = 1.0, meta: dict | None = None,
-           spool: Path = SPOOL) -> str:
-    """Write the clip and its job file; returns the job id. The publisher plays jobs in id (time) order."""
+           spool: Path = SPOOL, play: bool = True) -> str:
+    """Write the clip and its job file; returns the job id. The publisher plays jobs in id (time) order. With play
+    False only the clip is written, for the board's card (clearway/board.py reads <id>.avi): the publisher looks at
+    job files alone, so the lens never shows it (the service asks about such a spot on its own camera)."""
     spool.mkdir(parents=True, exist_ok=True)
     job_id = f"{utc_now():%Y%m%dT%H%M%S%f}_{re.sub(r'[^A-Za-z0-9_-]', '_', label)}"
     h, w = frames[0].shape[:2]
@@ -92,6 +95,8 @@ def submit(frames: list[np.ndarray], label: str, fps: int = 10, tail_s: float = 
     for f in frames:
         out.write(f if f.shape[:2] == (h, w) else cv2.resize(f, (w, h)))
     out.release()
+    if not play:
+        return job_id
     spec = {"id": job_id, "video": video.name, "fps": fps, "tail_s": tail_s, "meta": meta or {}}
     tmp = spool / f"{job_id}.json.tmp"
     tmp.write_text(json.dumps(spec), encoding="utf-8")
@@ -100,7 +105,7 @@ def submit(frames: list[np.ndarray], label: str, fps: int = 10, tail_s: float = 
 
 
 def wait(job_id: str, timeout: float = 300, spool: Path = SPOOL) -> dict:
-    """Block until the publisher has played the job; returns its done record (start, end, frames)."""
+    """Block until the publisher has played the job; returns its done record (start, end, frames, sent, seq, fps)."""
     done = spool / f"{job_id}.done.json"
     deadline = time.monotonic() + timeout
     while True:
@@ -116,10 +121,26 @@ def wait(job_id: str, timeout: float = 300, spool: Path = SPOOL) -> dict:
     return record
 
 
+def replay(job_id: str, spool: Path = SPOOL) -> str:
+    """Queue a clip once more under a new id (its AVI copied, so the board finds either id): for a clip of which no
+    frame reached the Recording Server (lens/clock.py). Returns the new job id."""
+    label = job_id.split("_", 1)[1] if "_" in job_id else job_id
+    new_id = f"{utc_now():%Y%m%dT%H%M%S%f}_{label}"
+    shutil.copyfile(spool / f"{job_id}.avi", spool / f"{new_id}.avi")
+    old = json.loads((spool / f"{job_id}.json").read_text(encoding="utf-8"))
+    spec = {**old, "id": new_id, "video": f"{new_id}.avi", "meta": {**old.get("meta", {}), "replay_of": job_id}}
+    tmp = spool / f"{new_id}.json.tmp"
+    tmp.write_text(json.dumps(spec), encoding="utf-8")
+    tmp.replace(spool / f"{new_id}.json")
+    return new_id
+
+
 def span(done: dict, delay_s: float = 0.3) -> tuple[dt.datetime, dt.datetime]:
-    """The whole-second span to ask Hafnia about (the gateway takes whole seconds). The publisher starts clips on a
-    whole second and frames reach the recording about 0.2 s after they are sent (first test, 2026-10-21), so the start
-    is that second and the end is rounded up past the last frame; the held tail and the idle gap cover the rounding."""
+    """The whole-second span to ask Hafnia about, assumed from the publisher's clock: the publisher starts clips on a
+    whole second and, on an idle machine, frames reach the recording about 0.2 s after they are sent (first test,
+    2026-10-21), so the start is that second and the end is rounded up past the last frame. The recording's time base
+    does not keep to this under load (0.3-9.5 s behind during M3, run/lens-check-20261027): the service takes the span
+    from lens_1's own frames instead (lens/clock.py) and uses this only when it cannot read them."""
     def parse(s: str) -> dt.datetime:
         return dt.datetime.fromisoformat(s.replace("Z", "+00:00"))
     start = parse(done["start"]).replace(microsecond=0)

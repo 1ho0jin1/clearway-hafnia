@@ -1,0 +1,506 @@
+{
+  "run": "clearway-live-20261027T124112Z-clean",
+  "minutes": 20.0,
+  "cameras": {
+    "vehicle_breakdown_traffic_queue": {
+      "fps": 4.0,
+      "dropped": 0,
+      "questions": 1,
+      "startup_questions": 1,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "STALLED_VEHICLE": 1
+      },
+      "cards": 1,
+      "occurrences_on_cards": 15,
+      "dismissed": 0,
+      "merged": 0,
+      "to_card_s_asked_median": 19.5,
+      "to_card_s_recurrence_median": 4.0,
+      "direct": 1,
+      "lens": 0,
+      "lens_wait_s_median": null,
+      "hafnia_s_median": 11.6,
+      "lens_offset_s_median": null,
+      "lens_unverified": 0,
+      "lens_replayed": 0,
+      "scored": [
+        {
+          "incident": "cw-0003",
+          "hafnia": "STALLED_VEHICLE",
+          "expected": "STALLED_VEHICLE",
+          "agree": true,
+          "summary": "A silver pickup truck stalls in the middle of the lane with its driver-side door open and smoke rising from the engine, blocking traffic and forcing vehicles to stop behind it."
+        }
+      ],
+      "replay_no_guard": {
+        "requests": 2,
+        "cards": 1
+      }
+    },
+    "bin_pushed_over_onto_sidewalk": {
+      "fps": 3.9,
+      "dropped": 0,
+      "questions": 3,
+      "startup_questions": 3,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "OBSTRUCTION": 3
+      },
+      "cards": 1,
+      "occurrences_on_cards": 82,
+      "dismissed": 0,
+      "merged": 2,
+      "to_card_s_asked_median": 19.9,
+      "to_card_s_recurrence_median": 1.4,
+      "direct": 3,
+      "lens": 0,
+      "lens_wait_s_median": null,
+      "hafnia_s_median": 12.5,
+      "lens_offset_s_median": null,
+      "lens_unverified": 0,
+      "lens_replayed": 0,
+      "scored": [
+        {
+          "incident": "cw-0001",
+          "hafnia": "OBSTRUCTION",
+          "expected": "OBSTRUCTION",
+          "agree": true,
+          "summary": "A person tips a green wheeled bin onto its side on the pavement, leaving it lying there as they walk away."
+        },
+        {
+          "incident": "cw-0002",
+          "hafnia": "OBSTRUCTION",
+          "expected": "OBSTRUCTION",
+          "agree": true,
+          "summary": "A green wheeled bin lies on its side on the pavement, partially blocking the sidewalk; a person walks around it and later returns to lift it upright."
+        },
+        {
+          "incident": "cw-0007",
+          "hafnia": "OBSTRUCTION",
+          "expected": "OBSTRUCTION",
+          "agree": true,
+          "summary": "A person tips a green wheeled bin onto the pavement, leaving it lying on its side as they walk away."
+        }
+      ],
+      "replay_no_guard": {
+        "requests": 3,
+        "cards": 1
+      }
+    },
+    "escooter_left_across_sidewalk": {
+      "fps": 3.9,
+      "dropped": 0,
+      "questions": 2,
+      "startup_questions": 2,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "OBSTRUCTION": 2
+      },
+      "cards": 1,
+      "occurrences_on_cards": 3,
+      "dismissed": 0,
+      "merged": 1,
+      "to_card_s_asked_median": 42.4,
+      "to_card_s_recurrence_median": 1.7,
+      "direct": 0,
+      "lens": 2,
+      "lens_wait_s_median": 24.9,
+      "hafnia_s_median": 16.4,
+      "lens_offset_s_median": 0.4,
+      "lens_unverified": 0,
+      "lens_replayed": 0,
+      "scored": [
+        {
+          "incident": "cw-0006",
+          "hafnia": "OBSTRUCTION",
+          "expected": "OBSTRUCTION",
+          "agree": true,
+          "summary": "A large tree branch lies across the pavement, partially blocking the bike lane and forcing a cyclist to stop and maneuver around it."
+        },
+        {
+          "incident": "cw-0012",
+          "hafnia": "OBSTRUCTION",
+          "expected": "OBSTRUCTION",
+          "agree": true,
+          "summary": "An electric scooter lies on its side across the pavement, blocking the walkway, while a person walks past and another rides past in the adjacent lane."
+        }
+      ],
+      "replay_no_guard": {
+        "requests": 2,
+        "cards": 1
+      }
+    },
+    "school_gate_break_in_night": {
+      "fps": 3.9,
+      "dropped": 0,
+      "questions": 4,
+      "startup_questions": 3,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "NONE": 1,
+        "TAMPERING": 3
+      },
+      "cards": 1,
+      "occurrences_on_cards": 83,
+      "dismissed": 1,
+      "merged": 2,
+      "to_card_s_asked_median": 22.8,
+      "to_card_s_recurrence_median": 1.6,
+      "direct": 2,
+      "lens": 2,
+      "lens_wait_s_median": 21.4,
+      "hafnia_s_median": 20.1,
+      "lens_offset_s_median": 0.3,
+      "lens_unverified": 1,
+      "lens_replayed": 0,
+      "scored": [
+        {
+          "incident": "cw-0005",
+          "hafnia": "TAMPERING",
+          "expected": "TAMPERING",
+          "agree": true,
+          "summary": "A person crouches and uses a tool to pick the padlock on a metal gate, then stands up and walks away, leaving the padlock still attached to the gate."
+        },
+        {
+          "incident": "cw-0013",
+          "hafnia": "TAMPERING",
+          "expected": "TAMPERING",
+          "agree": true,
+          "summary": "A person in a hoodie crouches and removes a padlock from a metal gate, then walks away with the lock."
+        },
+        {
+          "incident": "cw-0009",
+          "hafnia": "NONE",
+          "expected": "TAMPERING",
+          "agree": false,
+          "summary": "A metallic fence with pointed tops remains stationary on the pavement throughout the video."
+        },
+        {
+          "incident": "cw-0010",
+          "hafnia": "TAMPERING",
+          "expected": "TAMPERING",
+          "agree": true,
+          "summary": "A person crouches and removes a padlock and chain from a metal gate, leaving the lock and chain on the pavement."
+        }
+      ],
+      "replay_no_guard": {
+        "requests": 2,
+        "cards": 2
+      }
+    },
+    "person_on_railway_tracks": {
+      "fps": 4.0,
+      "dropped": 0,
+      "questions": 3,
+      "startup_questions": 2,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "PERSON_ON_TRACKS": 3
+      },
+      "cards": 2,
+      "occurrences_on_cards": 80,
+      "dismissed": 0,
+      "merged": 1,
+      "to_card_s_asked_median": 20.9,
+      "to_card_s_recurrence_median": 1.2,
+      "direct": 3,
+      "lens": 0,
+      "lens_wait_s_median": null,
+      "hafnia_s_median": 13.6,
+      "lens_offset_s_median": null,
+      "lens_unverified": 0,
+      "lens_replayed": 0,
+      "scored": [
+        {
+          "incident": "cw-0004",
+          "hafnia": "PERSON_ON_TRACKS",
+          "expected": "PERSON_ON_TRACKS",
+          "agree": true,
+          "summary": "A person in a red jacket sits on the edge of the platform near the tracks, then stands and walks along the tracks away from the platform."
+        },
+        {
+          "incident": "cw-0011",
+          "hafnia": "PERSON_ON_TRACKS",
+          "expected": "PERSON_ON_TRACKS",
+          "agree": true,
+          "summary": "A person in a red jacket walks along the platform, steps onto the railway tracks, and sits down on the track edge."
+        },
+        {
+          "incident": "cw-0014",
+          "hafnia": "PERSON_ON_TRACKS",
+          "expected": "PERSON_ON_TRACKS",
+          "agree": true,
+          "summary": "A person in a red jacket walks along the railway tracks, crosses the rails, and exits the frame."
+        }
+      ],
+      "replay_no_guard": {
+        "requests": 1,
+        "cards": 1
+      }
+    },
+    "graffiti_on_standing_train": {
+      "fps": 4.0,
+      "dropped": 0,
+      "questions": 1,
+      "startup_questions": 1,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {
+        "OBSTRUCTION": 1
+      },
+      "cards": 1,
+      "occurrences_on_cards": 79,
+      "dismissed": 0,
+      "merged": 0,
+      "to_card_s_asked_median": 30.7,
+      "to_card_s_recurrence_median": 1.3,
+      "direct": 1,
+      "lens": 0,
+      "lens_wait_s_median": null,
+      "hafnia_s_median": 12.9,
+      "lens_offset_s_median": null,
+      "lens_unverified": 0,
+      "lens_replayed": 0,
+      "scored": [
+        {
+          "incident": "cw-0008",
+          "hafnia": "OBSTRUCTION",
+          "expected": "DAMAGE",
+          "agree": false,
+          "summary": "A person on the platform uses a spray paint can to apply graffiti on the side of a stationary train, then walks away from the train."
+        }
+      ],
+      "replay_no_guard": {
+        "requests": 1,
+        "cards": 1
+      }
+    },
+    "busy_street": {
+      "fps": 3.9,
+      "dropped": 0,
+      "questions": 0,
+      "startup_questions": 0,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {},
+      "cards": 0,
+      "occurrences_on_cards": 0,
+      "dismissed": 0,
+      "merged": 0,
+      "to_card_s_asked_median": null,
+      "to_card_s_recurrence_median": null,
+      "direct": 0,
+      "lens": 0,
+      "lens_wait_s_median": null,
+      "hafnia_s_median": null,
+      "lens_offset_s_median": null,
+      "lens_unverified": 0,
+      "lens_replayed": 0,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 5,
+        "cards": 0
+      }
+    },
+    "highway_traffic_overcast_weather": {
+      "fps": 3.8,
+      "dropped": 0,
+      "questions": 0,
+      "startup_questions": 0,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {},
+      "cards": 0,
+      "occurrences_on_cards": 0,
+      "dismissed": 0,
+      "merged": 0,
+      "to_card_s_asked_median": null,
+      "to_card_s_recurrence_median": null,
+      "direct": 0,
+      "lens": 0,
+      "lens_wait_s_median": null,
+      "hafnia_s_median": null,
+      "lens_offset_s_median": null,
+      "lens_unverified": 0,
+      "lens_replayed": 0,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 0,
+        "cards": 0
+      }
+    },
+    "city_street_7_condensation_inside_housing": {
+      "fps": 4.0,
+      "dropped": 0,
+      "questions": 0,
+      "startup_questions": 0,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {},
+      "cards": 0,
+      "occurrences_on_cards": 0,
+      "dismissed": 0,
+      "merged": 0,
+      "to_card_s_asked_median": null,
+      "to_card_s_recurrence_median": null,
+      "direct": 0,
+      "lens": 0,
+      "lens_wait_s_median": null,
+      "hafnia_s_median": null,
+      "lens_offset_s_median": null,
+      "lens_unverified": 0,
+      "lens_replayed": 0,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 4,
+        "cards": 0
+      }
+    },
+    "vandalism": {
+      "fps": 4.0,
+      "dropped": 0,
+      "questions": 0,
+      "startup_questions": 0,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {},
+      "cards": 0,
+      "occurrences_on_cards": 0,
+      "dismissed": 0,
+      "merged": 0,
+      "to_card_s_asked_median": null,
+      "to_card_s_recurrence_median": null,
+      "direct": 0,
+      "lens": 0,
+      "lens_wait_s_median": null,
+      "hafnia_s_median": null,
+      "lens_offset_s_median": null,
+      "lens_unverified": 0,
+      "lens_replayed": 0,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 0,
+        "cards": 0
+      }
+    },
+    "traffic_flows_in_the_open_lanes": {
+      "fps": 4.0,
+      "dropped": 0,
+      "questions": 0,
+      "startup_questions": 0,
+      "escalated": 0,
+      "unanswered": [],
+      "answers": {},
+      "cards": 0,
+      "occurrences_on_cards": 0,
+      "dismissed": 0,
+      "merged": 0,
+      "to_card_s_asked_median": null,
+      "to_card_s_recurrence_median": null,
+      "direct": 0,
+      "lens": 0,
+      "lens_wait_s_median": null,
+      "hafnia_s_median": null,
+      "lens_offset_s_median": null,
+      "lens_unverified": 0,
+      "lens_replayed": 0,
+      "scored": [],
+      "replay_no_guard": {
+        "requests": 0,
+        "cards": 0
+      }
+    }
+  },
+  "totals": {
+    "questions": 14,
+    "startup_questions": 12,
+    "cards": 7
+  },
+  "lens": {
+    "questions": 4,
+    "offset_s_median": 0.3,
+    "offset_s_min": 0.29,
+    "offset_s_max": 0.47,
+    "drift_s_max": 0.11,
+    "unverified": 1,
+    "assumed": 0,
+    "replayed": 0,
+    "foreign": 0,
+    "clock_offset_s_min": -0.1,
+    "clock_offset_s_max": 3.78,
+    "clock_readable": 8307,
+    "clock_frames": 8307
+  },
+  "xprotect": {
+    "raise": 7,
+    "reopen": 0,
+    "close": 7,
+    "confirm": 0,
+    "bookmarks": 8,
+    "errors": [],
+    "checked": [
+      {
+        "alarm": "c52e98c8-73bb-4a11-82a8-27e17d067d9a",
+        "name": "Clearway: OBSTRUCTION, Street services",
+        "priority": "Medium",
+        "state": "Closed",
+        "expected": "Closed",
+        "ok": true
+      },
+      {
+        "alarm": "11ce1323-5ed7-4bc5-a11e-ce32141ef3c8",
+        "name": "Clearway: STALLED_VEHICLE, Traffic operations",
+        "priority": "High",
+        "state": "Closed",
+        "expected": "Closed",
+        "ok": true
+      },
+      {
+        "alarm": "b88ca4ca-6fd7-4161-9717-5e00352ce7f7",
+        "name": "Clearway: PERSON_ON_TRACKS, Rail control",
+        "priority": "High",
+        "state": "Closed",
+        "expected": "Closed",
+        "ok": true
+      },
+      {
+        "alarm": "e0fd61ea-841d-4134-bf3e-eea25975e441",
+        "name": "Clearway: TAMPERING, Security",
+        "priority": "Low",
+        "state": "Closed",
+        "expected": "Closed",
+        "ok": true
+      },
+      {
+        "alarm": "2e52797b-7a11-4c9f-9dd3-43c2d967c5e8",
+        "name": "Clearway: OBSTRUCTION, Street services",
+        "priority": "Medium",
+        "state": "Closed",
+        "expected": "Closed",
+        "ok": true
+      },
+      {
+        "alarm": "2e26b269-45d0-4f93-9b46-aa1cd7bdfb61",
+        "name": "Clearway: OBSTRUCTION, Street services",
+        "priority": "Medium",
+        "state": "Closed",
+        "expected": "Closed",
+        "ok": true
+      },
+      {
+        "alarm": "9d45d968-7133-4731-9f55-deaf1b1dd582",
+        "name": "Clearway: PERSON_ON_TRACKS, Rail control",
+        "priority": "High",
+        "state": "Closed",
+        "expected": "Closed",
+        "ok": true
+      }
+    ]
+  }
+}
