@@ -354,6 +354,18 @@ and the service processes every frame; for the first 3 minutes, while everything
 (the first alarm took 116 s, later ones 0.2-0.3 s). The five street cameras at the real-camera setting report
 nothing: a change must last 15 s, longer than their 8-15.5 s loops.
 
+**Three-hour live shift (M3)** (`run/clearway-live-20261026T141534Z-m3/README.md`, 32 requests; judged from Hafnia's
+summaries, not yet audited against the frames): eleven cameras for 3 h, 11 cards, 4 of them false (0.12 per
+camera-hour), all from answers asked in the first 6 minutes, when 26 questions came at once; 24 of 32 answers fit the
+scene. Three wrong answers describe another camera's scene (the gate "walks along the railway tracks"), matching the
+clip the lens played about 10 s after the asked span: `lens_1`'s recording may lag the publisher under start-up load
+(unverified; recordings expire 24 h after). The looped object incidents faded: the detector reported them in the
+first half hour and hardly after (the slow background, τ 600 s, probably takes in a state present for most of each
+loop), so their cards stayed open all shift and questions stopped after 70 minutes; the person triggers did not fade.
+XProtect was slow all shift with eleven cameras (35-62 s per alarm action, bookmarks about 30 s; a card's alarm 276 s
+after it), not only at start-up; 12 calls timed out on one alarm. The stand-in is no answer key for the gate: it
+expects TAMPERING for the lit pavement, which Hafnia rightly calls NONE.
+
 **Owner notifications (F12)** (`run/clearway-dry-20261025T144944Z-notify`, `...145829Z-notify-cycle`, no requests): the
 ledger's effects go to the incident's owner as JSON webhooks (`clearway/notify.py`) beside the XProtect alarms; the
 stand-in owner inbox (`scripts/owner_inbox.py`, 127.0.0.1:8770) shows a feed per owner. Live: 8 messages (6 opened, a
@@ -410,7 +422,8 @@ code = 5" and the camera stays black. Always run `scripts/annexb_normalize.py` a
 clips, out of scope) were 75 GB of it and are now **disabled** (hardware disabled; re-enable with `Set-VmsHardware
 -Enabled $true`). Long offline replays were stopped twice by Claude Code for low RAM while the session was idle (XProtect
 about 4.9 GB, VS Code, Edge and Claude Code about 4 GB, plus YOLO, SigLIP and decoding): run long jobs detached
-(`Start-Process`) and check free memory.
+(`Start-Process`) and check free memory. During M3 (eleven cameras, 2026-10-26) the service held about 4.5 GB and
+2.8 GB of 15.7 GB stayed free; Claude Code stopped its own background waiter for low memory, the detached run went on.
 
 **Current state (2026-10-24):** our cameras: `test_06`–`test_10` (ports 111–115) disabled; `test_11` (port 116) plays AI City 2021 Track 4 training video 91 (15 min,
 800×410; a crash at about 602 s; licence not cleared for the entry: internal tests only; source in `data/aicity21/`,

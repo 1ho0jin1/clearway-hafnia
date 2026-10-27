@@ -4,6 +4,14 @@ Status: **current.** This turns plan C (`docs/PLAN-C.md`, the pipeline and its m
 uses. Plan C stays the technical reference; where the two disagree on scope or schedule, this document wins.
 Submission about 2026-10-30. A "clearway" is a road where stopping is not allowed: the product keeps public ways clear.
 
+**Progress (2026-10-27):** F1-F9 and F12 are built (F6 is the prompt's COLLISION category); F10 and F11 are not
+started. M3, the three-hour live shift on all eleven cameras, ran on 2026-10-26
+(`run/clearway-live-20261026T141534Z-m3`): 11 cards, 4 false, all from the start-up minutes; 32 requests. It found
+three problems to fix before the demo (Risks): answers that may describe another camera's clip, looped incidents
+fading from the detector after about 10 minutes, and XProtect taking 35-62 s per alarm action with eleven cameras.
+Next: check the lens recording against the clips sent before the recordings expire (from about 14:16 UTC 2026-10-27),
+then the fixes, F10, M4, the report and the video (Schedule).
+
 ## The operator's question
 
 > **What is blocking a public way right now, whose job is it, and how long has it been there?**
@@ -114,6 +122,13 @@ the breakdown.
 | Category right, claims checked against the frames | can the card be trusted | Hafnia answers, audited as in `run/probe-20261022T054342Z/audit.md` |
 | Operator corrections that changed later decisions | does it adapt | F7 log |
 
+First numbers from M3 (2026-10-26, eleven cameras, 3 h; answers judged from Hafnia's summaries, not yet audited
+against the frames): 0.12 false cards per camera-hour (4 in 33, all in the first 6 minutes); first card 104 s after the
+change (median; the start-up burst waiting for the one lens camera), repeats 1.1 s; a card's XProtect alarm 276 s
+after it; 1.0 request per camera-hour; 24 of 32 answers fit the scene. No operator was at the board, so the
+corrections row has no M3 number. The requests per camera are flattered by the looped incidents fading from the
+detector (Risks): not a claim until a run without that.
+
 Honesty rules for the demo and the report: the organizers' clips loop every 8–17 s, so an incident "clears" when its
 clip restarts and comes back as a recurrence a few seconds later; we say so. Hotspot counts on loops are replays of one
 incident, so the hotspot feature is shown on them but no planning claim is made from them. Every measured number points
@@ -141,17 +156,17 @@ A day in the life, on the shared cameras so any judge can rerun it:
 4. Numbers in operator terms: false cards per hour, seconds to alarm, cameras per allowance; accuracy beside them.
 5. What it adapts to: operator corrections into the memory; hotspots for planners; what we did not claim.
 
-## Schedule (replaces plan C's from Oct 24)
+## Schedule (replaces plan C's from Oct 24; revised 2026-10-27)
 
-The allowance resets at 00:00 UTC; stay under the cap each day.
+The allowance resets at 00:00 UTC; stay under the cap each day. Requests are the plan's, not counts.
 
 | Day | Date | Work | Requests |
 |---|---|---|---|
-| 3 | Oct 24 | This plan. G3 (COLLISION, 3). Ledger with recurrences (F1), replayed offline on recorded detector output. Pipeline service skeleton (F2). | 10 |
-| 4 | Oct 25 | Live pipeline on the six incident cameras (F2); XProtect alarms, bookmarks, auto-close (F3); danger zone for the tracks (F5). | 60 |
-| 5 | Oct 26 | Owner board with clips (F4), in a browser and in a Smart Client HTML view; confirm / reject (F7). Machine restart (organizers; participant). | 40 |
-| 6 | Oct 27 | Shift summary (F8) and hotspots (F9); Smart Map check (F10, half a day). A live shift on all eleven cameras for 2–4 hours (M3). | 150 |
-| 7 | Oct 28 | Report in operator terms with accuracy and audits; `test_11` (M4); fixes. | 60 |
+| 3 | Oct 24 | **Done:** this plan; G3 (COLLISION); the ledger (F1), replayed offline; the service skeleton (F2). | 10 |
+| 4 | Oct 25 | **Done:** the live pipeline (F2); XProtect alarms, bookmarks, auto-close (F3); the danger zone (F5); and, ahead of plan, the owner board (F4; Smart Client's HTML item cannot show it, see Risks), confirm / reject (F7), the shift summary (F8), owner notifications (F12). | 60 |
+| 5 | Oct 26 | **Done:** hotspots (F9); the eleven-camera preflight; M3, three hours live on all eleven cameras (32 requests). | 40 |
+| 6 | Oct 27 | **Done:** M3 analysed. **Before about 14:16 UTC:** export `lens_1`'s recorded frames for M3's wrong-scene answers and compare them with the clips sent (the recordings expire). Then: replay one looped incident offline for 30+ minutes (the fade); Smart Map check (F10, half a day). | 0 |
+| 7 | Oct 28 | Fixes from M3 (lens recording lag, the detector's fade on loops, the start-up burst, XProtect's slowness with eleven cameras); a shorter live run to check them; `test_11` (M4); report in operator terms with accuracy and audits. | 80 |
 | 8 | Oct 29 | Demo video; `setup.ps1`, README (opens with the board). | 30 |
 | 9 | Oct 30 | Spare; submission. | |
 
@@ -164,6 +179,9 @@ The allowance resets at 00:00 UTC; stay under the cap each day.
 | Recurrence matching merges two different incidents at one spot | The memory checks the look as well as the spot; the operator can split by rejecting |
 | The board becomes a second alarm list | Alarms stay in Alarm Manager (operators' habit); the board is for owners and the overview, and links each card to its alarm |
 | Not enough time for P1 | P0 alone is a complete product (cards, clips, alarms, auto-close); P1 adds adaptation and analysis |
+| Hafnia is shown the wrong clip | **Suspected in M3 (2026-10-26), unverified.** Three wrong answers describe another camera's scene, matching the clip the lens played about 10 s after the asked span; all in the start-up minutes. Check `lens_1`'s recording against the clips sent; if it lags, ask for the span the recording holds, or space the clips out with idle frames and say so |
+| Looped incidents fade from the detector in a long run | **Happened in M3.** The object incidents were reported in the first half hour and hardly after; their cards stayed open all shift. Probably the slow background taking in a state present for most of each loop (real incidents do not loop). Confirm offline; for the demo, keep runs short or reset the background at a loop start, and say so |
+| XProtect is slow with eleven cameras | **Happened in M3:** 35-62 s per alarm action all shift (0.2-0.3 s in a 3-minute preflight after start-up), a card's alarm 276 s after it, 12 timeouts on one alarm. The board and the owners' messages are not held up (messages 0.7-3.6 s after the card). Cause not found; for the demo, fewer cameras |
 
 ## Sources
 

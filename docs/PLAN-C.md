@@ -1,4 +1,4 @@
-# Plan C: right-of-way incidents (decided 2026-10-22, updated 2026-10-24)
+# Plan C: right-of-way incidents (decided 2026-10-22, updated 2026-10-27)
 
 Status: **technical plan.** The product built on it, with the current scope and schedule, is in `docs/PRODUCT.md`
 (2026-10-24); where they differ, `docs/PRODUCT.md` wins. Supersedes `docs/PLAN.md` (verified accident alarms) and `docs/PLAN-near-miss.md` (near-miss
@@ -98,17 +98,17 @@ options.
 
 ## Components
 
-| # | Component | Status (2026-10-25) | What |
+| # | Component | Status (2026-10-27) | What |
 |---|---|---|---|
-| 1 | Change detector (`tier0/change.py`) | **built, G1** | Dual-rate background (Porikli et al., 2008) with a median warm-up; per-pixel static time that pauses while something moves across a spot; people held back; whole-view changes ignored; each change closed when its spot matches its BEFORE snapshot. Two settings: `ChangeParams.loops()` (synthetic clips) and `.real()` (640 px, 0.15%, 15 s). |
+| 1 | Change detector (`tier0/change.py`) | **built, G1** | Dual-rate background (Porikli et al., 2008) with a median warm-up; per-pixel static time that pauses while something moves across a spot; people held back; whole-view changes ignored; each change closed when its spot matches its BEFORE snapshot. Two settings: `ChangeParams.loops()` (synthetic clips) and `.real()` (640 px, 0.15%, 15 s). In M3's three hours the looped object incidents were reported in the first half hour and hardly after (probably the slow background, τ 600 s, taking in a state present for most of each loop; to confirm offline). |
 | 2 | Verdict memory (`tier0/memory.py`) | **built, offline** | SigLIP 2 (`google/siglip2-base-patch16-224`, Apache-2.0) embeddings of each changed spot, kept with Hafnia's verdict; a change at a rejected spot that looks like the rejection is not sent. 45% fewer requests, no incident skipped, against a stand-in for Hafnia (`run/memory-compare`). |
 | 3 | Stalled-vehicle trigger | to build | A vehicle track that was moving and has stood still for ≥ N s in a lane (`tier0/rules.py`, `sharp_decel`). Covers the breakdown and crash aftermaths. |
 | 4 | Person triggers | danger zone **built, live** (F5); staying at a spot to build (F11) | `tier0/zones.py`: a person's feet (bottom centre of YOLO's box, 5 fps) inside a danger-zone polygon for ≥ 1 s is reported like a change; closed after 2 s empty. One polygon per camera in `config/zones.json` (the only per-camera setting); the tracks' polygon is everything beyond the near platform's yellow tactile strip, its edge fitted by colour. Live: the person on the track reported in every loop, PERSON_ON_TRACKS from Hafnia. To build: a person staying at one spot for ≥ N s (gate). |
-| 5 | Router | **built, live** | In the service (`clearway/service.py`, `HafniaAnswers`): one request per ledger question, a run cap, none once today's `DailySummaryCount` reaches a limit. Not built: urgent first. The single lens camera is the bottleneck (first cards 36–85 s after the change when six incidents start within a minute). |
-| 6 | Lens | **built, M1** | `lens/` (publisher, client, `lens_1`): event window from 2 s before the change started to 3 s after it was reported, cropped to the spot. Options measured and left out of the default: Real-ESRGAN super-resolution (`lens/enhance.py`), BEFORE/AFTER stills (`before_after()`). |
+| 5 | Router | **built, live** | In the service (`clearway/service.py`, `HafniaAnswers`): one request per ledger question, a run cap, none once today's `DailySummaryCount` reaches a limit. Not built: urgent first. The single lens camera is the bottleneck (first cards 36–85 s after the change when six incidents start within a minute; 104 s median, up to 213 s, when eleven cameras start at once in M3). |
+| 6 | Lens | **built, M1** | `lens/` (publisher, client, `lens_1`): event window from 2 s before the change started to 3 s after it was reported, cropped to the spot. Options measured and left out of the default: Real-ESRGAN super-resolution (`lens/enhance.py`), BEFORE/AFTER stills (`before_after()`). Open question from M3: three answers in the start-up minutes describe the clip played about 10 s after the asked span (is `lens_1`'s recording lagging under load?). |
 | 7 | Prompt and parser | **built, M1, G3** | `clearway/prompt.py` `PROMPT`: JSON with `category` (`PERSON_ON_TRACKS`, `COLLISION`, `STALLED_VEHICLE`, `OBSTRUCTION`, `DAMAGE`, `TAMPERING`, `NONE`, each defined), `object`, `where`, `still_present`, `summary`; parsed in code with a keyword fallback. Use the category and `still_present`; treat `object` details (tool types) as unreliable. Live: 10 of 10 valid JSON, 6 of 6 incidents right. |
 | 8 | Ledger and XProtect | **built, live** (F1, F2, F3) | `clearway/ledger.py`: one record per incident (pieces, recurrences, provisional skips, merges, clearing, failed questions), event log replayable. `clearway/alarms.py`: one XProtect alarm per incident on its camera, priority by category, owner in the name, Hafnia's summary, a snapshot, bookmarks on the camera and on the lens clip; closed once the incident has stayed cleared for 60 s, reopened when it recurs. Operators' verdicts (F7) go into the same memory: a rejected card's looks are skipped at its spot, a confirmed card's alarm goes to In progress. The owners are told by webhook (`clearway/notify.py`, F12). |
-| 9 | Ledger page | **built** (F4, F8) | `clearway/board.py`: the owner board, a web page on 127.0.0.1:8765 following a run folder (the ledger's log applied incrementally): cards by owner with the lens clip (MP4 made from the spool), the camera's view with the spot boxed, summary, time open, recurrences, alarm state, Confirm / Reject buttons (F7); questions being checked; requests used. Its own window beside Smart Client (`scripts/open_board.ps1`): Smart Client's HTML page item falls back to Internet Explorer on this machine. The shift summary (`clearway/summary.py`, `/summary`, `shift.json`): counts by owner and category, times from change to card and alarm and to clear, longest open, recurring spots, cost. |
+| 9 | Ledger page | **built** (F4, F8) | `clearway/board.py`: the owner board, a web page on 127.0.0.1:8765 following a run folder (the ledger's log applied incrementally): cards by owner with the lens clip (MP4 made from the spool), the camera's view with the spot boxed, summary, time open, recurrences, alarm state, Confirm / Reject buttons (F7); questions being checked; requests used. Its own window beside Smart Client (`scripts/open_board.ps1`): Smart Client's HTML page item falls back to Internet Explorer on this machine. The shift summary (`clearway/summary.py`, `/summary`, `shift.json`): counts by owner and category, times from change to card and alarm and to clear, longest open, recurring spots, cost; hotspots (F9) over each camera's scene image. |
 | 10 | Setup | partly | `scripts/setup_lens.ps1` exists; `setup.ps1` for a fresh machine; CC0 footage fetched by script from Wikimedia Commons. |
 
 ## Cameras and footage
@@ -140,6 +140,12 @@ as a scene reset; each loop is one more trial of the same incident, and the ledg
   the candidate, false candidates per hour on the negatives. No requests.
 - **M3 End to end, live.** All incident cameras for an hour or more: items opened and closed per loop, precision and
   recall, time from change to alarm, time to close, requests per hour and cameras one 500-a-day allowance covers.
+  **Run 2026-10-26** (`run/clearway-live-20261026T141534Z-m3`, all eleven cameras for 3 h, 32 requests; judged from
+  the summaries, audit against the frames to do): 11 cards, 4 false (0.12 per camera-hour), all from the start-up
+  minutes; 24 of 32 answers fit the scene; first card 104 s after the change (median), repeats 1.1 s, alarm 276 s
+  after the card. Three findings to fix before the numbers count: answers that may describe another camera's clip
+  (`lens_1`'s recording possibly lagging the publisher by about 10 s under start-up load), looped incidents fading
+  from the detector after about 10 minutes, and XProtect at 35-62 s per alarm action with eleven cameras.
 - **M4 Real footage.** `test_11` and the earlier real accident cameras (aftermaths), the CC0 streets: does the same
   pipeline hold outside synthetic loops? False items per hour, misses, audited answers.
 
