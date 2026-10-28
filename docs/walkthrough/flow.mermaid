@@ -1,0 +1,30 @@
+flowchart TD
+    %% Clearway: how a live frame becomes one incident, and what teaches the system (state 2026-10-28).
+    %% Rendered in docs/walkthrough/index.html (the same text); GitHub renders it inside a ```mermaid fence.
+    CAM["XProtect cameras: live frames at 10 fps through our MIP SDK reader, FrameBridge"]
+    CAM --> CD["Change detector: something changed and stayed changed; people held back, whole-view changes ignored"]
+    CAM --> ZONE["Danger zone: a person's feet on the track bed for 1 s"]
+    CD --> LOOK["The spot's fingerprint: a SigLIP 2 embedding, free"]
+    ZONE --> LOOK
+    LOOK --> LED{"Incident memory: known at this spot?"}
+    LED -- "part of an open incident" --> JOIN(["joins it: no request"])
+    LED -- "looks like an incident open or cleared within the hour" --> RECUR(["recurrence: no request; the incident counts it, a closed alarm reopens"])
+    LED -- "looks like what Hafnia or the operator rejected here" --> HOLD["on hold: no request"]
+    HOLD -- "still there after 30 s" --> Q
+    LED -- "new" --> Q["a request: the clip around the change, 2 s before to 3 s after, cropped to the spot"]
+    Q --> SIZE{"would the magnifier camera enlarge it 2.5x or more?"}
+    SIZE -- "no" --> DIRECT["asked on the camera's own recording"]
+    SIZE -- "yes" --> LENS["played enlarged on the magnifier camera lens_1; the recorded seconds read back from the code in its frames; played again after a hole"]
+    DIRECT --> HAF["Hafnia VLM: one request, a JSON answer (category, summary, still present)"]
+    LENS --> HAF
+    HAF -- "NONE" --> REJ["rejected at this spot: remembered; the detector lets the spot into the background"]
+    HAF -- "a category" --> CARD["one incident: its owner (the team responsible) and its priority from the category"]
+    CARD --> OUT["an XProtect alarm with a snapshot and bookmarks; a card on the owner's board; a push to the owner's phone"]
+    OUT --> OP{"Operator: Confirm or Reject, on the board or the phone"}
+    OP -- "Reject" --> REJO["alarm closed; the incident's fingerprints rejected at its spot; later answers about it join the incident"]
+    OP -- "Confirm" --> CONF["alarm In progress; Hafnia's rejections here that look like the incident are overruled"]
+    CD -- "the spot looks as before again" --> CLEAR["cleared: the alarm closes after 60 s, no request"]
+    REJ -.-> LED
+    REJO -.-> LED
+    CONF -.-> LED
+    CLEAR -.-> LED

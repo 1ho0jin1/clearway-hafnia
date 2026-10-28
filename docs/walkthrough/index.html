@@ -1,10 +1,14 @@
-<title>Right-of-Way Pipeline</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Clearway decides</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: one reading column of numbered pipeline steps; each step = claim, real camera figure, measured numbers. */
+/* Layout: one reading column of numbered steps; each step = claim, real camera figure, measured numbers. */
 :root {
   --bg: #f3f5f7;          /* overcast asphalt, light */
   --surface: #ffffff;
@@ -34,7 +38,7 @@
   --signal: #f0a530; --signal-soft: #3a2b10; --stop: #f07068; --stop-soft: #3d1b19;
   --go: #6cc070; --go-soft: #1c3320; --code-bg: #10161b; color-scheme: dark;
 }
-body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.6; }
 .page { max-width: 980px; margin: 0 auto; padding-block: 40px 72px;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   display: grid; gap: 56px; }
@@ -43,6 +47,7 @@ h1 { font-size: clamp(2.4rem, 6vw, 3.6rem); letter-spacing: 0.01em; }
 h2 { font-size: clamp(1.6rem, 3.6vw, 2.1rem); }
 h3 { font-size: 1.25rem; }
 p { margin: 0; max-width: 68ch; }
+ul { margin: 0; padding-left: 1.2em; max-width: 70ch; display: grid; gap: 6px; }
 a { color: var(--signal); }
 header { display: grid; gap: 16px; }
 .eyebrow { font-family: var(--display); text-transform: uppercase; letter-spacing: 0.12em; color: var(--signal); font-weight: 600; font-size: 0.95rem; }
@@ -55,8 +60,10 @@ header { display: grid; gap: 16px; }
 .chip.built { color: var(--go); background: var(--go-soft); }
 .chip.todo { color: var(--signal); background: var(--signal-soft); }
 .chip.out { color: var(--muted); background: transparent; }
-.flow { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 16px; overflow-x: auto; }
-.flow pre { margin: 0; }
+.flow { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 16px; overflow-x: auto; display: grid; gap: 10px; }
+.flow pre { margin: 0; font-family: var(--mono); font-size: 0.8rem; line-height: 1.45; }
+.flow pre svg { max-width: 100%; height: auto; }
+.flow .note { margin: 0; }
 section.step { display: grid; gap: 16px; grid-template-columns: 64px minmax(0, 1fr); align-items: start; }
 .num { font-family: var(--display); font-weight: 700; font-size: 2.6rem; line-height: 1; color: var(--signal);
   font-variant-numeric: tabular-nums; border-top: 4px solid var(--signal); padding-top: 6px; }
@@ -79,7 +86,7 @@ table { border-collapse: collapse; width: 100%; font-size: 0.9rem; background: v
 th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
 th { font-family: var(--display); font-weight: 600; letter-spacing: 0.04em; font-size: 0.95rem; color: var(--muted); }
 tr:last-child td { border-bottom: none; }
-td code, p code { font-family: var(--mono); font-size: 0.86em; background: var(--code-bg); padding: 1px 4px; border-radius: 2px; }
+td code, p code, li code, figcaption code { font-family: var(--mono); font-size: 0.86em; background: var(--code-bg); padding: 1px 4px; border-radius: 2px; }
 .pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
 .answer { border: 1px solid var(--rule); border-left: 4px solid var(--go); background: var(--surface); padding: 12px 14px; border-radius: 3px;
   display: grid; gap: 6px; min-width: 0; }
@@ -92,17 +99,22 @@ footer { border-top: 1px solid var(--rule); padding-top: 20px; display: grid; ga
   .num { font-size: 2rem; width: 56px; }
 }
 </style>
-
+</head>
+<body>
 <div class="page">
   <header>
-    <div class="eyebrow">Hafnia Hackathon 2026 · plan C</div>
-    <h1>Right-of-Way Pipeline</h1>
-    <p class="lede">When something blocks or endangers a public way, the team that owns it gets an alarm, and the alarm
-      closes itself when the way is clear again. Every camera is watched for free; Hafnia is asked only about changes
-      worth a request, and shown them the way it reads best.</p>
+    <div class="eyebrow">Hafnia Hackathon 2026 · Clearway</div>
+    <h1>How Clearway decides</h1>
+    <p class="lede">What is blocking a public way right now, whose job is it, and how long has it been there? Every
+      camera is watched for free. The Hafnia VLM is asked once per incident and shown the moment and the spot. One
+      incident is then one XProtect alarm, one card on the board of the team responsible for it (its owner) and one
+      push to that team's phone, and the operator's Confirm or Reject teaches the system. Each step below is a claim,
+      a figure from the real cameras and the numbers behind it.</p>
     <div class="facts">
-      <span>Shown on the organizers' cameras (on every hackathon machine) and a CC0 street clip</span>
-      <span>Hafnia requests behind these results: <b>57</b> of the 500-a-day allowance</span>
+      <span>Shown on the organizers' cameras (on every hackathon machine) and one CC0 street clip</span>
+      <span>Live results on this page: the 20-minute run on Oct 27, after that day's fixes (<b>14</b> requests, eleven
+        cameras), and the three-hour shift on Oct 26 (<b>33</b> requests)</span>
+      <span>State <b>2026-10-28</b>; first written 2026-10-24</span>
     </div>
     <div class="legend">
       <span class="chip built">built</span> built and measured
@@ -114,47 +126,70 @@ footer { border-top: 1px solid var(--rule); padding-top: 20px; display: grid; ga
   <div class="flow" aria-label="Pipeline flow diagram">
 <pre class="mermaid">
 flowchart TD
-    CAM["XProtect cameras"] --> FB["FrameBridge: live frames, 10 fps"]
-    FB --> CD["Change detector: changed and stayed changed"]
-    FB --> PT["Person and stalled-vehicle triggers"]
-    CD --> MEM{"Verdict memory (SigLIP 2): looks like a change Hafnia already rejected here?"}
-    PT --> MEM
-    MEM -- "yes" --> DROP(["skipped, no request"])
-    MEM -- "no" --> RT["Router: daily budget, urgent first"]
-    RT --> LENS["Lens: event window, cropped to the spot, played on camera lens_1"]
-    LENS --> GW["Hafnia: one request, JSON answer"]
-    GW -- "NONE" --> REJ["remember the rejection"]
-    REJ -.-> MEM
-    GW -- "an incident category" --> ITEM["Item + XProtect alarm for the owner + bookmark"]
-    ITEM --> WATCH["Tier 0 watches the spot"]
-    WATCH -- "looks as before" --> CLOSE(["closed, no request"])
-    classDef built fill:#d8f0d8,stroke:#2e7d32,color:#000
-    classDef planned fill:#fff3cd,stroke:#b38600,color:#000
-    class CAM,FB,CD,MEM,DROP,LENS,GW,REJ built
-    class PT,RT,ITEM,WATCH,CLOSE planned
+    %% Clearway: how a live frame becomes one incident, and what teaches the system (state 2026-10-28).
+    %% Rendered in docs/walkthrough/index.html (the same text); GitHub renders it inside a ```mermaid fence.
+    CAM["XProtect cameras: live frames at 10 fps through our MIP SDK reader, FrameBridge"]
+    CAM --> CD["Change detector: something changed and stayed changed; people held back, whole-view changes ignored"]
+    CAM --> ZONE["Danger zone: a person's feet on the track bed for 1 s"]
+    CD --> LOOK["The spot's fingerprint: a SigLIP 2 embedding, free"]
+    ZONE --> LOOK
+    LOOK --> LED{"Incident memory: known at this spot?"}
+    LED -- "part of an open incident" --> JOIN(["joins it: no request"])
+    LED -- "looks like an incident open or cleared within the hour" --> RECUR(["recurrence: no request; the incident counts it, a closed alarm reopens"])
+    LED -- "looks like what Hafnia or the operator rejected here" --> HOLD["on hold: no request"]
+    HOLD -- "still there after 30 s" --> Q
+    LED -- "new" --> Q["a request: the clip around the change, 2 s before to 3 s after, cropped to the spot"]
+    Q --> SIZE{"would the magnifier camera enlarge it 2.5x or more?"}
+    SIZE -- "no" --> DIRECT["asked on the camera's own recording"]
+    SIZE -- "yes" --> LENS["played enlarged on the magnifier camera lens_1; the recorded seconds read back from the code in its frames; played again after a hole"]
+    DIRECT --> HAF["Hafnia VLM: one request, a JSON answer (category, summary, still present)"]
+    LENS --> HAF
+    HAF -- "NONE" --> REJ["rejected at this spot: remembered; the detector lets the spot into the background"]
+    HAF -- "a category" --> CARD["one incident: its owner (the team responsible) and its priority from the category"]
+    CARD --> OUT["an XProtect alarm with a snapshot and bookmarks; a card on the owner's board; a push to the owner's phone"]
+    OUT --> OP{"Operator: Confirm or Reject, on the board or the phone"}
+    OP -- "Reject" --> REJO["alarm closed; the incident's fingerprints rejected at its spot; later answers about it join the incident"]
+    OP -- "Confirm" --> CONF["alarm In progress; Hafnia's rejections here that look like the incident are overruled"]
+    CD -- "the spot looks as before again" --> CLEAR["cleared: the alarm closes after 60 s, no request"]
+    REJ -.-> LED
+    REJO -.-> LED
+    CONF -.-> LED
+    CLEAR -.-> LED
 </pre>
+    <p class="note">The same diagram is <code>flow.mermaid</code> beside this page (rendered here with Mermaid from a
+      CDN; without a network connection the source text shows instead). Solid arrows: a frame on its way to an alarm.
+      Dotted arrows: what changes the memory, so that the next change at the spot is decided differently.</p>
   </div>
 
   <section class="step" id="cameras">
     <div class="num">1</div>
     <div class="body">
       <div class="title-row"><h2>The cameras</h2><span class="chip built">built</span></div>
-      <p>Eleven XProtect cameras play the organizers' clips on a loop at 10 frames per second. Six of them, added on
-        21 October, show incidents in public ways: a breakdown, a tipped bin, an e-scooter left on the pavement, a person
-        on the tracks, graffiti on a train and a break-in at a school gate. The last tile is <code>lens_1</code>, a camera
-        of our own whose video we render: it is how Hafnia gets to see a close-up.</p>
+      <p>Eleven XProtect cameras play the organizers' clips on a loop at 10 frames per second; a clip restarts every
+        8 to 17 seconds, so each staged incident happens again and again. Six of them show incidents in public ways: a
+        breakdown, a tipped bin, an e-scooter left on the pavement, a person on the tracks, graffiti on a train and a
+        break-in at a school gate; five show ordinary streets. The last tile is <code>lens_1</code>, our magnifier
+        camera: a camera of our own whose video we render, so that Hafnia gets to see a close-up. Our live-frame
+        reader, FrameBridge, a small program of ours on Milestone's MIP SDK, brings every camera's live frames to the
+        service at 832 pixels wide; the change detector looks at every second frame, which is all it needs and what
+        keeps the machine's four cores from starving the video system (step 11).</p>
       <figure>
         <img src="01_cameras.jpg" alt="Grid of eleven camera frames, one per organizer camera, plus a frame from lens_1 showing an enlarged e-scooter on a pavement.">
         <figcaption>One frame per camera, taken from the clip each camera plays. Our real-crash camera (AI City video 91)
           is not shown: its licence does not allow redistribution.</figcaption>
       </figure>
+      <div class="numbers">
+        <div><b>11 + 1</b><span>cameras, and the lens camera lens_1</span></div>
+        <div><b>7.5–8.1</b><span>frames per second received per camera with all eleven running (the 20-minute run)</span></div>
+        <div><b>0</b><span>motion events or gateway rules wired to Hafnia: nothing in XProtect sends a clip on its own</span></div>
+      </div>
     </div>
   </section>
 
   <section class="step" id="detector">
     <div class="num">2</div>
     <div class="body">
-      <div class="title-row"><h2>Tier 0 notices that something changed and stayed changed</h2><span class="chip built">built</span></div>
+      <div class="title-row"><h2>The change detector notices that something changed and stayed changed</h2><span class="chip built">built</span></div>
       <p>Two background models run on every frame. A slow one remembers how the scene looked minutes ago; a fast one
         follows it within half a second. A pixel that differs from the slow model but not from the fast one belongs to
         something that arrived and stopped, or to something that left. When a region stays that way for 1.5 seconds and
@@ -171,22 +206,45 @@ flowchart TD
         <div><b>0.1–3.9 s</b><span>from the object coming to rest to the report</span></div>
         <div><b>0</b><span>reports on the roadworks camera and on 13 min of foggy highway</span></div>
       </div>
+      <p>A lasting change has to stay a change. The slow background learns wherever nothing moves, and until
+        2026-10-27 that included the obstruction itself: within minutes it belonged to the scene, and the three-hour
+        shift on Oct 26 saw its looped incidents reported in the first half hour and hardly after. Three general fixes: an
+        open change's spot is kept out of the slow background; pixels that are static and changed but not reported
+        yet (a person standing still, an object settling) are not learnt for 60 seconds, so that the next change at
+        the spot does not carry a ghost of them in its "before" snapshot; and "restored" is judged against the
+        change's own contrast. A change that was judged harmless is released into the background instead
+        (step 13).</p>
+      <figure>
+        <img src="10_fade.jpg" alt="Four rows of ticks over 30 minutes: the bin and the e-scooter loops, each with the detector before the fix (ticks stop early) and after it (ticks steady to the end).">
+        <figcaption>Thirty minutes of the bin and e-scooter loops replayed offline, one tick per report
+          (<code>run/change-fade-before</code>, <code>run/change-fade-after3</code>). Before the fix: 16 of 119 loops
+          caught on each camera, nearly all in the first seven minutes, with a stray report or two later. After: every loop,
+          reports steady to the end, and 357 of the bin's 362 changes closed by themselves when the loop restarted.</figcaption>
+      </figure>
     </div>
   </section>
 
   <section class="step" id="people">
     <div class="num">3</div>
     <div class="body">
-      <div class="title-row"><h2>A person is not an obstruction</h2><span class="chip built">held back</span><span class="chip todo">person triggers</span></div>
+      <div class="title-row"><h2>A person is not an obstruction</h2><span class="chip built">held back</span><span class="chip built">danger zone</span><span class="chip todo">staying at a spot</span></div>
       <p>A change that a person stands in is held back until they leave: someone pausing on the pavement is not an
-        obstacle, the scooter they leave behind is. The two incidents that are people (on the tracks, at the gate) are
-        therefore not the change detector's job. They get their own triggers: a danger zone drawn once over the
-        tracks, and a person staying at one spot.</p>
+        obstacle, the scooter they leave behind is. The two incidents that are people get their own treatment. The
+        tracks camera has a danger zone, the only per-camera setting: everything beyond the platform's yellow tactile
+        strip. A person's feet (the bottom of the YOLO box, at 5 frames per second) inside it for one second is
+        reported like a change, in every loop. The gate's break-in is a person who stays at one spot; that trigger is
+        not built, and the gate's incident comes from the change the detector sees at the gate once the person's
+        hold-back lets it through.</p>
       <figure>
         <img src="03_people_held.jpg" alt="Railway platform with a seated person boxed in green, and a person crouching at a school gate boxed in green; small red static-change areas around them.">
-        <figcaption>Green: YOLO person boxes. Red: static change. Both are held back. In the lens tests below, YOLO's
-          person box stands in for the person triggers.</figcaption>
+        <figcaption>Green: YOLO person boxes. Red: static change. Both are held back; the tracks get the danger zone
+          instead.</figcaption>
       </figure>
+      <div class="numbers">
+        <div><b>1.0 s</b><span>from the feet entering the track bed to the report; every loop</span></div>
+        <div><b>12</b><span>occurrences in 3 minutes on one incident, without a request; Hafnia PERSON_ON_TRACKS 2 of 2</span></div>
+        <div><b>High</b><span>the alarm's priority for rail control: the phone rings through</span></div>
+      </div>
     </div>
   </section>
 
@@ -197,7 +255,9 @@ flowchart TD
       <p>Roadworks that are there all the time belong to the background. A camera fogging up changes most of the view
         at once, which the detector ignores as a whole-view change, though its edges still slip through. A dense crowd
         moves all the time, but people standing still for a moment cause false reports at the short setting used for
-        the 15-second loops. On real cameras, where an obstruction lasts minutes, the detector waits 15 seconds instead.</p>
+        the 15-second loops. On real cameras, where an obstruction lasts minutes, the detector waits 15 seconds instead.
+        In the 20-minute live run the five street cameras produced no incident; the three-hour shift's four false
+        incidents came from the lens recording's clock (step 7), not from the detector.</p>
       <figure>
         <img src="04_negatives.jpg" alt="Three rows: roadworks camera, a camera fogging up, a night crowd; left column different pixels in yellow, right column static change in red with the false-report count.">
         <figcaption>Left: pixels different from the slow background. Right: static change, with the false reports
@@ -214,28 +274,38 @@ flowchart TD
           </tbody>
         </table>
       </div>
+      <div class="numbers">
+        <div><b>0</b><span>incidents reported on the five street cameras in the 20-minute live run</span></div>
+        <div><b>4 of 11</b><span>incidents in the three-hour shift that were false, all traced to one cause and fixed; the next run had none</span></div>
+      </div>
     </div>
   </section>
 
-  <section class="step" id="memory">
+  <section class="step" id="ledger">
     <div class="num">5</div>
     <div class="body">
-      <div class="title-row"><h2>A memory of Hafnia's verdicts</h2><span class="chip built">built, offline</span></div>
-      <p>Every answer is kept. The changed spot is embedded with SigLIP 2, an image model that runs on the machine's
-        GPU in milliseconds, and stored with Hafnia's verdict. A new change at a spot Hafnia already rejected is not sent
-        if it also looks like what was rejected there. Spot alone is not enough: an incident often comes to rest where
-        something harmless was before.</p>
+      <div class="title-row"><h2>The incident memory: one incident, many changes</h2><span class="chip built">built</span></div>
+      <p>Every reported change gets a fingerprint from SigLIP 2, an image model that runs on the machine's GPU in
+        milliseconds, and goes to the incident memory, which decides without a request wherever it can, in this
+        order. A change that overlaps a change already active in an incident is <em>part</em> of it (the detector
+        reports a tipped bin as its empty place, the bin and its base). A change at the spot of an incident that is
+        open, or cleared within the hour, and that looks like it (similarity 0.85 or more) is a <em>recurrence</em>:
+        the incident counts it, a closed alarm reopens. A change that looks like what Hafnia or the operator rejected
+        at that spot is put <em>on hold</em>: no request, and if it is still there after 30 seconds it is asked about
+        after all, because on a real street a crashed car and a car that merely stopped can look alike while the
+        harmless one leaves. Everything else is a request. Spot alone is not enough: an incident often comes to rest
+        where something harmless was before.</p>
       <figure>
         <img src="05_memory.jpg" alt="Top row: two crops of a busy Mumbai junction, similarity 0.92, the second skipped. Bottom row: empty pavement then a person with an e-scooter at the same spot, similarity 0.63, asked.">
         <figcaption>Top: a busy Mumbai junction. The change at 34 s looks like the one rejected at 26 s (similarity 0.92)
           and is skipped. Bottom: the e-scooter camera. At 24 s the rider stops with the scooter where an empty-pavement
-          change was rejected at 16 s; it looks different (0.63), so it is asked. Verdicts here come from a stand-in for
-          Hafnia (the known ground truth), not from real requests.</figcaption>
+          change was rejected at 16 s; it looks different (0.63), so it is asked. The answers here come from a local model
+          that stands in for Hafnia in dry runs (the known ground truth), not from real requests.</figcaption>
       </figure>
       <div class="numbers">
-        <div><b>223 → 123</b><span>requests for 223 changes, with the memory (45% fewer)</span></div>
-        <div><b>0 of 56</b><span>incidents skipped by the memory</span></div>
-        <div><b>20 of 56</b><span>incidents a spot-only rule would have skipped</span></div>
+        <div><b>223 → 123</b><span>requests for 223 changes offline, with the memory (45 % fewer); 0 of 56 incidents skipped</span></div>
+        <div><b>1242 of 1256</b><span>changes that needed no request in the 20-minute live run: 331 recurrences, the rest parts of open incidents</span></div>
+        <div><b>1.4 s</b><span>from a repeat to the incident it joins (median, live); the first time needs Hafnia</span></div>
       </div>
     </div>
   </section>
@@ -243,27 +313,66 @@ flowchart TD
   <section class="step" id="lens">
     <div class="num">6</div>
     <div class="body">
-      <div class="title-row"><h2>The lens shows Hafnia the moment and the spot</h2><span class="chip built">built</span></div>
-      <p>Hafnia can only read video that XProtect recorded. So the lens renders a short clip, plays it on our own camera
-        <code>lens_1</code> through a local video stream, and Hafnia is asked about that recording. The clip runs from
-        2 seconds before the change started to 3 seconds after it was reported, so the outcome is in it, and it is
-        cropped to the spot.</p>
+      <div class="title-row"><h2>The magnifier camera shows Hafnia the moment and the spot</h2><span class="chip built">built</span></div>
+      <p>Hafnia can only read video that XProtect recorded. A request covers the clip around the change, from 2 seconds
+        before it started to 3 seconds after it was reported, so the outcome is in it, cropped to the spot. A large
+        spot, one the magnifier would enlarge less than 2.5 times, is asked about on the camera's own recording over
+        those seconds: no queue and the camera's own clock. A small one is rendered as a short clip, played enlarged
+        on our own camera <code>lens_1</code>, the magnifier (the lens, for short), through a local video stream, and
+        Hafnia is asked about that recording.</p>
       <figure>
         <img src="06_lens_graffiti.jpg" alt="Top row: five full frames of a person spraying graffiti on a red train, the changed spot boxed. Bottom row: the same five moments cropped and enlarged.">
         <figcaption>Graffiti camera, 6.3 to 12.7 s of the loop. Top: the camera's view with the reported spot. Bottom:
           what <code>lens_1</code> plays. For things close to the camera, such as the bin, the crop is nearly the whole
-          frame; for small, distant things it is a real close-up.</figcaption>
+          frame, so they are asked about directly; for small, distant things it is a real close-up.</figcaption>
       </figure>
+      <div class="numbers">
+        <div><b>13 s</b><span>from the change to its incident when asked on the camera's own recording, three cameras (20–31 s with eleven running)</span></div>
+        <div><b>22–47 s</b><span>through the lens on three cameras (42–72 s with eleven: the one lens plays the clips in turn)</span></div>
+        <div><b>NONE → crash</b><span>a 30-pixel crash on a real highway camera: the plain window got NONE twice, the crop named it</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" id="code">
+    <div class="num">7</div>
+    <div class="body">
+      <div class="title-row"><h2>The lens proves which seconds it showed</h2><span class="chip built">built</span></div>
+      <p>Hafnia is asked about a camera and a span of recorded time, so the lens must know when its recording holds
+        the clip. At first that was assumed from the publisher's clock, and under the eleven-camera load the
+        recording's time ran 0.3 to 9.5 seconds behind it: the publisher dropped frames when the busy machine held it
+        up, and ffmpeg stamped the frames it did send by count. Four of the three-hour shift's six wrong answers had judged a
+        neighbouring clip. Now the publisher stamps frames with the wall clock and burns a code into every frame.
+        <code>lens_1</code>'s own frames come back through FrameBridge with the Recording Server's times; the service
+        reads the code from them and measures each clip's recorded span from its own frames. A span is verified when
+        frames from the clip's first and last quarters were seen, the drift is under a second, and no neighbouring
+        clip and no hole lies in it; a clip of which no frame arrived, or with a hole of a second, is played once
+        more.</p>
+      <figure>
+        <img src="11_lens_code.jpg" alt="A lens frame of the person on the tracks, cropped and enlarged, with a thin barcode band along its bottom edge; below, the band enlarged into 64 black and white blocks with the values read back from it.">
+        <figcaption>A lens frame as played: the person on the tracks, cropped and enlarged, job 9195, frame 7, sent
+          12:25:20.03 UTC. Below, its bottom band enlarged: 64 blocks that hold 8 sync bits, the job number, the frame
+          index, the publisher's centiseconds of the day and a CRC. Read back from an 832-pixel JPEG of the frame, as
+          the frames reach the service, the band gives the same job, frame and time.</figcaption>
+      </figure>
+      <div class="numbers">
+        <div><b>−9.4 s</b><span>the recording behind the publisher's clock within four minutes under load, with frames stamped by count</span></div>
+        <div><b>+0.4 to +1.4 s</b><span>under the same load with wall-clock stamping (the delivery latency); +0.02 s on a quiet machine, the recording read back</span></div>
+        <div><b>3 of 4</b><span>lens spans verified in the 20-minute run, offsets +0.29 to +0.47 s, none replayed; no answer about another camera's scene</span></div>
+      </div>
     </div>
   </section>
 
   <section class="step" id="answer">
-    <div class="num">7</div>
+    <div class="num">8</div>
     <div class="body">
-      <div class="title-row"><h2>Hafnia answers in a fixed format</h2><span class="chip built">built</span><span class="chip todo">COLLISION category</span></div>
-      <p>One request per change. The prompt asks for JSON and defines each category in a few words; Hafnia was trained
-        to answer in JSON. Code parses the answer and uses the category and whether the thing is still there. The
-        object's details are not trusted: Hafnia invents some, such as tool types.</p>
+      <div class="title-row"><h2>Hafnia answers in a fixed format</h2><span class="chip built">built</span></div>
+      <p>Each question is one request. The prompt asks for JSON and defines each category in a few words, and since
+        2026-10-27 says what each category is not (an OBSTRUCTION is "not someone painting, breaking or forcing
+        something"; NONE is "ordinary traffic, people walking, parked vehicles, a stationary train"). Hafnia was
+        trained to answer in JSON. Code parses the answer and uses the category and whether the thing is still there;
+        the category names the owner and the priority. The object's details are not trusted: Hafnia invents some, such
+        as tool types.</p>
       <div class="json" aria-label="Hafnia's answer for the graffiti clip"><span class="k">{"category":</span> <span class="v">"DAMAGE"</span>,
  <span class="k">"object":</span> <span class="v">"spray-painted graffiti"</span>,
  <span class="k">"where":</span> <span class="v">"pavement"</span>,
@@ -283,17 +392,19 @@ flowchart TD
         </table>
       </div>
       <div class="numbers">
-        <div><b>30 of 30</b><span>categories right: six incidents, five ways of showing each</span></div>
+        <div><b>30 of 30</b><span>categories right in the pilot: six incidents, five ways of showing each</span></div>
         <div><b>7 of 9</b><span>with the earlier one-word question and unaligned windows</span></div>
+        <div><b>13 of 14</b><span>the 20-minute run's spans asked again with the negatives (21 requests), against 12 of 14 before: the graffiti became DAMAGE</span></div>
       </div>
       <p class="note">The category list steers the whole answer. On a real highway crash, with no crash category in the
-        list, Hafnia answered STALLED_VEHICLE nine times and never mentioned the impact. A COLLISION category is next
-        (gate G3, three requests).</p>
+        list, Hafnia answered STALLED_VEHICLE nine times and never mentioned the impact; with COLLISION in the list
+        the crop of the crash says COLLISION while the full frame still says STALLED_VEHICLE, and the six synthetic
+        incidents keep their categories.</p>
     </div>
   </section>
 
   <section class="step" id="window">
-    <div class="num">8</div>
+    <div class="num">9</div>
     <div class="body">
       <div class="title-row"><h2>Why the clip is centred on the event</h2><span class="chip built">measured</span></div>
       <p>A clip that is not aligned with the event can start in the aftermath and end in the run-up. Hafnia then tells
@@ -307,7 +418,7 @@ flowchart TD
         <div class="answer bad"><div class="who">Full loop</div>
           <div>"A person approaches a locked metal gate at night, crouches to inspect the lock, then walks away without
             cutting the gate." Object: "person with chainsaw". Still there: no.</div></div>
-        <div class="answer"><div class="who">Event window</div>
+        <div class="answer"><div class="who">Clip around the change</div>
           <div>"A hooded person crouches at the gate, working on the lock with tools, and remains there at the end of
             the video." Still there: yes.</div></div>
       </div>
@@ -315,7 +426,7 @@ flowchart TD
   </section>
 
   <section class="step" id="left-out">
-    <div class="num">9</div>
+    <div class="num">10</div>
     <div class="body">
       <div class="title-row"><h2>Tested and left out</h2><span class="chip out">left out</span></div>
       <p>Two ideas for showing Hafnia more were measured and gave nothing. A super-resolution model (Real-ESRGAN)
@@ -329,51 +440,182 @@ flowchart TD
     </div>
   </section>
 
-  <section class="step" id="alarm">
-    <div class="num">10</div>
+  <section class="step" id="owners">
+    <div class="num">11</div>
     <div class="body">
-      <div class="title-row"><h2>An alarm for the team that owns it</h2><span class="chip todo">to build</span></div>
-      <p>A confirmed change opens an item in a ledger and an XProtect alarm. The category decides who gets it and how
-        urgent it is; the lens clip is bookmarked so the operator sees the moment. The alarm and bookmark calls exist
-        from earlier work; the ledger and the routing by owner are next.</p>
+      <div class="title-row"><h2>One alarm, one card, one push, for the team that owns it</h2><span class="chip built">built</span></div>
+      <p>The category decides who gets the incident and how urgent it is. The control room gets an XProtect alarm on
+        the camera, named with the category and the owner, with Hafnia's sentence marked as AI-generated, a snapshot of
+        the spot and bookmarks on the camera and, for a cropped clip, on <code>lens_1</code>. The owner's team gets a
+        card in its column on the board: the clip Hafnia judged, playing; the summary; how long the spot has been
+        open; how many times at this spot; the alarm's state; Confirm and Reject. And the owner's phone gets a push
+        with the snapshot, the incident's priority (a person on the tracks rings through) and the same two buttons.</p>
       <div class="tablewrap">
         <table>
-          <thead><tr><th>Category</th><th>Owner</th><th>Priority</th></tr></thead>
+          <thead><tr><th>Category</th><th>Owner</th><th>Alarm priority</th></tr></thead>
           <tbody>
-            <tr><td>PERSON_ON_TRACKS</td><td>Rail control: stop trains</td><td>High, urgent</td></tr>
-            <tr><td>COLLISION (to add)</td><td>Traffic operations, emergency services</td><td>High, urgent</td></tr>
-            <tr><td>STALLED_VEHICLE</td><td>Traffic operations, towing</td><td>High</td></tr>
-            <tr><td>OBSTRUCTION</td><td>Scooter operator, sanitation, street maintenance</td><td>Medium</td></tr>
+            <tr><td>PERSON_ON_TRACKS</td><td>Rail control</td><td>High</td></tr>
+            <tr><td>COLLISION, STALLED_VEHICLE</td><td>Traffic operations</td><td>High</td></tr>
+            <tr><td>OBSTRUCTION</td><td>Street services</td><td>Medium</td></tr>
             <tr><td>DAMAGE</td><td>Asset owner</td><td>Low</td></tr>
             <tr><td>TAMPERING</td><td>Security</td><td>Low</td></tr>
           </tbody>
         </table>
       </div>
+      <figure>
+        <img src="12_board.jpg" alt="The owner board: five columns, Rail control, Traffic operations, Street services, Asset owner, Security, with seven incident cards showing camera frames, Hafnia's summaries, time open and alarm state.">
+        <figcaption>The board at the end of the 20-minute live run (eleven cameras): seven cards in their
+          owners' columns, each with the clip Hafnia judged (inset: the camera's view with the spot boxed), the
+          summary, how long it has been open, how many times at this spot, the alarm's state and whether the owner was
+          told. Smart Client's HTML page item cannot show it on this machine, so the board is its own window beside it;
+          the alarms and bookmarks are inside Smart Client.</figcaption>
+      </figure>
+      <p>With eleven cameras the alarm actions took 19 seconds each (the three-hour shift: up to a minute). The cause was our own CPU
+        load, not XProtect's: the service and FrameBridge now run below normal priority, so that XProtect's services
+        are scheduled first, and a raise takes a fifth of a second with the same cameras.</p>
+      <div class="numbers">
+        <div><b>21 s</b><span>from the change to its incident, median, first time (asked on the camera's own recording 20–31 s, through the lens 42–72 s)</span></div>
+        <div><b>0.2 s</b><span>an XProtect alarm raised with its snapshot and bookmarks, after the priority change (19 s before)</span></div>
+        <div><b>0.6–0.7 s</b><span>from the card to the push on the phone, snapshot attached; owners told 25 s after the change (median)</span></div>
+      </div>
     </div>
   </section>
 
   <section class="step" id="close">
-    <div class="num">11</div>
+    <div class="num">12</div>
     <div class="body">
-      <div class="title-row"><h2>The alarm closes itself</h2><span class="chip built">in the detector</span><span class="chip todo">alarm closing</span></div>
-      <p>Each change keeps a snapshot of how its spot looked before. Tier 0 compares the spot with it on every frame,
-        and when they match for a second the item is closed, without another request. In the looped clip that happens
-        when the loop restarts and the bin stands again; on a real street, when someone sets the bin back up.</p>
+      <div class="title-row"><h2>The alarm closes itself</h2><span class="chip built">built</span></div>
+      <p>Each change keeps a snapshot of how its spot looked before. The detector compares the spot with it on every frame,
+        and when they match for a second the change closes; the incident clears when its largest change closes,
+        without another request. Its alarm closes once it has stayed cleared for 60 seconds, so that a recurring
+        incident keeps one alarm instead of closing and reopening it with every occurrence, and it reopens if the
+        incident recurs within the hour. In the looped clip that happens when the loop restarts and the bin stands
+        again; on a real street, when someone sets the bin back up.</p>
       <figure>
         <img src="09_auto_close.jpg" alt="Four crops of the bin spot: the BEFORE snapshot, the spot at 14 s with mean difference 92, after the loop restart with difference 7, then closed.">
         <figcaption>The bin's spot: BEFORE; at 14.0 s (mean difference 92, open); 0.5 s after the loop restarts
           (difference 7, under the threshold of 12); 1.5 s after, closed. Reported at 10.2 s, closed 1.0 s into the
           next loop.</figcaption>
       </figure>
+      <div class="numbers">
+        <div><b>322</b><span>occurrences that cleared by themselves in the 20-minute run, 8.8 s each (median); loops restart every 8–17 s</span></div>
+        <div><b>0</b><span>requests to clear, reopen or close an alarm</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" id="verdicts">
+    <div class="num">13</div>
+    <div class="body">
+      <div class="title-row"><h2>The operator teaches it: Confirm and Reject</h2><span class="chip built">built</span></div>
+      <p>A verdict comes from the board (a button on the card) or from the phone (the push's buttons post a signed
+        verdict to a reply topic that the service follows; nothing reaches the machine from outside). Both land in the
+        run's <code>operator.jsonl</code>, which the service reads every second. Nothing is retrained. The incident
+        memory keeps, per camera and spot, the fingerprints it has judged (the SigLIP 2 embeddings of step 5, up to
+        eight per incident, kept diverse), and a verdict changes what those fingerprints mean there.</p>
+      <ul>
+        <li><b>Reject.</b> The incident becomes rejected and its fingerprints are added to the rejections at its spot.
+          The XProtect alarm closes with the reason, the owner's phone gets "stand down", and the detector is told to
+          let the spot into the background, so the harmless thing becomes scenery and its leaving is not a change of
+          its own. From then on a change at that spot that looks like the rejected incident (more than like any live
+          one) is put on hold without a request. If it is still there after 30 seconds it is asked about after all;
+          an answer that names the same category joins the rejected incident, no new card and no alarm, and its
+          fingerprint joins the rejections; another category is a new incident. Answers already on their way when the
+          verdict came join the rejected incident too.</li>
+        <li><b>Confirm.</b> The alarm goes to In progress with the operator's name on it. Hafnia's own rejections at the
+          spot that look like the incident are overruled, so the next such change joins it as a recurrence instead of
+          waiting on hold; the operator's rejections stand. A confirmed incident can be rejected later; a rejected one
+          cannot be confirmed.</li>
+      </ul>
+      <div class="flow" aria-label="What a verdict changes">
+<pre class="mermaid">
+flowchart LR
+    V["Confirm or Reject on a card, on the board or the phone"] --> F["operator.jsonl, read every second"]
+    F --> D{"verdict"}
+    D -- "Reject" --> RJ["incident rejected; its fingerprints rejected at the spot; alarm closed; the spot released to the background"]
+    D -- "Confirm" --> CF["alarm In progress; Hafnia's rejections at the spot that look like the incident overruled"]
+    RJ --> N["the next change at that spot"]
+    CF --> N
+    N -- "looks like the rejected incident" --> H["on hold, no request; asked after 30 s if it stays, and the same category joins the incident"]
+    N -- "looks like the confirmed incident" --> J["joins the incident as a recurrence, no request"]
+</pre>
+      </div>
+      <div class="numbers">
+        <div><b>0.1–0.3 s</b><span>from a click on the board to the memory; 0.9 s from a tap on the phone, the alarm closed at 1.2 s, the phone acknowledged at 1.4 s</span></div>
+        <div><b>26</b><span>look-alikes put on hold in the 3 minutes after a Reject on the bin: 24 never asked, 2 asked after 30 s and joined the incident; 13 after a Reject from the phone</span></div>
+        <div><b>7</b><span>later occurrences that joined the e-scooter incident after a Confirm; a Confirm from the phone had the alarm In progress in 0.9 s</span></div>
+      </div>
+      <p class="note">What it does not do: a verdict is bound to its camera and spot (a bus stop here, not everywhere);
+        a look-alike on hold that stays costs a request after 30 seconds; and the verdicts live in the run's own
+        memory, so a new run starts without them (keeping them across runs is on the list, step 15).</p>
+    </div>
+  </section>
+
+  <section class="step" id="summary">
+    <div class="num">14</div>
+    <div class="body">
+      <div class="title-row"><h2>The shift summary, and where it keeps happening</h2><span class="chip built">built</span></div>
+      <p>At the end of a shift, or at any moment during it, the board's summary page is built from the run's logs
+        without a request: incidents by owner, how fast things went (from the change to the incident, from the
+        incident to its alarm, from the alarm to clear), what the requests bought, the incidents the operator
+        rejected, and each camera's hotspots: the memory's spots with their counts and the heat of every reported
+        change, drawn over the scene as the detector remembers it, with
+        the spots that were not incidents dashed. On the looped clips a count is a replay of one incident, and the
+        page says so.</p>
+      <figure>
+        <img src="13_summary.jpg" alt="The shift summary page: tiles with 7 incidents, 342 occurrences, 21 s to a card, 14 Hafnia requests, 0 false cards; a table by owner; median timings; and eight camera images with hotspots boxed.">
+        <figcaption>The 20-minute run's summary. Fourteen requests covered 1,256 changes; a new incident took 21 s
+          (median), a repeat 1.4 s; the five street cameras at the bottom have no spots.</figcaption>
+      </figure>
+      <div class="numbers">
+        <div><b>1.0</b><span>request per camera-hour in the three-hour shift on Oct 26; a day of eleven cameras is about 260 of the 500</span></div>
+        <div><b>0</b><span>false incidents in the 20-minute run; every run folder in the repository carries its numbers and a README</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" id="next">
+    <div class="num">15</div>
+    <div class="body">
+      <div class="title-row"><h2>Not built, and what is next</h2><span class="chip todo">to build</span></div>
+      <ul>
+        <li><b>The application layer.</b> The board is a page beside Smart Client and the phone gets a push with two
+          buttons; both are thin. One window for the cards, the alarm state and the verdicts; split, merge, snooze and
+          assign; a note with a verdict; the verdicts kept across runs; a topic per owner; Teams and Slack.</li>
+        <li><b>The start-up burst.</b> Every loop's first question comes at once when the service starts, and the one
+          lens camera plays the clips in turn: that is where the 42–72 s incidents come from. Asking on the camera's own
+          recording took the median from 104 s to 21 s; the rest is a second lens camera or a steadier start.</li>
+        <li><b>Ambiguous small crops.</b> The lying scooter's crop was called "a large tree branch" with the right
+          category, and NONE with the negatives prompt: a second, wider view for a doubtful small crop.</li>
+        <li><b>A map layer</b> (XProtect Smart Map), <b>a person staying at a spot</b> (the gate), and the real highway
+          crash clip (<code>test_11</code>) run live as a camera.</li>
+      </ul>
     </div>
   </section>
 
   <footer>
-    <p>Results from the repository's run folders: change detector <code>run/change-G1-loops</code>, verdict memory
-      <code>run/memory-compare</code>, lens pilot <code>run/pilot-20261023T162040Z</code>, small-object test
-      <code>run/lens-test_11-20261023T165151Z</code>, probe and audit <code>run/probe-20261022T054342Z</code>. Figures:
-      <code>scripts/viz_walkthrough.py</code>.</p>
+    <p>Results from the repository's run folders: change detector <code>run/change-G1-loops</code>, the detector
+      forgetting a lasting change, before and after the fix, <code>run/change-fade-before</code> and <code>-after3</code>,
+      the fingerprint memory <code>run/memory-compare</code>, lens pilot <code>run/pilot-20261023T162040Z</code>,
+      small-object test <code>run/lens-test_11-20261023T165151Z</code>, the lens recording's clock
+      <code>run/lens-check-20261027T095146Z-load-wallclock</code>, asking on the camera's own recording
+      <code>run/clearway-live-20261027T081803Z-direct</code>, the danger zone <code>run/clearway-live-20261025T092317Z-tracks</code>,
+      operator verdicts <code>run/clearway-dry-20261025T133738Z-operator</code>, the phone
+      <code>run/clearway-dry-20261027T044611Z-ntfy</code> and <code>-045613Z-ntfy-confirmed</code>, the priority change
+      <code>run/clearway-dry-20261027T134043Z-priority</code>, the three-hour shift on Oct 26 <code>run/clearway-live-20261026T141534Z-m3</code>,
+      the 20-minute run after the fixes <code>run/clearway-live-20261027T124112Z-clean</code>. Figures:
+      <code>scripts/viz_walkthrough.py</code>; the flowchart: <code>flow.mermaid</code>.</p>
     <p>Footage: the organizers' hackathon cameras; "Street in Mumbai (video) 02" by Nicolas Vigier, Wikimedia Commons,
       CC0.</p>
   </footer>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.6.0/mermaid.min.js"></script>
+<script>
+  if (window.mermaid) {
+    mermaid.initialize({ startOnLoad: true, securityLevel: "strict",
+      theme: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "neutral",
+      flowchart: { curve: "basis", htmlLabels: true } });
+  }
+</script>
+</body>
+</html>

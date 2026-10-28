@@ -148,5 +148,47 @@
     "closed_at_abs": 31.00000000000017,
     "closed_by": "restored",
     "threshold": 12.0
-  }
+  },
+  "fade": {
+    "bin_pushed_over_onto_sidewalk_before": {
+      "reports": 69,
+      "loops_caught": 16,
+      "loops": 119,
+      "last_report_min": 17.5
+    },
+    "bin_pushed_over_onto_sidewalk_after": {
+      "reports": 362,
+      "loops_caught": 119,
+      "loops": 119,
+      "last_report_min": 29.9
+    },
+    "escooter_left_across_sidewalk_before": {
+      "reports": 21,
+      "loops_caught": 16,
+      "loops": 119,
+      "last_report_min": 27.4
+    },
+    "escooter_left_across_sidewalk_after": {
+      "reports": 241,
+      "loops_caught": 119,
+      "loops": 119,
+      "last_report_min": 29.9
+    }
+  },
+  "lens_code": {
+    "clip": "20261027T122514522358_cw-0013-person_on_railway_tracks.avi",
+    "seq": 9195,
+    "frame": 7,
+    "sent": "2026-10-27T12:25:20.030000+00:00",
+    "read_back": {
+      "seq": 9195,
+      "idx": 7,
+      "cs": 4472003,
+      "wall": "2026-10-27T12:25:20.030000+00:00"
+    }
+  },
+  "pages": [
+    "12_board.jpg",
+    "13_summary.jpg"
+  ]
 }

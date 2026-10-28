@@ -71,6 +71,9 @@ XProtect cameras ──FrameBridge (MIP .NET, JPEG at 10 fps)──> the service
                                                            ──> phone push, Confirm / Reject (clearway/notify.py)
 ```
 
+The same pipeline as a flowchart, with what the operator's verdicts change: `docs/walkthrough/flow.mermaid`; the
+step-by-step walkthrough with a figure and the numbers for each step: `docs/walkthrough/index.html`.
+
 - The **change detector** is Porikli's dual-rate background: a pixel that differs from the slow background but not
   from the fast one has arrived and stopped. People standing in a change hold it back until they leave; whole-frame
   changes (light, fog) are not objects. A change at a danger zone (`config/zones.json`: the track bed) is a person

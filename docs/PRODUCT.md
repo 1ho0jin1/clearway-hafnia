@@ -241,4 +241,5 @@ The allowance resets at 00:00 UTC; stay under the cap each day. Requests are the
 - Smart Client web page view item: https://doc.milestonesys.com/2025R1/en-US/standard_features/sf_sc/sf_createviews/sc_addotherwebp.htm
 - Smart Map overview (alarms on maps not confirmed for our case): https://www.milestonesys.com/articles/xprotect-smart-map/
 - Hafnia's trained output formats (MonitoringSummary): `docs/PLAN-near-miss.md`, "Why consider a change"
-- The pipeline and its measurements: `docs/PLAN-C.md`, `docs/walkthrough/`
+- The pipeline and its measurements: `docs/walkthrough/` (the walkthrough, renewed 2026-10-28, with `flow.mermaid`),
+  `docs/PLAN-C.md`

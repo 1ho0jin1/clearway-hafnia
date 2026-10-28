@@ -1,10 +1,14 @@
-r"""viz_walkthrough.py - figures that show each step of plan C's pipeline on real camera frames, for the presentation.
+r"""viz_walkthrough.py - figures that show each step of Clearway's pipeline on real camera frames (docs/walkthrough/).
 
-    .venv\Scripts\python.exe scripts\viz_walkthrough.py [--out docs\walkthrough]
+    .venv\Scripts\python.exe scripts\viz_walkthrough.py [--out docs\walkthrough] [--only fade lens_code pages ...]
 
-No Hafnia requests: answers are read from earlier runs (run/pilot-20261023T162040Z, run/memory-compare). Only footage
+No Hafnia requests: answers are read from earlier runs (run/pilot-20261023T162040Z, run/memory-compare), the fade
+figure from the replays run/change-fade-before and -after3, the lens-code figure from a clip in the lens spool
+(run/lens/spool, git-ignored: it needs a machine that has played one), the board and summary figures from the
+headless renders of docs/video/render (git-ignored; scripts/make_video.py --render-cards makes them). Only footage
 we may show is used: the organizers' cameras (on every machine) and Wikimedia Commons CC0 clips; never test_11 (the AI
-City licence forbids redistribution). Writes one JPEG per step and facts.json (numbers and answers the page quotes).
+City licence forbids redistribution). Writes one JPEG per step and facts.json (numbers and answers the page quotes);
+--only makes some of the figures (YOLO is loaded only for the ones that need it) and merges their facts into the file.
 """
 from __future__ import annotations
 
@@ -327,21 +331,159 @@ def fig_close(out: Path, people) -> dict:
                       "closed_by": ch.closed_by, "threshold": pr.p.restored_diff}}
 
 
+def titled(img: np.ndarray, text: str | list[str], color=WHITE, line: int = 34) -> np.ndarray:
+    """A dark title bar above the image, one or more lines (label() draws over the image's top rows: wrong for a
+    strip a few pixels high)."""
+    lines = [text] if isinstance(text, str) else list(text)
+    h, w = img.shape[:2]
+    bar = line * len(lines)
+    out = np.full((h + bar, w, 3), 20, np.uint8)
+    out[bar:] = img
+    for i, t in enumerate(lines):
+        cv2.putText(out, t, (8, int(line * (i + 0.7))), FONT, line / 40, color, 1, cv2.LINE_AA)
+    return out
+
+
+def fig_fade(out: Path) -> dict:
+    """10_fade.jpg: when the detector reported over 30 minutes of two looped cameras, before and after the fade fix
+    (run/change-fade-before, run/change-fade-after3: scripts/eval_change.py --loops 120). One tick per report; the
+    old detector's rows are grey, the fixed detector's in the accent (emphasis, not a palette)."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    runs = {"before": REPO / "run" / "change-fade-before", "after": REPO / "run" / "change-fade-after3"}
+    cases = {"bin_pushed_over_onto_sidewalk": "Bin", "escooter_left_across_sidewalk": "E-scooter"}
+    rows, facts = [], {}
+    for case, name in cases.items():
+        for state, folder in runs.items():
+            res = json.loads((folder / "results.json").read_text(encoding="utf-8"))
+            c = next(x for x in res["cases"] if x["case"] == case)
+            times = sorted(r["t_detect"] / 60 for r in c["reports"])
+            rows.append((f"{name}, {'the detector before the fix' if state == 'before' else 'after the fix'}",
+                         times, c["loops_caught"], c["loops"], state))
+            facts[f"{case}_{state}"] = {"reports": len(times), "loops_caught": c["loops_caught"], "loops": c["loops"],
+                                        "last_report_min": round(times[-1], 1) if times else None}
+    ink, muted, rule, accent, grey = "#1b232c", "#5a6673", "#d5dbe1", "#b86e00", "#9aa4ae"
+    fig, ax = plt.subplots(figsize=(16, 5.2), dpi=100)
+    fig.patch.set_facecolor("white")
+    ax.set_facecolor("white")
+    minutes = max(r[1][-1] if r[1] else 0 for r in rows)
+    span = 30.0 if minutes <= 30 else minutes
+    for i, (name, times, caught, loops, state) in enumerate(rows):
+        y = len(rows) - 1 - i
+        ax.vlines(times, y - 0.32, y + 0.32, color=accent if state == "after" else grey, linewidth=1.2)
+        ax.text(-0.4, y, name, ha="right", va="center", fontsize=12, color=ink)
+        note = (f"{caught} of {loops} loops, {len(times)} reports"
+                + (f"; the last at {times[-1]:.1f} min" if state == "before" and times and times[-1] < span - 1 else ""))
+        ax.text(span + 0.4, y, note, ha="left", va="center", fontsize=11, color=muted)
+    ax.set_xlim(0, span)
+    ax.set_ylim(-0.7, len(rows) - 0.3)
+    ax.set_xticks(range(0, int(span) + 1, 5))
+    ax.set_xticklabels([f"{m} min" for m in range(0, int(span) + 1, 5)], fontsize=11, color=muted)
+    ax.set_yticks([])
+    for x in range(5, int(span) + 1, 5):
+        ax.axvline(x, color=rule, linewidth=1, zorder=0)
+    for side in ("top", "right", "left", "bottom"):
+        ax.spines[side].set_visible(False)
+    ax.tick_params(axis="x", length=0, pad=8)
+    fig.subplots_adjust(left=0.24, right=0.76, top=0.96, bottom=0.12)
+    fig.savefig(str(out / "10_fade.jpg"), format="jpg", pil_kwargs={"quality": 88})
+    plt.close(fig)
+    return {"fade": facts}
+
+
+def fig_lens_code(out: Path) -> dict:
+    """11_lens_code.jpg: a lens frame as the publisher plays it on lens_1 (a clip from the spool, fitted to the stream
+    size, the frame code in its bottom band), and the band enlarged, with what reads back from a scaled,
+    JPEG-recompressed copy (as lens_1's frames reach the service through FrameBridge). Needs a played clip in the
+    spool (run/lens/spool, git-ignored)."""
+    import datetime as dt
+    from lens.code import band_rows, read, stamp
+    from lens.publisher import SPOOL, fit
+    jobs = []
+    for pattern in ("*person_on_railway_tracks.avi", "*bin_pushed_over_onto_sidewalk.avi", "*.avi"):
+        jobs = sorted(p for p in SPOOL.glob(pattern) if p.with_suffix(".done.json").exists())
+        if jobs:
+            break
+    if not jobs:
+        print("no played clip in the lens spool: 11_lens_code.jpg not made", flush=True)
+        return {}
+    avi = jobs[-1]
+    done = json.loads(avi.with_suffix(".done.json").read_text(encoding="utf-8"))
+    cap = cv2.VideoCapture(str(avi))
+    frames = []
+    while True:
+        ok, f = cap.read()
+        if not ok:
+            break
+        frames.append(f)
+    cap.release()
+    idx = min(7, len(frames) - 1)
+    fps = done.get("fps", 10)
+    when = dt.datetime.fromisoformat(done["start"].replace("Z", "+00:00")) + dt.timedelta(seconds=idx / fps)
+    frame = stamp(fit(frames[idx], 1280, 720), done["seq"], idx, when)
+    # what reaches the service: the stream transcoded to JPEG and scaled by the Recording Server for FrameBridge
+    small = cv2.resize(frame, (832, 468), interpolation=cv2.INTER_AREA)
+    small = cv2.imdecode(cv2.imencode(".jpg", small, [cv2.IMWRITE_JPEG_QUALITY, 70])[1], cv2.IMREAD_COLOR)
+    code = read(small, near=when)
+    y0, y1 = band_rows(720)
+    strip = cv2.resize(frame[y0:y1], (1280, (y1 - y0) * 8), interpolation=cv2.INTER_NEAREST)
+    top = titled(frame, f"what lens_1 plays: {avi.name.split('_', 1)[1][:-4]}, job {done['seq']}, frame {idx}, "
+                        f"sent {when:%H:%M:%S.%f}"[:-4] + " UTC")
+    read_back = (f"job {code['seq']}, frame {code['idx']}, sent {code['wall']:%H:%M:%S.%f}"[:-4] + " UTC"
+                 if code else "unreadable")
+    bottom = titled(strip, ["the bottom band enlarged: 64 blocks = 8 sync bits, job, frame, centiseconds of the day, CRC-8",
+                            f"read back from an 832-px JPEG of the frame: {read_back}"], YELLOW)
+    img = np.vstack([top, np.full((16, 1280, 3), 30, np.uint8), bottom])
+    cv2.imwrite(str(out / "11_lens_code.jpg"), img, [cv2.IMWRITE_JPEG_QUALITY, 88])
+    return {"lens_code": {"clip": avi.name, "seq": done["seq"], "frame": idx, "sent": when.isoformat(),
+                          "read_back": {k: (v.isoformat() if hasattr(v, "isoformat") else v) for k, v in code.items()}
+                          if code else None}}
+
+
+def fig_pages(out: Path) -> dict:
+    """12_board.jpg and 13_summary.jpg: the owner board and the shift summary as rendered headless at the end of the
+    clean live run (docs/video/render/board-final.png, summary-final.png: scripts/make_video.py --render-cards with
+    the board on port 8766 following run/clearway-live-20261027T124112Z-clean). Skipped when the renders are not
+    there."""
+    made = []
+    for src, dst in (("board-final.png", "12_board.jpg"), ("summary-final.png", "13_summary.jpg")):
+        png = REPO / "docs" / "video" / "render" / src
+        if not png.exists():
+            print(f"{png} is not there: {dst} not made", flush=True)
+            continue
+        img = cv2.imread(str(png))
+        cv2.imwrite(str(out / dst), fit(img, 1600), [cv2.IMWRITE_JPEG_QUALITY, 85])
+        made.append(dst)
+    return {"pages": made} if made else {}
+
+
+FIGURES = {   # name -> (needs YOLO's person finder, function)
+    "cameras": (False, fig_cameras), "detector": (True, fig_detector), "people": (True, fig_people),
+    "negatives": (True, fig_negatives), "memory": (False, fig_memory), "lens": (False, fig_lens),
+    "lens_options": (False, fig_lens_options), "loopcut": (False, fig_loopcut), "close": (True, fig_close),
+    "fade": (False, fig_fade), "lens_code": (False, fig_lens_code), "pages": (False, fig_pages),
+}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--out", type=Path, default=REPO / "docs" / "walkthrough")
+    ap.add_argument("--only", nargs="+", choices=sorted(FIGURES), help="make only these figures")
     args = ap.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
-    from ultralytics import YOLO
-    people = person_finder(YOLO(str(REPO / "models" / "yolo11m.pt")))
-    facts = {}
-    for step in (lambda: fig_cameras(args.out), lambda: fig_detector(args.out, people),
-                 lambda: fig_people(args.out, people), lambda: fig_negatives(args.out, people),
-                 lambda: fig_memory(args.out), lambda: fig_lens(args.out), lambda: fig_lens_options(args.out),
-                 lambda: fig_loopcut(args.out), lambda: fig_close(args.out, people)):
-        facts.update(step())
-        print("done", sorted(p.name for p in args.out.glob("*.jpg"))[-1], flush=True)
-    (args.out / "facts.json").write_text(json.dumps(facts, indent=2, default=str), encoding="utf-8")
+    names = args.only or list(FIGURES)
+    people = None
+    if any(FIGURES[n][0] for n in names):
+        from ultralytics import YOLO
+        people = person_finder(YOLO(str(REPO / "models" / "yolo11m.pt")))
+    facts_path = args.out / "facts.json"
+    facts = json.loads(facts_path.read_text(encoding="utf-8")) if args.only and facts_path.exists() else {}
+    for n in names:
+        needs_people, fn = FIGURES[n]
+        facts.update(fn(args.out, people) if needs_people else fn(args.out))
+        print("done", n, flush=True)
+    facts_path.write_text(json.dumps(facts, indent=2, default=str), encoding="utf-8")
     print(json.dumps(facts, indent=2, default=str)[:3000])
     return 0
 
