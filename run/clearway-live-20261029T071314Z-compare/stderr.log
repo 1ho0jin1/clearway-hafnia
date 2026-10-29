@@ -1,0 +1,4 @@
+W1029 07:14:56.809000 9396 .venv\Lib\site-packages\torch\distributed\elastic\multiprocessing\redirects.py:29] NOTE: Redirects are currently not supported in Windows or MacOs.
+[transformers] Model config: bos_token_id must be `None` or an integer within the vocabulary (between 0 and 31999), got 49406. This may result in unexpected behavior.
+[transformers] Model config: eos_token_id must be `None` or an integer within the vocabulary (between 0 and 31999), got 49407. This may result in unexpected behavior.
+Loading weights:   0%|          | 0/408 [00:00<?, ?it/s]Loading weights:  81%|████████  | 329/408 [00:00<00:00, 2114.67it/s]Loading weights: 100%|██████████| 408/408 [00:01<00:00, 377.17it/s] 

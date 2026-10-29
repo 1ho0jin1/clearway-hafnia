@@ -239,6 +239,18 @@ starvation that discarded lens frames.
    escalation instead of a card, and a one-line orientation ("a fixed CCTV camera; the first two seconds show the
    spot before the change"). Try Hafnia's trained AlertValidation shape and system prompt (noted in
    `docs/PLAN-near-miss.md`) on 20 to 30 requests; the gateway's Advanced Settings may be changed.
+   **Done later on 2026-10-28, with the opposite result** (`run/prompt-20261028T1605Z/README.md`,
+   `scripts/prompt_experiment.py`, 267 requests): on 28 clips the service had sent (18 incidents, 10 with none;
+   the machine's eight looped scenes, which the prompt had been written against, so a comparison between prompts
+   rather than a held-out accuracy), the prompt as it is kept all 28 answers in both runs; the orientation line, the rules, a `confidence`
+   field, a sectioned layout, Hafnia's trained AlertValidation shape and both system prompts (the trained one and
+   our own) each lost 4 to 10 answers, mostly false cards with invented objects. Confidence came back 0.9-1.0 on
+   every answer, right or wrong, so it cannot feed the escalation. The AlertValidation shape confirmed nothing
+   wrong and all five High-priority clips, but discarded 10 of the 18 incidents: a candidate for item 5's second
+   question on High categories, not for the first. The prompt stays; the system prompt stays empty. **Held out on
+   2026-10-29** (`run/holdout-20261029/README.md`): on three real streets the same prompt made 31 false cards of 39
+   hard negatives (waiting cars called stalled, invented collisions, "a fallen tree trunk"); the fix is upstream of
+   the prompt.
 7. **Audit against the clip that was sent, not the stand-in.** The spool AVIs are the ground truth of what was
    sent; after fix 1 or 2 they are also what was seen. Score every answer against them (Opus as judge, as the plan
    says) and retire the stand-in as "expected" for the gate.

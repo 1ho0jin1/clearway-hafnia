@@ -67,6 +67,13 @@ SCENES = [
      "say": "Three hours on eleven cameras cost thirty-three requests, one per camera-hour. The false cards that run "
             "produced were traced to one cause and fixed; the next run had none. Everything is in the repository: "
             "the runs, their numbers, and a single setup script for a fresh machine."},
+    {"id": "compare", "min_s": 16, "visual": ("card", "compare.html"),
+     "say": "The plain way asks every camera on a timer. Once a minute on eleven cameras is sixty requests per "
+            "camera-hour, the day's five hundred gone in forty-five minutes, and a paragraph to read per request. "
+            "Clearway spent one request per camera-hour over a three-hour shift. Six times out of six, the plain "
+            "way's full frame left the person on the platform; the magnified clip put them on the tracks. To be "
+            "fair, the plain way reports the smashed window every minute, and Clearway never asks about it, "
+            "because nothing stays changed."},
     {"id": "summary", "min_s": 8, "visual": ("still", RENDER / "summary-final.png"),
      "say": "At the end of a shift, the summary: incidents by owner, how fast, where it keeps happening."},
     {"id": "close", "min_s": 6, "visual": ("card", "close.html"),

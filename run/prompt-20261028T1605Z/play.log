@@ -1,0 +1,31 @@
+﻿bridge: 15:59:11.667 streaming [0] lens_1
+lens clock alive after 9.0 s, offset 0.01699995994567871 s
+clip  1 39929_cw-0001-person_on_railway_trac  60f recorded 15:59:15-15:59:23 seen 70/70 offset 0.01 s drift 0.02 verified True
+clip  2 68961_cw-0002-escooter_left_across_s  47f recorded 15:59:25-15:59:32 seen 57/57 offset 0.02 s drift 0.01 verified True
+clip  3 93547_cw-0004-school_gate_break_in_n  23f recorded 15:59:33-15:59:37 seen 33/33 offset 0.02 s drift 0.01 verified True
+clip  4 96829_cw-0007-bin_pushed_over_onto_s  17f recorded 15:59:39-15:59:43 seen 27/27 offset 0.02 s drift 0.0 verified True
+clip  5 71209_cw-0008-vehicle_breakdown_traf  32f recorded 15:59:44-15:59:49 seen 42/42 offset 0.02 s drift 0.01 verified True
+clip  6 57474_cw-0012-school_gate_break_in_n  31f recorded 15:59:51-15:59:56 seen 41/41 offset 0.02 s drift 0.01 verified True
+clip  7 92754_cw-0014-graffiti_on_standing_t  32f recorded 15:59:58-16:00:03 seen 42/42 offset 0.02 s drift 0.0 verified True
+clip  8 17085_cw-0015-school_gate_break_in_n  35f recorded 16:00:05-16:00:10 seen 45/45 offset 0.02 s drift 0.01 verified True
+clip  9 25006_cw-0013-busy_street.avi         87f recorded 16:00:12-16:00:23 seen 97/97 offset 0.02 s drift 0.0 verified True
+clip 10 98983_cw-0019-bin_pushed_over_onto_s  39f recorded 16:00:24-16:00:30 seen 49/49 offset 0.01 s drift 0.02 verified True
+clip 11 88745_cw-0021-bin_pushed_over_onto_s  53f recorded 16:00:32-16:00:39 seen 63/63 offset 0.02 s drift 0.0 verified True
+clip 12 39462_cw-0023-traffic_flows_in_the_o 108f recorded 16:00:41-16:00:54 seen 118/118 offset 0.01 s drift 0.02 verified True
+clip 13 97697_cw-0024-traffic_flows_in_the_o 118f recorded 16:00:55-16:01:09 seen 128/128 offset 0.02 s drift 0.0 verified True
+clip 14 64700_cw-0028-school_gate_break_in_n  21f recorded 16:01:10-16:01:14 seen 31/31 offset 0.01 s drift 0.02 verified True
+clip 15 33995_cw-0031-school_gate_break_in_n  30f recorded 16:01:16-16:01:21 seen 40/40 offset 0.02 s drift 0.0 verified True
+clip 16 77617_cw-0032-escooter_left_across_s  40f recorded 16:01:23-16:01:29 seen 50/50 offset 0.02 s drift 0.0 verified True
+clip 17 82319_cw-0033-bin_pushed_over_onto_s  20f recorded 16:01:31-16:01:35 seen 30/30 offset 0.02 s drift 0.0 verified True
+clip 18 61867_cw-0001-bin_pushed_over_onto_s  56f recorded 16:01:37-16:01:44 seen 66/66 offset 0.01 s drift 0.01 verified True
+clip 19 17167_cw-0003-vehicle_breakdown_traf  54f recorded 16:01:46-16:01:53 seen 64/64 offset 0.02 s drift 0.0 verified True
+clip 20 85257_cw-0004-person_on_railway_trac  43f recorded 16:01:55-16:02:01 seen 53/53 offset 0.01 s drift 0.02 verified True
+clip 21 01116_cw-0005-school_gate_break_in_n  46f recorded 16:02:03-16:02:10 seen 56/56 offset 0.02 s drift 0.0 verified True
+clip 22 01555_cw-0006-escooter_left_across_s  39f recorded 16:02:11-16:02:17 seen 49/49 offset 0.02 s drift -0.0 verified True
+clip 23 66831_cw-0008-graffiti_on_standing_t  40f recorded 16:02:19-16:02:25 seen 50/50 offset 0.02 s drift 0.0 verified True
+clip 24 65311_cw-0009-school_gate_break_in_n  48f recorded 16:02:27-16:02:34 seen 58/58 offset 0.02 s drift -0.0 verified True
+clip 25 37185_cw-0010-school_gate_break_in_n  52f recorded 16:02:36-16:02:43 seen 62/62 offset 0.02 s drift 0.0 verified True
+clip 26 62072_cw-0011-person_on_railway_trac  76f recorded 16:02:45-16:02:54 seen 86/86 offset 0.02 s drift -0.0 verified True
+clip 27 01036_cw-0012-escooter_left_across_s  76f recorded 16:02:56-16:03:05 seen 86/86 offset 0.01 s drift 0.01 verified True
+clip 28 65659_cw-0013-school_gate_break_in_n  40f recorded 16:03:07-16:03:13 seen 50/50 offset 0.01 s drift 0.01 verified True
+28 clips played, 28 spans verified; wrote run\prompt-20261028T1605Z\clips.jsonl

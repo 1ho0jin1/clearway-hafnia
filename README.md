@@ -16,7 +16,9 @@ shows:
 
 1. **Every request is earned.** No timer, no motion event. A change detector on the live frames notices what stayed
    changed, a verdict memory skips what Hafnia or the operator already judged, a ledger merges the pieces and
-   recurrences of one incident. Eleven cameras for three hours cost 33 requests: one per camera-hour.
+   recurrences of one incident. Eleven cameras for three hours cost 33 requests: one per camera-hour on the
+   organizers' looped cameras; a real junction raises about 17 candidates per camera-hour at the same setting
+   (`run/holdout-20261029`).
 2. **Hafnia is shown the right thing.** A small spot is cropped and enlarged on a lens camera of our own (a 30-pixel
    crash the plain window called NONE twice, the crop named); a large one is asked about on its own recording; the
    lens frames carry a code that proves which seconds the recording holds, after its time base was caught up to 9.5 s
@@ -52,6 +54,9 @@ shows:
 | The lens's time base, read back from its own frames | +0.02 s on a quiet machine, +0.4 to +1.4 s under load; the old stamping ran up to 9.4 s behind under the same load | `run/lens-check-20261027T095146Z-load-wallclock/README.md` |
 | The fade: 30-minute replays of two looped cameras | before 16 of 119 loops caught on both, silent after 7 minutes; after 119 of 119, reports steady | `run/change-fade-after3/README.md` |
 | Where the CPU goes with eleven cameras | the Recording Server under 2 %; our service 56-62 %, FrameBridge 22-28 % (the MIP library decodes client-side); the detector on every second frame lifted the delivered rate from 4.7 to 7.5 fps per camera; the service below normal priority took XProtect's alarm actions from 19 s to 0.2 s | `run/clearway-dry-20261027T121705Z-width0/README.md`, `-123136Z-detect2`, `-134043Z-priority` |
+| Held-out check on three real streets the entry had never seen (CC0 clips, 2026-10-29) | the detector at the real-camera setting: 3 candidates in 11 minutes, about 17 per camera-hour; Hafnia with the service's prompt on 39 hard negatives: 8 right, 31 false cards (20 waiting cars called stalled, 5 invented collisions, 6 obstructions, "a fallen tree trunk" three times). The limit of the entry as it stands, and the next thing to fix | `run/holdout-20261029/README.md` |
+| The plain way against Clearway on the same eleven cameras (2026-10-29, 66 requests) | the organizers' example question asked about every camera once a minute: 60 requests per camera-hour, half of each camera's time looked at, the day's 500 gone in 45 minutes; 66 paragraphs to read for six minutes, each incident reported six times, the person on the tracks never (0 of 6), the e-scooter once; nothing invented on the ordinary street scenes, and the smashed window reported every time, which Clearway never asks about because nothing stays changed. Clearway on the same loops: 14 requests for 20 minutes, 7 incidents, none false; 1 request per camera-hour over the three-hour shift | `run/vanilla-20261029T0714Z-compare/README.md` |
+| A second question in Hafnia's alert-validation form, the first answer put back to confirm or discard (2026-10-29, 49 requests) | removed 19 of the 31 false cards above (all 5 invented collisions; waiting cars only when the whole junction was in view, 11 of 13, against 8 of 18 crops) and kept 15 of 18 true incidents, but held 2 of the 3 people on the tracks; confidence 0.95 on every answer. Measured, not adopted as a gate; possible as a priority signal | `run/validate-20261029/README.md` |
 
 The analysis behind the day's fixes: `docs/INVESTIGATION-2026-10-27.md`. The product plan, with the schedule and
 the risks: `docs/PRODUCT.md`. The pipeline's design and gates: `docs/PLAN-C.md`. Working notes for the repository:
@@ -86,8 +91,20 @@ step-by-step walkthrough with a figure and the numbers for each step: `docs/walk
   code; the service reads it back from `lens_1`'s own live frames and asks about the seconds the recording really
   holds.
 - The **prompt** is JSON: category (PERSON_ON_TRACKS, COLLISION, STALLED_VEHICLE, OBSTRUCTION, DAMAGE, TAMPERING or
-  NONE), a one-sentence summary, the evidence. Nothing in XProtect is wired to Hafnia on its own: no motion event
-  or gateway rule ever sends a clip.
+  NONE), a one-sentence summary, the evidence. It is one plain paragraph on purpose: in a comparison on 28 clips
+  the service had sent from the eight looped scenes on this machine (the same scenes the prompt had been written
+  against, so a comparison between prompts, not a held-out accuracy), the paragraph kept every answer while a
+  sectioned layout, added context and rules, a confidence field, Hafnia's trained validation format and two system
+  prompts each lost 4 to 10 of the 28 (`run/prompt-20261028T1605Z`). On three real streets it had never seen (CC0
+  clips of junctions in Mumbai and Düsseldorf), the same prompt turned ordinary stopped traffic into incidents: 31
+  of 39 hard negatives became false cards, most of them cars waiting at a light called stalled
+  (`run/holdout-20261029`). That is the known limit of the entry as it stands: the fix lies upstream of the model
+  (how long a vehicle must stay before a question, the operator's rejections teaching the memory) and is not
+  built. A second question in Hafnia's own alert-validation form, the first answer put back to the model to
+  confirm or discard, was measured and not adopted as a gate: it removed 19 of those 31 false cards (every
+  invented collision among them) but also held 3 of 18 true incidents, two of them a person on the tracks
+  (`run/validate-20261029`). Nothing in XProtect is wired to Hafnia on its own: no motion event or gateway rule
+  ever sends a clip.
 
 ## Run it
 
@@ -136,6 +153,21 @@ requests; the run script refuses to plan past `--stop-at` (450 by default).
 
 Run one of these at a time: the machine has 15.7 GB with XProtect resident, and each loads a model.
 
+### The held-out check on real streets (40 requests)
+
+The three street clips are public (CC0); `scripts/fetch_footage.py` fetches them from Wikimedia Commons and checks
+their SHA-256 (about 500 MB). Then the detector offline, the clips on the lens camera, one request per clip, the
+score. Details and what to expect: `run/holdout-20261029/README.md`, "Reproduce it on another machine".
+
+```powershell
+py scripts\fetch_footage.py
+.venv\Scripts\python.exe scripts\holdout.py detect --out run\holdout-<date>      # no request
+Copy-Item run\holdout-20261029\labels.json run\holdout-<date>\
+.venv\Scripts\python.exe scripts\holdout.py play run\holdout-<date>              # on the lens camera
+.venv\Scripts\python.exe scripts\holdout.py ask run\holdout-<date>               # 40 requests; --dry-run prints the plan
+.venv\Scripts\python.exe scripts\holdout.py score run\holdout-<date>
+```
+
 ## Repository
 
 `clearway/` the service, ledger, prompt, alarms, board, notifier, shift summary; `tier0/` the change detector, the
@@ -150,13 +182,17 @@ with one line per file is in `CLAUDE.md`, "Repository layout".
 Our code is the entry's. Components: Ultralytics YOLO11 (AGPL-3.0), SigLIP 2 (Apache-2.0, google/siglip2-base-patch16-224),
 Real-ESRGAN weights (BSD-3-Clause; optional, not in the default lens), spandrel (MIT), MediaMTX (MIT), ffmpeg
 (gyan.dev build, GPL), MilestonePSTools and the MIP SDK (Milestone's terms), psutil (BSD). The organizer cameras'
-clips belong to the organizers and stay on the machine; the AI City Challenge clip used for `test_11` may not be
-redistributed and is not in the repository; other candidate footage and its licences are listed in
-`docs/PLAN-near-miss.md`. Frames and clips under `run/` are git-ignored for the same reason.
+clips belong to the organizers and stay on the machine. The three street clips of the held-out check are CC0 on
+Wikimedia Commons ("Street in Mumbai (video) 02" and "03" by Nicolas Vigier, 2016; "Straßenverkehr in Düsseldorf"
+by Slick, 2014); `scripts/fetch_footage.py` fetches them with their checksums, and they are git-ignored for size.
+The AI City Challenge clip used for `test_11` may not be redistributed and is not in the repository; other candidate
+footage and its licences are listed in `docs/PLAN-near-miss.md`. Frames and clips under `run/` are git-ignored for
+the same reason.
 
 ## Status (2026-10-27)
 
 Built and measured: the pipeline, alarms and bookmarks, the board, person triggers, the shift summary, hotspots,
 phone pushes, direct asks, the lens self-check, the fade fix. Not built: a Smart Map layer and the gate's dwell
 trigger; the application layer beyond the board and the phone is a TODO (`docs/PRODUCT.md`, F13). The demo video
-and the submission are scheduled for Oct 29-30; the portal closes 1 November 2026, 12:00 CET.
+and the submission are scheduled for Oct 29-31; the portal closes 2 November 2026, 12:00 CET (extended from
+1 November).

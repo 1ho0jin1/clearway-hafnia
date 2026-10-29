@@ -1,0 +1,88 @@
+detect 2026-10-29T03:43:54.012959+00:00 clips mumbai02 mumbai03 duesseldorf profiles real loops people yolo11m; frames 832 px at 10 fps, detector at 640 px; window -2.0/+3.0 s, at most 30.0 s; lens from x2.5
+mumbai02 real: a Mumbai junction from above by day, 3:03, 960x540
+  mumbai02-real-001: t 24.4-42.7 s, box (249, 229, 277, 260), x5.82 lens, 234 frames
+  mumbai02-real-002: t 27.1-43.4 s, box (47, 30, 89, 57), x6.71 lens, 214 frames
+  2 reports in 173.2 s (41.6 per hour), 0 scene jumps, 138.0 s
+mumbai02 loops: a Mumbai junction from above by day, 3:03, 960x540
+  mumbai02-loops-001: t 11.8-13.4 s, box (114, 0, 230, 60), x2.76 lens, 67 frames
+  mumbai02-loops-002: t 11.8-14.0 s, box (30, 0, 94, 54), x3.34 lens, 73 frames
+  mumbai02-loops-003: t 12.9-15.0 s, box (32, 20, 110, 108), x2.05 direct, 71 frames
+  mumbai02-loops-004: t 14.3-16.3 s, box (286, 186, 350, 248), x2.91 lens, 71 frames
+  mumbai02-loops-005: t 14.6-16.4 s, box (526, 102, 610, 146), x3.82 lens, 69 frames
+  mumbai02-loops-006: t 15.8-17.6 s, box (228, 218, 278, 262), x4.1 lens, 69 frames
+  mumbai02-loops-007: t 24.9-26.2 s, box (244, 0, 308, 40), x4.52 lens, 64 frames
+  mumbai02-loops-008: t 25.5-27.3 s, box (212, 0, 338, 70), x2.54 lens, 69 frames
+  mumbai02-loops-009: t 25.4-27.7 s, box (328, 270, 384, 320), x3.6 lens, 74 frames
+  mumbai02-loops-010: t 25.6-27.8 s, box (0, 0, 338, 98), x1.0 direct, 73 frames
+  mumbai02-loops-011: t 25.4-28.0 s, box (326, 188, 372, 250), x2.91 lens, 77 frames
+  mumbai02-loops-012: t 26.2-28.2 s, box (480, 38, 574, 102), x2.82 lens, 71 frames
+  mumbai02-loops-013: t 25.4-28.7 s, box (54, 0, 172, 84), x2.14 direct, 84 frames
+  mumbai02-loops-014: t 27.4-29.4 s, box (368, 206, 512, 262), x2.22 direct, 71 frames
+  mumbai02-loops-015: t 26.9-29.5 s, box (290, 44, 348, 110), x2.73 lens, 77 frames
+  mumbai02-loops-016: t 27.0-29.5 s, box (190, 184, 286, 260), x2.37 direct, 76 frames
+  mumbai02-loops-017: t 28.5-30.1 s, box (496, 0, 586, 66), x2.73 lens, 67 frames
+  mumbai02-loops-018: t 27.9-30.1 s, box (498, 306, 560, 360), x3.34 lens, 73 frames
+  mumbai02-loops-019: t 28.4-30.2 s, box (542, 150, 586, 212), x2.91 lens, 69 frames
+  mumbai02-loops-020: t 28.0-30.3 s, box (364, 150, 586, 310), x1.13 direct, 74 frames
+  mumbai02-loops-021: t 28.4-30.4 s, box (424, 0, 592, 140), x1.29 direct, 71 frames
+  mumbai02-loops-022: t 29.0-33.5 s, box (170, 10, 264, 48), x3.41 lens, 96 frames
+  mumbai02-loops-023: t 29.1-33.5 s, box (382, 8, 494, 66), x2.86 lens, 95 frames
+  mumbai02-loops-024: t 28.0-33.7 s, box (418, 234, 566, 270), x2.17 direct, 108 frames
+  mumbai02-loops-025: t 27.9-33.7 s, box (374, 242, 468, 310), x2.65 lens, 109 frames
+  mumbai02-loops-026: t 34.0-36.0 s, box (446, 66, 542, 116), x3.34 lens, 71 frames
+  mumbai02-loops-027: t 33.6-38.1 s, box (206, 194, 460, 264), x1.26 direct, 96 frames
+  mumbai02-loops-028: t 39.4-41.1 s, box (180, 276, 240, 348), x2.51 lens, 68 frames
+  mumbai02-loops-029: t 41.4-46.5 s, box (50, 44, 184, 130), x2.1 direct, 102 frames
+  mumbai02-loops-030: t 43.9-47.1 s, box (86, 44, 184, 76), x3.28 lens, 83 frames
+  mumbai02-loops-031: t 42.7-47.3 s, box (458, 92, 524, 124), x4.87 lens, 97 frames
+  mumbai02-loops-032: t 47.6-50.8 s, box (446, 88, 600, 134), x2.08 direct, 83 frames
+  mumbai02-loops-033: t 44.0-50.9 s, box (144, 152, 284, 222), x2.29 direct, 120 frames
+  mumbai02-loops-034: t 49.8-52.0 s, box (168, 232, 228, 318), x2.1 direct, 73 frames
+  mumbai02-loops-035: t 131.3-134.7 s, box (190, 0, 640, 210), x1.0 direct, 85 frames
+  mumbai02-loops-036: t 130.9-134.7 s, box (388, 186, 448, 234), x3.76 lens, 89 frames
+  mumbai02-loops-037: t 116.6-135.4 s, box (304, 268, 380, 320), x3.47 lens, 239 frames
+  mumbai02-loops-038: t 132.9-135.5 s, box (510, 0, 594, 66), x2.73 lens, 77 frames
+  38 reports in 173.2 s (789.8 per hour), 0 scene jumps, 96.5 s
+mumbai03 real: a Mumbai street at night, street level, 3:31, 960x540
+  0 reports in 201.2 s (0.0 per hour), 2 scene jumps, 149.4 s
+mumbai03 loops: a Mumbai street at night, street level, 3:31, 960x540
+  0 reports in 201.2 s (0.0 per hour), 2 scene jumps, 84.3 s
+duesseldorf real: a tram junction in Duesseldorf by day, 4:35, 1280x720
+  duesseldorf-real-001: t 12.2-29.9 s, box (362, 207, 430, 228), x4.73 lens, 228 frames
+  1 reports in 264.7 s (13.6 per hour), 21 scene jumps, 191.6 s
+duesseldorf loops: a tram junction in Duesseldorf by day, 4:35, 1280x720
+  duesseldorf-loops-001: t 10.6-12.0 s, box (410, 174, 496, 218), x3.73 lens, 65 frames
+  duesseldorf-loops-002: t 11.6-14.5 s, box (356, 174, 450, 232), x3.1 lens, 80 frames
+  duesseldorf-loops-003: t 13.5-15.0 s, box (130, 36, 356, 58), x1.42 direct, 66 frames
+  duesseldorf-loops-004: t 13.4-15.0 s, box (566, 80, 640, 104), x4.33 lens, 67 frames
+  duesseldorf-loops-005: t 13.5-15.0 s, box (180, 144, 278, 178), x3.28 lens, 66 frames
+  duesseldorf-loops-006: t 16.9-18.3 s, box (38, 76, 70, 168), x1.96 direct, 65 frames
+  duesseldorf-loops-007: t 16.9-18.3 s, box (144, 88, 404, 204), x1.23 direct, 65 frames
+  duesseldorf-loops-008: t 16.9-18.3 s, box (104, 288, 340, 360), x1.36 direct, 65 frames
+  duesseldorf-loops-009: t 16.9-18.4 s, box (406, 98, 494, 150), x3.47 lens, 66 frames
+  duesseldorf-loops-010: t 16.9-18.4 s, box (356, 248, 482, 278), x2.54 lens, 66 frames
+  duesseldorf-loops-011: t 17.0-18.5 s, box (0, 270, 116, 312), x2.76 lens, 66 frames
+  duesseldorf-loops-012: t 16.9-19.2 s, box (490, 76, 640, 134), x2.13 direct, 74 frames
+  duesseldorf-loops-013: t 16.9-19.8 s, box (78, 30, 358, 102), x1.14 direct, 80 frames
+  duesseldorf-loops-014: t 16.9-20.3 s, box (262, 144, 402, 176), x2.29 direct, 85 frames
+  duesseldorf-loops-015: t 15.7-21.9 s, box (274, 144, 486, 232), x1.51 direct, 113 frames
+  duesseldorf-loops-016: t 24.0-26.1 s, box (0, 232, 84, 276), x3.82 lens, 72 frames
+  duesseldorf-loops-017: t 24.9-26.4 s, box (80, 30, 256, 54), x1.82 direct, 66 frames
+  duesseldorf-loops-018: t 25.0-26.5 s, box (144, 126, 248, 178), x3.08 lens, 66 frames
+  duesseldorf-loops-019: t 24.9-26.6 s, box (36, 76, 68, 168), x1.96 direct, 68 frames
+  duesseldorf-loops-020: t 25.0-26.6 s, box (354, 244, 474, 282), x2.67 lens, 67 frames
+  duesseldorf-loops-021: t 25.2-26.6 s, box (218, 290, 410, 360), x1.67 direct, 65 frames
+  duesseldorf-loops-022: t 25.0-26.7 s, box (78, 30, 358, 88), x1.14 direct, 68 frames
+  duesseldorf-loops-023: t 25.2-26.7 s, box (144, 86, 304, 204), x1.53 direct, 66 frames
+  duesseldorf-loops-024: t 25.2-26.7 s, box (288, 144, 404, 184), x2.76 lens, 66 frames
+  duesseldorf-loops-025: t 19.5-26.7 s, box (602, 208, 640, 248), x4.52 lens, 123 frames
+  duesseldorf-loops-026: t 25.2-26.7 s, box (14, 212, 410, 360), x1.0 direct, 66 frames
+  duesseldorf-loops-027: t 25.3-26.8 s, box (406, 98, 494, 150), x3.47 lens, 66 frames
+  duesseldorf-loops-028: t 25.2-27.3 s, box (76, 226, 178, 276), x3.14 lens, 72 frames
+  duesseldorf-loops-029: t 25.4-27.4 s, box (80, 82, 114, 188), x1.7 direct, 71 frames
+  duesseldorf-loops-030: t 25.3-29.7 s, box (0, 20, 70, 184), x1.1 direct, 95 frames
+  duesseldorf-loops-031: t 25.3-29.7 s, box (78, 30, 492, 232), x1.0 direct, 95 frames
+  duesseldorf-loops-032: t 25.3-29.7 s, box (488, 76, 640, 134), x2.11 direct, 95 frames
+  duesseldorf-loops-033: t 26.5-29.7 s, box (114, 198, 242, 270), x2.51 lens, 83 frames
+  33 reports in 264.7 s (448.8 per hour), 21 scene jumps, 125.6 s
+74 candidates (3 real-setting, 71 looped-setting of which 0 the same spot as a real-setting one); wrote C:\hafnia-hackathon-2026\run\holdout-20261029\candidates.jsonl

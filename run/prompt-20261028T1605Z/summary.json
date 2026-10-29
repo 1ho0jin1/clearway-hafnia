@@ -1,0 +1,247 @@
+{
+ "A": {
+  "system": "none",
+  "prompt": "current",
+  "completed": 28,
+  "json_ok": 28,
+  "right": 28,
+  "scored": 28,
+  "false_cards": [],
+  "missed": [],
+  "wrong_category": [],
+  "confidence_right": null,
+  "confidence_wrong": null,
+  "chars": 253,
+  "seconds_median": 6.7
+ },
+ "B": {
+  "system": "none",
+  "prompt": "structured",
+  "completed": 28,
+  "json_ok": 28,
+  "right": 21,
+  "scored": 28,
+  "false_cards": [
+   4,
+   12,
+   13,
+   17
+  ],
+  "missed": [
+   22
+  ],
+  "wrong_category": [
+   2,
+   27
+  ],
+  "confidence_right": null,
+  "confidence_wrong": null,
+  "chars": 271,
+  "seconds_median": 6.5
+ },
+ "C": {
+  "system": "none",
+  "prompt": "structured_plus",
+  "completed": 28,
+  "json_ok": 28,
+  "right": 21,
+  "scored": 28,
+  "false_cards": [
+   4,
+   6,
+   9,
+   12,
+   13,
+   14,
+   17
+  ],
+  "missed": [],
+  "wrong_category": [],
+  "confidence_right": 0.957,
+  "confidence_wrong": 0.95,
+  "chars": 397,
+  "seconds_median": 5.8
+ },
+ "D": {
+  "system": "none",
+  "prompt": "alert",
+  "completed": 28,
+  "json_ok": 28,
+  "right": 18,
+  "scored": 28,
+  "false_cards": [],
+  "missed": [
+   2,
+   7,
+   8,
+   10,
+   11,
+   15,
+   18,
+   22,
+   23,
+   25
+  ],
+  "wrong_category": [],
+  "confidence_right": 0.95,
+  "confidence_wrong": 0.95,
+  "chars": 378,
+  "seconds_median": 4.5
+ },
+ "I": {
+  "system": "none",
+  "prompt": "trained_in_user",
+  "completed": 10,
+  "json_ok": 10,
+  "right": 9,
+  "scored": 10,
+  "false_cards": [],
+  "missed": [
+   7
+  ],
+  "wrong_category": [],
+  "confidence_right": null,
+  "confidence_wrong": null,
+  "chars": 249,
+  "seconds_median": 5.5
+ },
+ "E": {
+  "system": "trained",
+  "prompt": "current",
+  "completed": 28,
+  "json_ok": 28,
+  "right": 24,
+  "scored": 28,
+  "false_cards": [],
+  "missed": [
+   7,
+   22,
+   23
+  ],
+  "wrong_category": [
+   2
+  ],
+  "confidence_right": null,
+  "confidence_wrong": null,
+  "chars": 250,
+  "seconds_median": 4.4
+ },
+ "F": {
+  "system": "trained",
+  "prompt": "structured_plus",
+  "completed": 28,
+  "json_ok": 28,
+  "right": 20,
+  "scored": 28,
+  "false_cards": [
+   4,
+   9,
+   12,
+   13,
+   14,
+   17
+  ],
+  "missed": [],
+  "wrong_category": [
+   2,
+   27
+  ],
+  "confidence_right": 0.96,
+  "confidence_wrong": 0.954,
+  "chars": 391,
+  "seconds_median": 4.5
+ },
+ "G": {
+  "system": "clearway",
+  "prompt": "current",
+  "completed": 28,
+  "json_ok": 28,
+  "right": 23,
+  "scored": 28,
+  "false_cards": [
+   6,
+   9,
+   14,
+   16
+  ],
+  "missed": [],
+  "wrong_category": [
+   23
+  ],
+  "confidence_right": null,
+  "confidence_wrong": null,
+  "chars": 267,
+  "seconds_median": 4.4
+ },
+ "H": {
+  "system": "clearway",
+  "prompt": "structured_plus",
+  "completed": 28,
+  "json_ok": 28,
+  "right": 18,
+  "scored": 28,
+  "false_cards": [
+   3,
+   4,
+   6,
+   9,
+   12,
+   13,
+   14,
+   16,
+   17,
+   24
+  ],
+  "missed": [],
+  "wrong_category": [],
+  "confidence_right": 0.962,
+  "confidence_wrong": 0.95,
+  "chars": 394,
+  "seconds_median": 4.5
+ },
+ "R": {
+  "system": "none",
+  "prompt": "current",
+  "completed": 5,
+  "json_ok": 5,
+  "right": 5,
+  "scored": 5,
+  "false_cards": [],
+  "missed": [],
+  "wrong_category": [],
+  "confidence_right": null,
+  "confidence_wrong": null,
+  "chars": 263,
+  "seconds_median": 4.3
+ },
+ "A2": {
+  "system": "none",
+  "prompt": "current",
+  "completed": 28,
+  "json_ok": 28,
+  "right": 28,
+  "scored": 28,
+  "false_cards": [],
+  "missed": [],
+  "wrong_category": [],
+  "confidence_right": null,
+  "confidence_wrong": null,
+  "chars": 256,
+  "seconds_median": 4.5
+ },
+ "identical_I_E": {
+  "clips": 10,
+  "identical": 1,
+  "same_category": 9
+ },
+ "identical_R_A": {
+  "clips": 5,
+  "identical": 2,
+  "same_category": 5
+ },
+ "identical_A2_A": {
+  "clips": 28,
+  "identical": 18,
+  "same_category": 28
+ }
+}

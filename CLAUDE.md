@@ -13,7 +13,7 @@ research on Hafnia's trained formats, earlier and competing entries, and footage
 
 ## Project direction (decided 2026-10-22: plan C, right-of-way incidents)
 
-- Solo entry; the submission portal closes **2026-11-01 12:00 CET** (open from Oct 26; a demo video of 3-5 min is
+- Solo entry; the submission portal closes **2026-11-02 12:00 CET** (extended from 11-01, told on 2026-10-29; open from Oct 26; a demo video of 3-5 min is
   required; see `docs/PRODUCT.md` for the criteria), plan to submit on Oct 30.
 - **Selling point (2026-10-27, after seeing the field):** optimization, not detection. Two public 2026 entries
   (RoadWatch, Scene Contracts) ask Hafnia on a click or a timer and claim no accuracy; the README, video and pitch
@@ -92,7 +92,8 @@ an API; never write XProtect or gateway paths and fields from memory.
 - XProtect setup lives in an idempotent script in this repository (MilestonePSTools or the REST API). Each block
   checks by name first, so re-running is safe.
 - Commit what the gateway does not export together: the prompts export JSON, the system prompt text, any changed
-  *Advanced Settings*, and the gateway rules (recreate them through `POST /api/Rules`).
+  *Advanced Settings*, and the gateway rules (recreate them through `POST /api/Rules`). The system prompt is empty
+  by decision: every system prompt tried made the answers worse (`run/prompt-20261028T1605Z`).
 - Document every manual step a script cannot do: switching analytics events on in Management Client, and generating
   Hafnia webhook addresses in Smart Client (they embed prompt and camera IDs).
 - Times sent to the gateway are UTC with `Z`; never an offset like `+02:00` (the `+` becomes a space in the URI).
@@ -129,7 +130,7 @@ original diagram stays in `docs/PLAN-C.md`, "Pipeline".
 
 | Path | What |
 |---|---|
-| `hafnia/gateway.py` | Hafnia gateway client: session, quota, prompts by title, `ask`, `wait_all` with per-phase timing |
+| `hafnia/gateway.py` | Hafnia gateway client: session, quota, prompts by title, `ask`, `wait_all` with per-phase timing; settings groups and the system prompt (`system_prompt`, `set_system_prompt`: the gateway validates the whole group on a PUT, so every setting of the group is sent) |
 | `hafnia/xprotect.py` | Camera name → ID lookup through MilestonePSTools (10-30 s) |
 | `scripts/bench_hafnia.py` | Latency benchmark per phase; capped by `--max-requests` and `--stop-at` |
 | `scripts/report_bench.py` | Turns a run folder's `results.jsonl` into a self-contained `report.html` |
@@ -153,6 +154,11 @@ original diagram stays in `docs/PLAN-C.md`, "Pipeline".
 | `docs/walkthrough/`, `scripts/viz_walkthrough.py` | The walkthrough (renewed 2026-10-28): fifteen steps, each a claim, a figure from the real cameras and its numbers, with the operator's Confirm / Reject path (what a verdict changes and what it does not); `flow.mermaid` is the concise flowchart of the whole pipeline, embedded in `index.html` (Mermaid from cdnjs; the source text shows offline); the figures are made by the script (`--only fade lens_code pages` for the three added on 2026-10-28: the fade replays, a lens frame with its code read back, the board and summary renders). The page speaks the judges' words, not ours: "the incident memory" is the ledger, "a fingerprint" a SigLIP look, "on hold" held, "part of an incident" a piece, "the magnifier camera" the lens, "asked on the camera's own recording" a direct ask, "the lens recording's clock" its time base, "incident" the unit of counting ("card" only for the tile on the board), "the three-hour shift on Oct 26" M3 and "the 20-minute run after the fixes" the clean run; FrameBridge is introduced as our own MIP SDK reader (it is not an XProtect name) |
 | `scripts/lens_compare.py` | One looped event asked about plainly and through the lens (`--variants crop crop_slow2 crop_sr`, `--prompt classify|json`, `--asks N`): finds the event live by frame matching; (1 + variants) × asks requests |
 | `scripts/lens_pilot.py` | Plan C's lens pilot (M1): each synthetic incident camera, five views (full loop, event window, crop, crop + SR, BEFORE/AFTER), one JSON prompt (`clearway/prompt.py`); 5 requests per camera |
+| `scripts/prompt_experiment.py` | The prompt experiment (2026-10-28): 28 clips the service had sent (lens spool AVIs, labelled by eye) played once more on `lens_1` with verified spans (`play`), asked in cells of system prompt × user prompt with the gateway's system prompt switched through its Settings API and cleared at the end (`ask`, resumable, one request per clip and cell), scored into the run's README (`score`, the hand-written findings above the marker are kept); `restore` clears the system prompt |
+| `scripts/holdout.py` | The held-out check (2026-10-29): the change detector on the three CC0 street clips (`data/footage/commons`, never used for tuning) with the real-camera and the looped-clip settings (`detect`, no request: candidates, the clips the service would send built with the service's own window and crop rules, contact sheets for labelling by eye into `labels.json`), the clips played on `lens_1` with verified spans (`play`), asked once each with the service's prompt and the empty system prompt (`ask`, resumable, capped), scored into the run's README (`score`, hand-written text above the marker kept) |
+| `scripts/fetch_footage.py` | The three CC0 street clips of the held-out check fetched from Wikimedia Commons into `data/footage/commons` with a SHA-256 check (standard library only, so `py` runs it; resumable; waits on HTTP 429; `--check` verifies without downloading); their Commons titles, authors and checksums are in the script, read from the Commons records on 2026-10-29 |
+| `scripts/vanilla_poll.py` | The plain way to use Hafnia, measured for the comparison in the demo video (2026-10-29): the organizers' example question ("Describe what happens in this video.", a 30 s clip ending 5 s ago, as the kit's `ask_hafnia.py`) asked about every named camera every `--every` seconds for `--minutes`, as a recurring XProtect rule with a Hafnia webhook would (`run`: the plan and today's count first, `--dry-run`, `--max-requests`); `score` writes the run's README below the marker (per camera, which answers name an incident by keyword, the interval's arithmetic: requests per camera-hour, coverage, how long 500 last), `answers.md`, `summary.json`. Clearway's side is a live run over the same minutes |
+| `scripts/second_question.py` | The AlertValidation shape as a second question (2026-10-29): the first answer's category put to Hafnia as the upstream alert on the same recorded span, cell D's prompt otherwise (`plan` from the hold-out's false cards and the prompt experiment's cell A incidents; `ask`, resumable, the system prompt must be empty; `score` into the run's README below the marker, `answers.md`, `summary.json`) |
 | `clearway/ledger.py` | The ledger (product F1): incidents, pieces, recurrences (no request), provisional skips with escalation, same-category merge, one alarm per incident (closed once it stayed cleared 60 s, reopened when it recurs), clearing, failed questions, operators' verdicts (F7: a rejection teaches the card's looks as harmless at its spot, answers about what was rejected join the rejected card; a confirmation overrules Hafnia's rejections there); returns actions, logs events (JSONL), `Ledger.replay()` |
 | `clearway/alarms.py` | XProtect alarms and bookmarks for the ledger's incidents (F3): raise on the incident's camera (category priority, owner in the name, Hafnia's summary marked AI-generated, snapshot, bookmarks on the camera and, for a crop shown on the lens, on `lens_1`), reopen, close, confirm (In progress); one thread, in order |
 | `clearway/service.py`, `clearway/prompt.py` | The Clearway service (F2): FrameBridge → change detector (a thread per camera) → SigLIP look → ledger → the crop (a spot the lens would magnify less than `DIRECT_BELOW` is asked about on its own camera's recording, the crop only stored for the board; a small one is played on the lens) → `HafniaAnswers` (run cap, daily count, `PARALLEL` requests at once; a failed direct ask is asked once more on the lens) → ledger; logs `service.jsonl`, `ledger.jsonl`, `changes.jsonl` (replayable); takes operators' verdicts from `operator.jsonl` (F7) every second. The JSON prompt and its parser |
@@ -280,7 +286,8 @@ large synthetic objects and on test_11's 30-px crash; BEFORE/AFTER stills turned
 stay out of the default lens. The category list steers the whole answer: without a crash category the crash was
 STALLED_VEHICLE nine times and never named in a summary (COLLISION to add, gate G3). Tool types are invented
 ("chainsaw", "lockpicks" for bolt cutters). Asking again about the same span returns the same answer, word for
-word: repeats need different events or windows. Hafnia's cloud refused one specific clip twice ("Transfer Assets: …
+word: repeats need different events or windows (2026-10-28: the same category every time, but the words differ in
+about a third of repeats, `run/prompt-20261028T1605Z`). Hafnia's cloud refused one specific clip twice ("Transfer Assets: …
 HTTP 403 Forbidden"); the same window shifted by 1 s worked; failures are not counted.
 
 **Ledger, offline** (`run/ledger-F1/README.md`, no requests; stand-in for Hafnia): six incident cameras over 5 min cost
@@ -494,6 +501,86 @@ tree branch") to NONE: 13 of 14 as expected against 12. Asking for the summary b
 graffiti and made that crop STALLED_VEHICLE. The negatives prompt is `clearway/prompt.py`'s since; `reask.py`
 keeps the original as a variant. The sample is one run's spans: the pilot's thirty answers (`run/pilot-*`) have
 expired from the recordings and were not re-checked.
+
+**Prompt experiment: a system prompt and structured prompts** (`run/prompt-20261028T1605Z/README.md`,
+`scripts/prompt_experiment.py`, 267 requests on 2026-10-28): the gateway's *System Prompt* setting had never been
+set on this machine (no stored value; nothing in the repository sets one). 28 clips the service had sent on 10-26
+and 10-27 (the spool AVIs: crops, the former false cards, the "tree branch" scooter crop; 18 incidents, 10 with
+none, labelled by eye) were played once more on `lens_1` with verified spans and asked in every cell. **The
+service's one-paragraph prompt with negatives kept all 28 answers in both runs; every variant lost some.** Read it
+as a comparison between prompts, not as an accuracy (2026-10-29): the 28 clips are the machine's eight looped
+scenes (six staged incidents seen 2-5 times each: the five bolt-cutter clips are one act at one gate; the negatives
+are quiet moments of the same loops, nothing that looks like an incident without being one), and clips 18-28 are
+the very spans `reask.py` had re-asked on 10-27 to choose the negatives, so the baseline had two tuning passes on
+this material and the variants none. The repeat shows stability (the category never changed; the words differ in
+about a third), not generalisation; the held-out check on real streets is the hold-out paragraph below. Every
+variant was worse: the same content in
+sections lost 7 (cars driving through became "stopped in the middle of the lane"); sections plus context, rules
+and a `confidence` field lost 7, all false cards ("a large fallen tree trunk" on an empty pavement at night; the
+rule against guessing objects produced them); Hafnia's trained system prompt lost 4 (the graffiti twice: "a person
+stands beside a stationary train"); our own system prompt lost 5 (four false OBSTRUCTIONs), and with the structured
+prompt 10, every empty clip called an incident. The trained AlertValidation shape is a strict verifier: 0 false,
+10 of 18 incidents discarded ("a routine disposal action"), everything it confirmed right, the five High-priority
+clips among them: a candidate second question for High alarms, untested beyond these clips. Confidence was 0.9-1.0
+on every answer, right or wrong: not a signal. No latency difference between cells (Hafnia's phase 2-3 s). The
+trained text, as system prompt or in the user prompt, makes the JSON come fenced in ```` ```json ````; the
+baseline is fenced about half the time already, never with prose around it, and the parser's `{...}` search was
+right every time. Decisions: keep `clearway/prompt.py` as it is, leave the system prompt empty (the setup script
+sets none), do not add a confidence field; escalation must come from a second view or window, not from the model.
+The gateway's Settings API: `GET/PUT /api/Settings/{group}` with the group key URL-encoded (`##local##.Advanced`),
+the PUT carrying every setting of the group (`Gateway.save_settings`).
+
+**Hold-out check: the detector and the prompt on real streets** (`run/holdout-20261029/README.md`,
+`scripts/holdout.py`, 2026-10-29, 41 requests sent, 39 completed): the user's worry that the 28 of 28 was
+over-fitted was right. The three CC0 street clips (`data/footage/commons`: a Mumbai junction from above by day,
+a Mumbai street at night, a Düsseldorf tram junction; never used for tuning) went through the detector offline
+(no request) with the real-camera setting the service gives real cameras and, for more hard negatives, the
+looped-clip setting; each report became the clip the service would send by its own rules (`clearway/service.py`'s
+window and crop, the lens from x2.5, the whole frame below); 40 were played on `lens_1` with verified spans and
+asked once with the prompt and the empty system prompt as they are. Labels by eye, all NONE: queued taxis and cars
+waiting at lights or crossings, people crossing tram rails, motorbikes paused in the junction, parked cars, stalls,
+facades. **Result: 8 NONE, 31 false cards of 39 answers** (one clip failed twice at Hafnia, HTTP 403, free): 20
+STALLED_VEHICLE on waiting cars ("stopped in the middle of the lane, blocking traffic", lead vehicle or not), 5
+COLLISIONs invented on moving traffic ("sparks and smoke, the rider is thrown"), 6 OBSTRUCTIONs with "a large fallen
+tree trunk" three times (a pavement corner; pedestrians' legs over tram rails). The prompt's negatives already name
+queued and parked vehicles and ordinary traffic: they did not hold. 6 of the 8 right answers are Düsseldorf clips
+where the crossing and the lights are in view; the lens view and the whole frame did not differ otherwise. The
+detector at the real setting raised 3 candidates in 10.7 minutes (about 17 per camera-hour: Mumbai day 42,
+Düsseldorf 14, the night street 0, untested whether a blind spot); the loops setting 450-790 per hour. Decisions:
+the judge-facing numbers carry this result beside the looped ones; the prompt is not changed (its negatives are
+overridden, and 10-28 showed rules add invented objects); the set is a tuning set from now on, so any fix is
+checked on new footage. Where a fix would sit: a longer wait on a lane at a junction (a light cycle), the
+operator's rejections teaching the memory, the AlertValidation shape as a second question before a High alarm
+(39 requests to test on these spans), the whole frame with the spot marked for a stopped vehicle. **Reproducible on
+another machine since 2026-10-29:** `scripts/fetch_footage.py` fetches the clips (CC0, SHA-256 checked, about
+500 MB); the run README's "Reproduce it on another machine" gives the commands (a new run folder, this run's
+`labels.json` copied in, 40 requests) and what to expect (ids match when the candidates do; the counts land near 31
+of 39, not on it).
+
+**The second question tested** (`run/validate-20261029/README.md`, `scripts/second_question.py`, 2026-10-29, 49
+requests, today's count 88 after): the AlertValidation shape with the first answer's category as the upstream alert
+(cell D's prompt otherwise, pre-registered, one shot) on the hold-out's 31 false cards and the prompt experiment's
+18 true incidents. **Discards 19 of 31 false cards (all 5 invented COLLISIONs; 11 of 20 waiting cars, the whole-frame
+clips 11 of 13, the lens crops 8 of 18), confirms 15 of 18 incidents; as the gate before High alarms it stops 16 of
+25 false Highs and holds 2 of 5 true ones, both person-on-the-tracks clips** (cell D had confirmed all three with a
+generic alert; three clips cannot tell form from variation). Confidence 0.95 on all 49. Decision: not a hard gate on
+High alarms; possible as a signal (a discard lowers the priority and says why, the card stays), not built. The
+whole frame is the better second look for a stalled-vehicle crop (candidate fix 4), to be measured on footage
+neither run used. The reasons it gives are not evidence (a right discard "a stationary train at a platform" in
+Mumbai).
+
+**The plain way measured for the video** (`run/vanilla-20261029T0714Z-compare/README.md`, `scripts/vanilla_poll.py`,
+2026-10-29, 66 requests; today's count 169 after, with the live run's 15): the organizers' example question about
+every camera once a minute for six minutes, read one by one. 60 requests per camera-hour, half the time looked at,
+the day's 500 gone in 45 minutes for eleven cameras; the staged incident in 24 of 36 answers (the person on the
+tracks 0 of 6, "sits on the edge of the platform, calm, orderly"; the scooter 1 of 6), each reported again every
+minute; nothing invented on the four ordinary street cameras (24 of 24); the `vandalism` window smash reported 6 of
+6, which Clearway never asks about (an event, not a change that stays). The video's scene 7b and
+`docs/video/cards/compare.html` set it against the 10-27 run (14 requests, 7 incidents, none false) and the 10-26
+shift (1 per camera-hour). **Lesson:** running Clearway beside the poller on this machine starved it
+(`run/clearway-live-20261029T071314Z-compare`: CPU 100 %, the service 4-47 %, 0-2.5 fps per camera, three cameras
+without frames, 5 of 20 questions over the 15 cap, 6 cards; the board recorder got 23 frames in ten minutes): never
+run a second Hafnia-asking process beside a live run, and film the board in a run of its own.
 
 **Crash category (gate G3)** (`run/lens-test_11-20261024T110155Z`, 3 requests): with COLLISION in the JSON prompt the
 cropped view of test_11's crash says COLLISION ("loses control … veers sharply"), the full frame STALLED_VEHICLE; the

@@ -1,0 +1,130 @@
+{
+ "when": "2026-10-29T03:57:00.631575+00:00",
+ "params": {
+  "real": {
+   "work_width": 640,
+   "warmup_s": 10.0,
+   "fast_tau_s": 0.5,
+   "slow_tau_s": 600.0,
+   "diff": 25.0,
+   "persist_s": 15.0,
+   "min_area": 0.0015,
+   "max_area": 0.3,
+   "global_area": 0.15,
+   "global_diff": 0.3,
+   "jump_frac": 0.6,
+   "merge_iou": 0.3,
+   "restored_diff": 12.0,
+   "close_s": 1.0,
+   "person_cover": 0.5,
+   "freeze_open": true,
+   "learn_static_after_s": 60.0,
+   "restored_ratio": 0.25,
+   "changed_s": 0.0,
+   "moving_share": 0.2,
+   "seen_tau_s": 30.0
+  },
+  "loops": {
+   "work_width": 320,
+   "warmup_s": 10.0,
+   "fast_tau_s": 0.5,
+   "slow_tau_s": 600.0,
+   "diff": 25.0,
+   "persist_s": 1.5,
+   "min_area": 0.005,
+   "max_area": 0.3,
+   "global_area": 0.15,
+   "global_diff": 0.3,
+   "jump_frac": 0.6,
+   "merge_iou": 0.3,
+   "restored_diff": 12.0,
+   "close_s": 1.0,
+   "person_cover": 0.5,
+   "freeze_open": true,
+   "learn_static_after_s": 60.0,
+   "restored_ratio": 0.25,
+   "changed_s": 0.0,
+   "moving_share": 0.2,
+   "seen_tau_s": 30.0
+  }
+ },
+ "bridge_width": 832,
+ "work_width": 640,
+ "fps": 10,
+ "window": {
+  "before_s": 2.0,
+  "after_s": 3.0,
+  "max_clip_s": 30.0,
+  "direct_below": 2.5
+ },
+ "people": "yolo11m",
+ "clips": [
+  {
+   "clip": "mumbai02",
+   "profile": "real",
+   "what": "a Mumbai junction from above by day, 3:03, 960x540",
+   "frames": 1832,
+   "seconds": 173.2,
+   "reports": 2,
+   "per_hour": 41.6,
+   "scene_jumps": 0,
+   "took_s": 138.0
+  },
+  {
+   "clip": "mumbai02",
+   "profile": "loops",
+   "what": "a Mumbai junction from above by day, 3:03, 960x540",
+   "frames": 1832,
+   "seconds": 173.2,
+   "reports": 38,
+   "per_hour": 789.8,
+   "scene_jumps": 0,
+   "took_s": 96.5
+  },
+  {
+   "clip": "mumbai03",
+   "profile": "real",
+   "what": "a Mumbai street at night, street level, 3:31, 960x540",
+   "frames": 2112,
+   "seconds": 201.2,
+   "reports": 0,
+   "per_hour": 0.0,
+   "scene_jumps": 2,
+   "took_s": 149.4
+  },
+  {
+   "clip": "mumbai03",
+   "profile": "loops",
+   "what": "a Mumbai street at night, street level, 3:31, 960x540",
+   "frames": 2112,
+   "seconds": 201.2,
+   "reports": 0,
+   "per_hour": 0.0,
+   "scene_jumps": 2,
+   "took_s": 84.3
+  },
+  {
+   "clip": "duesseldorf",
+   "profile": "real",
+   "what": "a tram junction in Duesseldorf by day, 4:35, 1280x720",
+   "frames": 2747,
+   "seconds": 264.7,
+   "reports": 1,
+   "per_hour": 13.6,
+   "scene_jumps": 21,
+   "took_s": 191.6
+  },
+  {
+   "clip": "duesseldorf",
+   "profile": "loops",
+   "what": "a tram junction in Duesseldorf by day, 4:35, 1280x720",
+   "frames": 2747,
+   "seconds": 264.7,
+   "reports": 33,
+   "per_hour": 448.8,
+   "scene_jumps": 21,
+   "took_s": 125.6
+  }
+ ],
+ "duplicates": 0
+}

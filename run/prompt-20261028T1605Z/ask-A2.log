@@ -1,0 +1,33 @@
+﻿28 requests planned over cells A2 (28 clips; 239 answers already in results.jsonl)
+  A2: system 'none'       prompt 'current'          clips 28
+today's count before: 239 of 500
+the gateway's system prompt before: ''
+  A2 clip  1 39929_cw-0001-person_on_railwa -> PERSON_ON_TRACKS ok    (Completed, 4.5 s) A person in a red coat crawls along the yellow tactile paving at the edge of the railway t
+  A2 clip  2 68961_cw-0002-escooter_left_ac -> OBSTRUCTION      ok    (Completed, 4.5 s) The electric scooter lies on its side across the pavement, blocking the walkway, while the
+  A2 clip  3 93547_cw-0004-school_gate_brea -> NONE             ok    (Completed, 4.4 s) No incident occurs; the scene shows a quiet nighttime pavement with a metal fence and no v
+  A2 clip  4 96829_cw-0007-bin_pushed_over_ -> NONE             ok    (Completed, 5.5 s) A silver hatchback drives straight through the lane, maintaining steady speed and lane pos
+  A2 clip  5 71209_cw-0008-vehicle_breakdow -> STALLED_VEHICLE  ok    (Completed, 5.5 s) A silver pickup truck is stopped in the middle of the lane with its driver-side door open 
+  A2 clip  6 57474_cw-0012-school_gate_brea -> NONE             ok    (Completed, 5.4 s) The pavement remains clear and unobstructed throughout the clip with no visible obstructio
+  A2 clip  7 92754_cw-0014-graffiti_on_stan -> DAMAGE           ok    (Completed, 4.5 s) A person applies colorful graffiti to the side of a stationary red train on the platform, 
+  A2 clip  8 17085_cw-0015-school_gate_brea -> TAMPERING        ok    (Completed, 4.4 s) A person in a hoodie approaches a metal gate, uses a tool to pick the padlock, and removes
+  A2 clip  9 25006_cw-0013-busy_street.avi  -> NONE             ok    (Completed, 4.4 s) A crowd of people stands on the pavement, some holding up phones, and remains in place thr
+  A2 clip 10 98983_cw-0019-bin_pushed_over_ -> OBSTRUCTION      ok    (Completed, 4.6 s) A person tips a large green wheeled bin onto its side on the pavement, leaving it lying ac
+  A2 clip 11 88745_cw-0021-bin_pushed_over_ -> OBSTRUCTION      ok    (Completed, 4.5 s) A green bin is placed on the pavement, partially blocking the walkway and remaining in pla
+  A2 clip 12 39462_cw-0023-traffic_flows_in -> NONE             ok    (Completed, 4.5 s) A white van drives straight through the lane, exits the frame, and is no longer visible.
+  A2 clip 13 97697_cw-0024-traffic_flows_in -> NONE             ok    (Completed, 4.5 s) A dark-colored vehicle enters from the right and proceeds straight along the lane, maintai
+  A2 clip 14 64700_cw-0028-school_gate_brea -> NONE             ok    (Completed, 4.4 s) A person walks across the pavement from right to left and exits the frame, leaving the pav
+  A2 clip 15 33995_cw-0031-school_gate_brea -> TAMPERING        ok    (Completed, 4.4 s) A person crouches on the pavement and uses a padlock and chain to tamper with a metal fenc
+  A2 clip 16 77617_cw-0032-escooter_left_ac -> NONE             ok    (Completed, 4.7 s) A pedestrian walks along the pavement while a cyclist rides past on the adjacent lane; no 
+  A2 clip 17 82319_cw-0033-bin_pushed_over_ -> NONE             ok    (Completed, 4.6 s) A silver hatchback drives straight through the lane, maintaining steady speed and lane pos
+  A2 clip 18 61867_cw-0001-bin_pushed_over_ -> OBSTRUCTION      ok    (Completed, 4.6 s) A person pushes a green wheeled bin across the pavement, tips it over, and walks away as i
+  A2 clip 19 17167_cw-0003-vehicle_breakdow -> STALLED_VEHICLE  ok    (Completed, 4.7 s) A silver pickup truck stalls in the middle of the lane with thick smoke billowing from its
+  A2 clip 20 85257_cw-0004-person_on_railwa -> PERSON_ON_TRACKS ok    (Completed, 4.7 s) A person in a red jacket sits on the platform edge, stands up, and walks across the railwa
+  A2 clip 21 01116_cw-0005-school_gate_brea -> TAMPERING        ok    (Completed, 4.6 s) A hooded person crouches on the pavement and uses a tool to force or pick a lock on a meta
+  A2 clip 22 01555_cw-0006-escooter_left_ac -> OBSTRUCTION      ok    (Completed, 4.5 s) A bicycle lies fallen across the pavement, partially blocking the bike lane, while a pedes
+  A2 clip 23 66831_cw-0008-graffiti_on_stan -> DAMAGE           ok    (Completed, 4.5 s) A person spray-paints colorful graffiti on the side of a stationary red train at the platf
+  A2 clip 24 65311_cw-0009-school_gate_brea -> NONE             ok    (Completed, 4.4 s) A metallic fence with pointed tops remains stationary on the pavement throughout the video
+  A2 clip 25 37185_cw-0010-school_gate_brea -> TAMPERING        ok    (Completed, 5.5 s) A person crouches and uses a tool to force open a padlock and chain securing a metal gate,
+  A2 clip 26 62072_cw-0011-person_on_railwa -> PERSON_ON_TRACKS ok    (Completed, 5.5 s) A person in a red coat walks onto the railway tracks, pauses, then sits down on the rails.
+  A2 clip 27 01036_cw-0012-escooter_left_ac -> OBSTRUCTION      ok    (Completed, 5.4 s) An electric scooter lies on its side across the pavement, blocking the walkway, before a r
+  A2 clip 28 65659_cw-0013-school_gate_brea -> TAMPERING        ok    (Completed, 3.1 s) A person uses a tool to break the padlock and chain securing the gate, then removes the lo
+today's count after: 267 (28 completed here)

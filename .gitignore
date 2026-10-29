@@ -21,6 +21,9 @@ run/*/recorded/
 # The board's clips and snapshots (footage; clips are rebuilt from the lens spool)
 run/*/clips/
 run/*/snaps/
+# The hold-out check's contact sheets (scripts\holdout.py detect; CC0 frames, but bulky: regenerate)
+run/*/sheets/
+run/holdout-*.detect.out
 # The service's scene images for the hotspots (footage too)
 run/*/cameras/
 

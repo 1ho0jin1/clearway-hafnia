@@ -2,7 +2,7 @@
 
 Status: **current.** This turns plan C (`docs/PLAN-C.md`, the pipeline and its measurements) into something an operator
 uses. Plan C stays the technical reference; where the two disagree on scope or schedule, this document wins.
-**Submission portal: 26 October to 1 November 2026, 12:00 CET** (the Hafnia community's hackathon page, read
+**Submission portal: 26 October to 2 November 2026, 12:00 CET** (extended from 1 November, told on 2026-10-29; the Hafnia community's hackathon page, read
 2026-10-27); finalists announced 3-6 November, finals 10-11 November at the Developer Summit in Copenhagen. Required:
 a working solution (PoC or MVP), a solution description, a demonstration video (3-5 min recommended), the source code
 (open source not required); optional: a live demo link and documentation. Criteria: real-world value, innovation, use
@@ -218,7 +218,7 @@ The allowance resets at 00:00 UTC; stay under the cap each day. Requests are the
 | 6 | Oct 27 | **Done:** M3 analysed; `lens_1`'s recording checked against the clips sent before it expired (`run/lens-check-20261027`: 0.3-9.5 s behind, four false cards explained); phone pushes with Confirm / Reject (F12, ntfy); direct asks for large spots (`run/clearway-live-20261027T081803Z-direct`, 6 requests); the lens self-check (a frame code read back from `lens_1`'s own frames, wall-clock stamping in the publisher: `run/lens-check-20261027T095146Z-load-wallclock`, no requests); the fade found in code and fixed, verified by 30-minute offline replays (`run/change-fade-after3`: 119 of 119 loops on both cameras, against 16 before). Moved to Oct 28: the Smart Map check (F10). | 6 |
 | 7 | Oct 28 | **Done on Oct 27:** FrameBridge at 832 px and the detector on every second frame (the CPU finding: our own load, not XProtect's), the clean live run (`run/clearway-live-20261027T124112Z-clean`, 14 requests). Remaining: the start-up burst, the alarm actions' latency (19 s median under load; a below-normal process priority is being measured); `test_11` (M4); report in operator terms with accuracy and audits. | 80 |
 | 8 | Oct 28-29 | Demo video (`docs/VIDEO.md`; the storyboard, cards, tooling and a 2.6-minute first cut with a synthetic voice were done on Oct 27): the author's narration and the three captures by hand during a recorded live run on Oct 28, the final cut on Oct 29. `setup.ps1` and the README were done on Oct 27. | 15 |
-| 9 | Oct 30 | Spare; submission (the portal closes Nov 1, 12:00 CET). | |
+| 9 | Oct 30 | Spare; submission (the portal closes Nov 2, 12:00 CET, extended from Nov 1). | |
 | later | | **TODO (2026-10-27): the application layer** (F13). The board is a page beside Smart Client and the phone gets pushes with two buttons; both are thin. To build when the pipeline's numbers are in: a GUI that joins the cards, the alarm state and the verdicts from the board and the phones in one window; more interaction (split or merge cards, snooze, assign to a person, a note with a verdict, reply from the phone with a photo); one ntfy topic per owner; Teams and Slack formats; the verdicts kept across runs. | |
 
 ## Risks

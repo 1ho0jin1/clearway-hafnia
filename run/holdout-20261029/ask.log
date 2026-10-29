@@ -1,0 +1,47 @@
+40 requests planned, one per clip with the service's prompt (40 clips, 0 answered already)
+today's count before: 0 of 500
+  clip  1 mumbai02-real-001            -> UNPARSED         WRONG (Failed, 11.9 s) 
+  clip  2 mumbai02-real-002            -> OBSTRUCTION      WRONG (Completed, 11.9 s) A large tree trunk falls across the roadway, blocking the lane and forcing vehicles to sto
+  clip  3 duesseldorf-real-001         -> STALLED_VEHICLE  WRONG (Completed, 11.8 s) A dark station wagon is stopped in the lane with brake lights illuminated, blocking traffi
+  clip  4 mumbai02-loops-001           -> COLLISION        WRONG (Completed, 8.9 s) A white sedan collides with a parked vehicle at the curb, then stalls in the lane and bloc
+  clip  5 mumbai02-loops-002           -> STALLED_VEHICLE  WRONG (Completed, 8.8 s) A white sedan stalls in the middle of the lane, blocking traffic and forcing vehicles to m
+  clip  6 mumbai02-loops-004           -> NONE             ok    (Completed, 8.8 s) Motorcyclists and cars move through the intersection in an orderly flow, with no collision
+  clip  7 mumbai02-loops-006           -> STALLED_VEHICLE  WRONG (Completed, 7.8 s) A yellow taxi is stopped in the middle of the lane, blocking traffic, while motorcycles an
+  clip  8 mumbai02-loops-008           -> STALLED_VEHICLE  WRONG (Completed, 7.7 s) A white sedan stalls in the middle of the lane, blocking traffic and forcing vehicles to m
+  clip  9 mumbai02-loops-010           -> STALLED_VEHICLE  WRONG (Completed, 7.7 s) A white van stalls in the middle of the intersection, blocking the lane and forcing other 
+  clip 10 mumbai02-loops-012           -> OBSTRUCTION      WRONG (Completed, 8.8 s) A white SUV is parked on the pavement, blocking the lane and forcing passing vehicles to s
+  clip 11 mumbai02-loops-014           -> STALLED_VEHICLE  WRONG (Completed, 8.7 s) A white van stalls in the middle of the intersection, blocking the lane and forcing other 
+  clip 12 mumbai02-loops-016           -> NONE             ok    (Completed, 8.6 s) A motorcyclist rides along the pavement at the intersection, weaving between parked cars a
+  clip 13 mumbai02-loops-018           -> OBSTRUCTION      WRONG (Completed, 7.8 s) A blue tarpaulin lies across the pavement, partially blocking the pedestrian path and rema
+  clip 14 mumbai02-loops-020           -> STALLED_VEHICLE  WRONG (Completed, 7.7 s) A white van stalls in the middle of the intersection, blocking the lane and forcing other 
+  clip 15 mumbai02-loops-022           -> OBSTRUCTION      WRONG (Completed, 7.6 s) A white sedan is stopped in the middle of the lane, blocking traffic and forcing vehicles 
+  clip 16 mumbai02-loops-024           -> COLLISION        WRONG (Completed, 9.1 s) A white sedan collides with a black SUV at the intersection, then stalls in the lane and r
+  clip 17 mumbai02-loops-025           -> STALLED_VEHICLE  WRONG (Completed, 9.1 s) A yellow taxi is stopped in the middle of the lane, blocking traffic, while other vehicles
+  clip 18 mumbai02-loops-027           -> COLLISION        WRONG (Completed, 9.0 s) A white sedan collides with a black hatchback in the middle of the intersection, then stal
+  clip 19 mumbai02-loops-029           -> COLLISION        WRONG (Completed, 9.3 s) A white hatchback enters the intersection and collides with a black sedan, causing the hat
+  clip 20 mumbai02-loops-031           -> STALLED_VEHICLE  WRONG (Completed, 9.2 s) A white sedan is stopped in the middle of the lane, blocking traffic and causing vehicles 
+  clip 21 mumbai02-loops-033           -> STALLED_VEHICLE  WRONG (Completed, 9.2 s) A white hatchback stalls in the middle of the intersection, blocking the lane and forcing 
+  clip 22 mumbai02-loops-035           -> STALLED_VEHICLE  WRONG (Completed, 8.2 s) A white sedan is stopped in the middle of the intersection, blocking the lane and forcing 
+  clip 23 mumbai02-loops-037           -> COLLISION        WRONG (Completed, 8.2 s) A motorcycle collides with a parked vehicle in the lane, producing visible sparks and smok
+  clip 24 duesseldorf-loops-001        -> STALLED_VEHICLE  WRONG (Completed, 8.1 s) A dark blue station wagon is stopped in the lane with brake lights illuminated, blocking t
+  clip 25 duesseldorf-loops-003        -> STALLED_VEHICLE  WRONG (Completed, 7.7 s) A blue sedan is stopped in the middle of the intersection, blocking the lane and causing o
+  clip 26 duesseldorf-loops-005        -> STALLED_VEHICLE  WRONG (Completed, 7.7 s) A white sedan is stopped in the middle of the lane, blocking traffic, while other vehicles
+  clip 27 duesseldorf-loops-007        -> STALLED_VEHICLE  WRONG (Completed, 7.6 s) A blue sedan stalls in the middle of the intersection, blocking the lane and forcing other
+  clip 28 duesseldorf-loops-009        -> NONE             ok    (Completed, 8.4 s) Pedestrians cross the street while vehicles wait at a red light, with no collisions or obs
+  clip 29 duesseldorf-loops-010        -> STALLED_VEHICLE  WRONG (Completed, 8.3 s) A dark blue sedan is stopped in the lane with brake lights illuminated, blocking traffic; 
+  clip 30 duesseldorf-loops-012        -> STALLED_VEHICLE  WRONG (Completed, 8.3 s) A blue sedan stalls in the middle of the lane, blocking traffic and forcing other vehicles
+  clip 31 duesseldorf-loops-014        -> STALLED_VEHICLE  WRONG (Completed, 8.7 s) A blue sedan stalls in the middle of the lane, blocking traffic and forcing other vehicles
+  clip 32 duesseldorf-loops-016        -> STALLED_VEHICLE  WRONG (Completed, 8.6 s) A silver sedan is stopped in the middle of the lane, partially blocking traffic, while a r
+  clip 33 duesseldorf-loops-018        -> NONE             ok    (Completed, 8.6 s) Pedestrians cross the pavement while vehicles remain stopped or move slowly in the adjacen
+  clip 34 duesseldorf-loops-020        -> OBSTRUCTION      WRONG (Completed, 8.7 s) A large fallen tree trunk lies across the roadway, blocking the lane and forcing vehicles 
+  clip 35 duesseldorf-loops-022        -> STALLED_VEHICLE  WRONG (Completed, 8.6 s) A black station wagon is stopped in the middle of the lane, blocking traffic and forcing v
+  clip 36 duesseldorf-loops-024        -> NONE             ok    (Completed, 8.6 s) Pedestrians cross the street at the marked crosswalk while vehicles remain stopped at the 
+  clip 37 duesseldorf-loops-026        -> NONE             ok    (Completed, 8.8 s) Pedestrians cross the zebra crossing while vehicles wait at the red light, with no collisi
+  clip 38 duesseldorf-loops-028        -> OBSTRUCTION      WRONG (Completed, 8.8 s) A large fallen tree trunk lies across the roadway, blocking the lane and forcing vehicles 
+  clip 39 duesseldorf-loops-030        -> NONE             ok    (Completed, 8.5 s) Pedestrians cross the zebra crossing while vehicles wait at the red light, with no collisi
+  clip 40 duesseldorf-loops-032        -> NONE             ok    (Completed, 6.2 s) Pedestrians cross the zebra crossing while vehicles wait at the red light, maintaining ord
+today's count after: 39 (39 completed here)
+1 requests planned, one per clip with the service's prompt (40 clips, 39 answered already)
+today's count before: 39 of 500
+  clip  1 mumbai02-real-001            -> UNPARSED         WRONG (Failed, 5.2 s) 
+today's count after: 39 (0 completed here)

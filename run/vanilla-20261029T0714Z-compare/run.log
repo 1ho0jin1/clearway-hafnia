@@ -1,0 +1,77 @@
+66 requests planned: 11 cameras x 6 polls every 60 s for 6 min, 30 s clips ending 5 s ago, prompt 'Describe what happens in this video.'
+at this interval: 60 requests per camera-hour, the clips cover 50 % of each camera's time, and 500 requests last 0.76 h for 11 cameras
+today's count before: 88 of 500
+poll 1/6 at 07:14:01Z
+  vehicle_breakdown_traffic_queue              Completed   14.9 s  stalled vehicle          A silver pickup truck is stopped in the middle of the intersection wit
+  bin_pushed_over_onto_sidewalk                Completed   14.8 s  -                        A person in a dark hoodie and black pants attempts to tip a large gree
+  escooter_left_across_sidewalk                Completed   12.6 s  -                        A person in dark clothing approaches a white electric scooter parked o
+  school_gate_break_in_night                   Completed   13.2 s  tampering                A person in dark clothing approaches a locked metal gate at night, cro
+  person_on_railway_tracks                     Completed   13.1 s  -                        A person in a red jacket and black pants sits on the edge of the platf
+  graffiti_on_standing_train                   Completed   11.1 s  damage                   A person in dark clothing is spray-painting graffiti on the side of a 
+  busy_street                                  Completed   20.8 s  -                        The scene shows a busy urban street at night with a dense crowd of ped
+  highway_traffic_overcast_weather             Completed   20.7 s  -                        A single vehicle travels steadily along a wet, multi-lane highway unde
+  city_street_7_condensation_inside_housing    Completed   19.6 s  -                        The scene shows a clear, dry urban intersection with vehicles stopped 
+  vandalism                                    Completed   10.0 s  collision                A man in black clothing walks along a paved alleyway beside a brick bu
+  traffic_flows_in_the_open_lanes              Completed    9.9 s  -                        The scene shows a multi-lane urban roadway with a closed leftmost lane
+poll 2/6 at 07:15:01Z
+  vehicle_breakdown_traffic_queue              Completed   18.3 s  stalled vehicle          A silver pickup truck is stopped in the middle of the roadway with its
+  bin_pushed_over_onto_sidewalk                Completed   14.0 s  obstruction              A person in dark clothing attempts to lift a large green wheeled trash
+  escooter_left_across_sidewalk                Completed   12.8 s  obstruction              A person in dark clothing walks along a paved sidewalk toward a parked
+  school_gate_break_in_night                   Completed   12.1 s  -                        A person in dark clothing crouches at a locked metal gate at night, us
+  person_on_railway_tracks                     Completed   11.9 s  -                        A person in a red jacket and black pants walks along a train platform,
+  graffiti_on_standing_train                   Completed   10.5 s  damage                   A person in dark clothing stands on the platform beside a red train, r
+  busy_street                                  Completed   19.9 s  -                        A dense crowd of pedestrians fills the street at night, moving slowly 
+  highway_traffic_overcast_weather             Completed   19.6 s  -                        The scene shows a multi-lane highway under clear daytime conditions wi
+  city_street_7_condensation_inside_housing    Completed   17.8 s  -                        The scene shows a clear, sunny day at a city intersection with dry pav
+  vandalism                                    Completed    8.8 s  collision,damage         A man in black clothing walks along a paved alleyway beside a brick bu
+  traffic_flows_in_the_open_lanes              Completed    8.7 s  -                        The scene shows a multi-lane urban roadway with a marked bus lane on t
+poll 3/6 at 07:16:01Z
+  vehicle_breakdown_traffic_queue              Completed    9.1 s  -                        A silver pickup truck is stopped in the middle of the intersection wit
+  bin_pushed_over_onto_sidewalk                Completed    9.0 s  -                        A person in dark clothing and white sneakers attempts to tip a large g
+  escooter_left_across_sidewalk                Completed    8.9 s  -                        A person in dark clothing and white sneakers is seen on a sidewalk nex
+  school_gate_break_in_night                   Completed    9.9 s  tampering                A person in dark clothing approaches a locked metal gate at night, cro
+  person_on_railway_tracks                     Completed    9.9 s  -                        A person in a red jacket and black pants walks along a train platform,
+  graffiti_on_standing_train                   Completed    9.8 s  damage                   A person in dark clothing walks along the platform, stops near the tra
+  busy_street                                  Completed   19.2 s  -                        The scene shows a busy urban street at night with a dense crowd of ped
+  highway_traffic_overcast_weather             Completed   19.1 s  -                        The scene shows a multi-lane highway under clear daytime conditions wi
+  city_street_7_condensation_inside_housing    Completed   19.0 s  -                        The scene shows a clear, dry urban intersection with vehicles stopped 
+  vandalism                                    Completed    6.3 s  -                        A man in black clothing walks along a paved alleyway beside a brick bu
+  traffic_flows_in_the_open_lanes              Completed    6.2 s  -                        The scene shows a multi-lane urban roadway with a marked bus lane on t
+poll 4/6 at 07:17:01Z
+  vehicle_breakdown_traffic_queue              Completed    8.1 s  stalled vehicle,collision A silver pickup truck is stopped in the middle of the intersection wit
+  bin_pushed_over_onto_sidewalk                Completed    8.1 s  -                        A person in dark clothing and white sneakers attempts to tip a large g
+  escooter_left_across_sidewalk                Completed    8.0 s  -                        A person in dark clothing and white sneakers is seen on a sidewalk nex
+  school_gate_break_in_night                   Completed    9.1 s  tampering                A person in dark clothing approaches a locked metal gate at night, cro
+  person_on_railway_tracks                     Completed    9.0 s  -                        A person in a red jacket and black pants walks along a train platform,
+  graffiti_on_standing_train                   Completed    8.9 s  damage                   A person in dark clothing walks along the platform toward a stationary
+  busy_street                                  Completed   16.2 s  -                        The scene shows a busy urban street at night with a dense crowd of ped
+  highway_traffic_overcast_weather             Completed   16.1 s  -                        The scene shows a wet, multi-lane highway under overcast, rainy condit
+  city_street_7_condensation_inside_housing    Completed   16.0 s  -                        The scene shows a clear, dry urban intersection with vehicles stopped 
+  vandalism                                    Completed    8.3 s  -                        A man in black clothing repeatedly throws a small object toward a buil
+  traffic_flows_in_the_open_lanes              Completed    8.2 s  -                        The scene shows a multi-lane urban roadway with a marked bus lane on t
+poll 5/6 at 07:18:01Z
+  vehicle_breakdown_traffic_queue              Completed    8.8 s  stalled vehicle          A silver pickup truck is stopped in the middle of the intersection wit
+  bin_pushed_over_onto_sidewalk                Completed    8.7 s  -                        A person in dark clothing and white sneakers attempts to tip a large g
+  escooter_left_across_sidewalk                Completed    8.7 s  -                        A person in dark clothing and white sneakers is seen on a sidewalk nex
+  school_gate_break_in_night                   Completed    9.9 s  tampering                A person in dark clothing approaches a locked metal gate at night, car
+  person_on_railway_tracks                     Completed    9.8 s  -                        A person in a red jacket and black pants walks along a train platform,
+  graffiti_on_standing_train                   Completed    9.8 s  damage                   A person in dark clothing approaches the platform edge, pauses, and be
+  busy_street                                  Completed   16.2 s  -                        The scene shows a busy urban street at night with a dense crowd of ped
+  highway_traffic_overcast_weather             Completed   16.2 s  -                        A black sedan travels along a wet, multi-lane highway in rainy conditi
+  city_street_7_condensation_inside_housing    Completed   16.1 s  -                        The scene shows a clear, dry urban intersection with vehicles stopped 
+  vandalism                                    Completed    7.5 s  collision,damage         A man in black clothing walks along a paved alleyway beside a brick bu
+  traffic_flows_in_the_open_lanes              Completed    7.5 s  -                        The scene shows a multi-lane urban roadway with a closed leftmost lane
+poll 6/6 at 07:19:01Z
+  vehicle_breakdown_traffic_queue              Completed    7.6 s  stalled vehicle          A silver pickup truck is stopped in the middle of the roadway with its
+  bin_pushed_over_onto_sidewalk                Completed    7.5 s  -                        A person in a dark hoodie and black pants attempts to tip a large gree
+  escooter_left_across_sidewalk                Completed    7.5 s  -                        A person in dark clothing and white sneakers is seen on a sidewalk nex
+  school_gate_break_in_night                   Completed   12.8 s  tampering                A person in dark clothing approaches a locked metal gate at night, cro
+  person_on_railway_tracks                     Completed   12.7 s  -                        A person in a red jacket and black pants walks along a train platform,
+  graffiti_on_standing_train                   Completed    8.7 s  damage                   A person in dark clothing stands on the platform near a red train, hol
+  busy_street                                  Completed   17.4 s  -                        The scene shows a busy urban street at night with a dense crowd of ped
+  highway_traffic_overcast_weather             Completed   17.3 s  -                        A single silver SUV enters from the right and travels straight in the 
+  city_street_7_condensation_inside_housing    Completed   17.2 s  -                        The scene shows a clear, dry urban intersection with vehicles stopped 
+  vandalism                                    Completed    8.6 s  -                        A man in black clothing walks along a paved alleyway beside a brick bu
+  traffic_flows_in_the_open_lanes              Completed    8.6 s  -                        The scene shows a multi-lane urban roadway with a marked bus lane on t
+today's count after: 168 (66 completed of 66 sent)
+exit 0

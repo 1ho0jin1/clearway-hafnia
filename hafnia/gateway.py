@@ -134,6 +134,50 @@ class Gateway:
         """Newest first. Always limited: without a limit the gateway returns everything it has kept."""
         return self._call("GET", "/api/Summaries", query={"Limit": limit, **filters})
 
+    # --- settings -------------------------------------------------------------------------------------------------
+    ADVANCED = "##local##.Advanced"     # the group that holds the system prompt (house rules: only the two
+                                        # Advanced groups may be changed; never the Hafnia VLM or XProtect groups)
+
+    def setting_definitions(self) -> list[dict[str, Any]]:
+        return self._call("GET", "/api/Settings/Definitions")
+
+    def settings(self, group: str) -> dict[str, dict[str, Any]]:
+        """{key: {Key, Value, HasStoredValue, IsPassword}} of a group's stored settings. A key that was never saved
+        is absent and takes its definition's DefaultValue. The group key holds '#': it is URL-encoded."""
+        quoted = urllib.parse.quote(group, safe="")
+        return {s["Key"]: s for s in self._call("GET", f"/api/Settings/{quoted}") or []}
+
+    def save_settings(self, group: str, values: dict[str, str]) -> None:
+        """Save some of a group's settings. The gateway validates the whole group on every PUT (a PUT with only the
+        system prompt fails: 'Successful Summary Retention is required'), so the settings not in values are sent
+        with their stored value, or their default. Refuses a group with a password setting that values does not
+        give: its stored value cannot be read back."""
+        defs = next((g for g in self.setting_definitions() if g["Key"] == group), None)
+        if defs is None:
+            raise ValueError(f"no settings group {group!r}")
+        stored = self.settings(group)
+        body = []
+        for d in defs.get("Settings") or []:
+            key = d["Key"]
+            if key in values:
+                value = values[key]
+            elif d.get("IsPassword"):
+                raise ValueError(f"{group}: the password setting {key!r} must be given to save this group")
+            elif key in stored:
+                value = stored[key].get("Value")
+            else:
+                value = d.get("DefaultValue")
+            body.append({"Key": key, "Value": value, "IsPassword": bool(d.get("IsPassword")), "HasStoredValue": True})
+        self._call("PUT", f"/api/Settings/{urllib.parse.quote(group, safe='')}", body)
+
+    def system_prompt(self) -> str:
+        """The gateway's system prompt (Advanced Settings), sent before the prompt with every request; '' when unset."""
+        return (self.settings(self.ADVANCED).get("SystemPrompt") or {}).get("Value") or ""
+
+    def set_system_prompt(self, text: str) -> None:
+        """Applies to the next request (no restart). Keep the text in the repository: it is not in the prompt export."""
+        self.save_settings(self.ADVANCED, {"SystemPrompt": text})
+
     # --- asking ---------------------------------------------------------------------------------------------------
     def ask(self, uri: str, prompt: str, prompt_id: str | None = None, model_id: str | None = None) -> dict[str, Any]:
         """Start a summary. Costs 1 of the 500 daily requests if it completes. Pass prompt_id (with the prompt's

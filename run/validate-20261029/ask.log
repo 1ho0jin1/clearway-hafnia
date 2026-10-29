@@ -1,0 +1,52 @@
+49 requests planned, one per clip with the alert prompt (49 planned, 0 answered already)
+today's count before: 39 of 500
+   1 holdout mumbai02-real-002              OBSTRUCTION      -> discard  NONE             ok    (Completed, 13.5 s) The clip shows a stationary train at a platform with people standing on the plat
+   2 holdout duesseldorf-real-001           STALLED_VEHICLE  -> confirm  STALLED_VEHICLE  WRONG (Completed, 13.5 s) A dark station wagon is stopped in the middle of the lane with brake lights illu
+   3 holdout mumbai02-loops-001             COLLISION        -> discard  NONE             ok    (Completed, 13.4 s) The clip shows a black-and-yellow taxi turning left at an intersection and a whi
+   4 holdout mumbai02-loops-002             STALLED_VEHICLE  -> confirm  STALLED_VEHICLE  WRONG (Completed, 10.3 s) A black-and-yellow taxi is stopped in the middle of the roadway, blocking the la
+   5 holdout mumbai02-loops-006             STALLED_VEHICLE  -> confirm  STALLED_VEHICLE  WRONG (Completed, 10.2 s) A yellow-and-black taxi is stationary in the middle of the lane with its brake l
+   6 holdout mumbai02-loops-008             STALLED_VEHICLE  -> confirm  STALLED_VEHICLE  WRONG (Completed, 10.2 s) A white sedan is stopped in the middle of the intersection, blocking the lane an
+   7 holdout mumbai02-loops-010             STALLED_VEHICLE  -> discard  NONE             ok    (Completed, 9.8 s) The clip shows a clear intersection with vehicles moving through the junction an
+   8 holdout mumbai02-loops-012             OBSTRUCTION      -> confirm  OBSTRUCTION      WRONG (Completed, 9.7 s) A white SUV is parked across the roadway, blocking the lane and forcing passing 
+   9 holdout mumbai02-loops-014             STALLED_VEHICLE  -> discard  NONE             ok    (Completed, 9.6 s) The clip shows a clear intersection with vehicles moving through the junction an
+  10 holdout mumbai02-loops-018             OBSTRUCTION      -> confirm  OBSTRUCTION      WRONG (Completed, 9.4 s) A blue object lies across the pavement near the staircase, visibly blocking the 
+  11 holdout mumbai02-loops-020             STALLED_VEHICLE  -> discard  NONE             ok    (Completed, 9.4 s) The clip shows a clear intersection with vehicles moving through the junction an
+  12 holdout mumbai02-loops-022             OBSTRUCTION      -> confirm  OBSTRUCTION      WRONG (Completed, 9.3 s) A white sedan is stopped across the roadway, blocking the lane and forcing vehic
+  13 holdout mumbai02-loops-024             COLLISION        -> discard  NONE             ok    (Completed, 10.3 s) The clip shows a steady flow of vehicles and pedestrians with no visible collisi
+  14 holdout mumbai02-loops-025             STALLED_VEHICLE  -> discard  NONE             ok    (Completed, 10.2 s) The clip shows a yellow taxi parked at the kerb with motorcycles and other vehic
+  15 holdout mumbai02-loops-027             COLLISION        -> discard  NONE             ok    (Completed, 10.1 s) The clip shows a clear intersection with vehicles moving smoothly through the ju
+  16 holdout mumbai02-loops-029             COLLISION        -> discard  NONE             ok    (Completed, 11.1 s) The clip shows a busy intersection with vehicles and motorcycles moving through 
+  17 holdout mumbai02-loops-031             STALLED_VEHICLE  -> confirm  STALLED_VEHICLE  WRONG (Completed, 11.0 s) A white sedan is stopped in the middle of the lane, blocking traffic flow and ca
+  18 holdout mumbai02-loops-033             STALLED_VEHICLE  -> discard  NONE             ok    (Completed, 10.8 s) The clip shows a busy intersection with vehicles moving through the junction and
+  19 holdout mumbai02-loops-035             STALLED_VEHICLE  -> confirm  STALLED_VEHICLE  WRONG (Completed, 11.2 s) A white sedan is stopped in the middle of the intersection, blocking the lane an
+  20 holdout mumbai02-loops-037             COLLISION        -> discard  NONE             ok    (Completed, 11.1 s) The clip shows a red vehicle parked at the kerb with a motorcycle passing behind
+  21 holdout duesseldorf-loops-001          STALLED_VEHICLE  -> confirm  STALLED_VEHICLE  WRONG (Completed, 10.9 s) A dark station wagon is stopped in the middle of the traffic lane with brake lig
+  22 holdout duesseldorf-loops-003          STALLED_VEHICLE  -> discard  NONE             ok    (Completed, 10.2 s) The clip shows a blue sedan smoothly entering the intersection and turning left 
+  23 holdout duesseldorf-loops-005          STALLED_VEHICLE  -> discard  NONE             ok    (Completed, 10.2 s) The clip shows a dark sedan stopped at a red light with other vehicles moving ar
+  24 holdout duesseldorf-loops-007          STALLED_VEHICLE  -> discard  NONE             ok    (Completed, 10.1 s) The clip shows a blue sedan completing a right turn and merging into the lane, w
+  25 holdout duesseldorf-loops-010          STALLED_VEHICLE  -> confirm  STALLED_VEHICLE  WRONG (Completed, 9.1 s) A dark station wagon is stopped in the middle of the lane with brake lights illu
+  26 holdout duesseldorf-loops-012          STALLED_VEHICLE  -> confirm  STALLED_VEHICLE  WRONG (Completed, 9.1 s) A dark sedan is stopped in the middle of the intersection, blocking the lane and
+  27 holdout duesseldorf-loops-014          STALLED_VEHICLE  -> discard  NONE             ok    (Completed, 9.0 s) The clip shows a blue sedan completing a right turn and merging into the lane, w
+  28 holdout duesseldorf-loops-016          STALLED_VEHICLE  -> discard  NONE             ok    (Completed, 9.5 s) The clip shows a red car moving smoothly through the intersection with no vehicl
+  29 holdout duesseldorf-loops-020          OBSTRUCTION      -> discard  NONE             ok    (Completed, 9.4 s) The clip shows pedestrians crossing a marked zebra crossing with vehicles stoppe
+  30 holdout duesseldorf-loops-022          STALLED_VEHICLE  -> discard  NONE             ok    (Completed, 9.3 s) The clip shows a red convertible parked at the curb with no visible obstruction,
+  31 holdout duesseldorf-loops-028          OBSTRUCTION      -> discard  NONE             ok    (Completed, 9.2 s) The clip shows a clear, dry road surface with no obstruction, damage, or stalled
+  32 prompt  20261026T141630839929_cw-0001- PERSON_ON_TRACKS -> discard  NONE             WRONG (Completed, 8.9 s) The clip shows a person in a red jacket sitting on the platform edge near the ye
+  33 prompt  20261026T141635268961_cw-0002- OBSTRUCTION      -> confirm  OBSTRUCTION      ok    (Completed, 8.9 s) A white electric scooter lies on its side across the pavement, blocking the walk
+  34 prompt  20261026T141645171209_cw-0008- STALLED_VEHICLE  -> confirm  STALLED_VEHICLE  ok    (Completed, 6.9 s) A silver pickup truck is stopped in the middle of the lane with its driver-side 
+  35 prompt  20261026T141652792754_cw-0014- DAMAGE           -> confirm  DAMAGE           ok    (Completed, 6.9 s) The clip shows a person on the platform actively painting bright graffiti on the
+  36 prompt  20261026T141653717085_cw-0015- TAMPERING        -> confirm  TAMPERING        ok    (Completed, 6.8 s) A person in a hooded jacket is seen at night using a tool to force or pick a loc
+  37 prompt  20261026T141706898983_cw-0019- OBSTRUCTION      -> confirm  OBSTRUCTION      ok    (Completed, 8.0 s) A large green wheeled bin is knocked over and lies on its side across the paveme
+  38 prompt  20261026T141736188745_cw-0021- OBSTRUCTION      -> confirm  OBSTRUCTION      ok    (Completed, 7.9 s) A large green bin is positioned across the tiled pavement, blocking the pedestri
+  39 prompt  20261026T150515433995_cw-0031- TAMPERING        -> confirm  TAMPERING        ok    (Completed, 7.8 s) A person crouches at a metal fence and uses a tool to force or pick a lock, whic
+  40 prompt  20261027T124152361867_cw-0001- OBSTRUCTION      -> confirm  OBSTRUCTION      ok    (Completed, 8.9 s) A large green wheeled bin lies on its side across the pavement, blocking the wal
+  41 prompt  20261027T124201017167_cw-0003- STALLED_VEHICLE  -> confirm  STALLED_VEHICLE  ok    (Completed, 8.8 s) A silver pickup truck is stopped in the middle of the lane with its driver-side 
+  42 prompt  20261027T124204585257_cw-0004- PERSON_ON_TRACKS -> confirm  PERSON_ON_TRACKS ok    (Completed, 8.7 s) A person in a red jacket is clearly visible walking across the railway tracks be
+  43 prompt  20261027T124205701116_cw-0005- TAMPERING        -> confirm  TAMPERING        ok    (Completed, 7.8 s) A person in dark clothing is crouched beside a metal fence at night, using a too
+  44 prompt  20261027T124206301555_cw-0006- OBSTRUCTION      -> discard  NONE             WRONG (Completed, 7.8 s) The clip shows a person walking on the pavement and parked cars along the curb w
+  45 prompt  20261027T124207866831_cw-0008- DAMAGE           -> confirm  DAMAGE           ok    (Completed, 7.7 s) The train car displays vivid graffiti on its side, indicating property damage or
+  46 prompt  20261027T124211337185_cw-0010- TAMPERING        -> confirm  TAMPERING        ok    (Completed, 9.2 s) A person crouches beside a metal fence, uses a tool to cut or force the chain an
+  47 prompt  20261027T124212362072_cw-0011- PERSON_ON_TRACKS -> discard  NONE             WRONG (Completed, 9.2 s) The clip shows a person walking along the platform edge and stepping onto the tr
+  48 prompt  20261027T124213501036_cw-0012- OBSTRUCTION      -> confirm  OBSTRUCTION      ok    (Completed, 9.1 s) A white electric scooter lies across the pavement, blocking the walkway and forc
+  49 prompt  20261027T124225065659_cw-0013- TAMPERING        -> confirm  TAMPERING        ok    (Completed, 6.2 s) A person in dark clothing crouches at the gate, uses a tool to cut the padlock a
+today's count after: 88 (49 completed here)

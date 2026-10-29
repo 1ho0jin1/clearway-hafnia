@@ -1,0 +1,197 @@
+{
+ "hold-out false cards (a discard is right)": {
+  "asked": 31,
+  "answered": 31,
+  "failed": 0,
+  "right": 19,
+  "confirmed": 12,
+  "discarded": 19,
+  "other": 0,
+  "category_kept": 12,
+  "category_right": 0,
+  "json_ok": 31
+ },
+ "... of which High priority (the alarm gate)": {
+  "asked": 25,
+  "answered": 25,
+  "failed": 0,
+  "right": 16,
+  "confirmed": 9,
+  "discarded": 16,
+  "other": 0,
+  "category_kept": 9,
+  "category_right": 0,
+  "json_ok": 25
+ },
+ "true incidents (a confirm is right)": {
+  "asked": 18,
+  "answered": 18,
+  "failed": 0,
+  "right": 15,
+  "confirmed": 15,
+  "discarded": 3,
+  "other": 0,
+  "category_kept": 15,
+  "category_right": 15,
+  "json_ok": 18
+ },
+ "... of which High priority": {
+  "asked": 5,
+  "answered": 5,
+  "failed": 0,
+  "right": 3,
+  "confirmed": 3,
+  "discarded": 2,
+  "other": 0,
+  "category_kept": 3,
+  "category_right": 3,
+  "json_ok": 5
+ },
+ "all": {
+  "asked": 49,
+  "answered": 49,
+  "failed": 0,
+  "right": 34,
+  "confirmed": 27,
+  "discarded": 22,
+  "other": 0,
+  "category_kept": 27,
+  "category_right": 15,
+  "json_ok": 49
+ },
+ "by_first_category": {
+  "holdout/COLLISION": {
+   "asked": 5,
+   "answered": 5,
+   "failed": 0,
+   "right": 5,
+   "confirmed": 0,
+   "discarded": 5,
+   "other": 0,
+   "category_kept": 0,
+   "category_right": 0,
+   "json_ok": 5
+  },
+  "holdout/OBSTRUCTION": {
+   "asked": 6,
+   "answered": 6,
+   "failed": 0,
+   "right": 3,
+   "confirmed": 3,
+   "discarded": 3,
+   "other": 0,
+   "category_kept": 3,
+   "category_right": 0,
+   "json_ok": 6
+  },
+  "holdout/STALLED_VEHICLE": {
+   "asked": 20,
+   "answered": 20,
+   "failed": 0,
+   "right": 11,
+   "confirmed": 9,
+   "discarded": 11,
+   "other": 0,
+   "category_kept": 9,
+   "category_right": 0,
+   "json_ok": 20
+  },
+  "prompt/DAMAGE": {
+   "asked": 2,
+   "answered": 2,
+   "failed": 0,
+   "right": 2,
+   "confirmed": 2,
+   "discarded": 0,
+   "other": 0,
+   "category_kept": 2,
+   "category_right": 2,
+   "json_ok": 2
+  },
+  "prompt/OBSTRUCTION": {
+   "asked": 6,
+   "answered": 6,
+   "failed": 0,
+   "right": 5,
+   "confirmed": 5,
+   "discarded": 1,
+   "other": 0,
+   "category_kept": 5,
+   "category_right": 5,
+   "json_ok": 6
+  },
+  "prompt/PERSON_ON_TRACKS": {
+   "asked": 3,
+   "answered": 3,
+   "failed": 0,
+   "right": 1,
+   "confirmed": 1,
+   "discarded": 2,
+   "other": 0,
+   "category_kept": 1,
+   "category_right": 1,
+   "json_ok": 3
+  },
+  "prompt/STALLED_VEHICLE": {
+   "asked": 2,
+   "answered": 2,
+   "failed": 0,
+   "right": 2,
+   "confirmed": 2,
+   "discarded": 0,
+   "other": 0,
+   "category_kept": 2,
+   "category_right": 2,
+   "json_ok": 2
+  },
+  "prompt/TAMPERING": {
+   "asked": 5,
+   "answered": 5,
+   "failed": 0,
+   "right": 5,
+   "confirmed": 5,
+   "discarded": 0,
+   "other": 0,
+   "category_kept": 5,
+   "category_right": 5,
+   "json_ok": 5
+  }
+ },
+ "holdout_by_view": {
+  "direct": {
+   "asked": 13,
+   "answered": 13,
+   "failed": 0,
+   "right": 11,
+   "confirmed": 2,
+   "discarded": 11,
+   "other": 0,
+   "category_kept": 2,
+   "category_right": 0,
+   "json_ok": 13
+  },
+  "lens": {
+   "asked": 18,
+   "answered": 18,
+   "failed": 0,
+   "right": 8,
+   "confirmed": 10,
+   "discarded": 8,
+   "other": 0,
+   "category_kept": 10,
+   "category_right": 0,
+   "json_ok": 18
+  }
+ },
+ "confidence": {
+  "n": 49,
+  "min": 0.95,
+  "max": 0.95,
+  "mean": 0.95
+ },
+ "evidence_frames": {
+  "start, middle, end": 6,
+  "middle": 42,
+  "start, middle, end of the clip": 1
+ }
+}
