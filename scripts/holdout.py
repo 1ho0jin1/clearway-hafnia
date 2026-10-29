@@ -53,6 +53,7 @@ from clearway.prompt import PROMPT  # noqa: E402
 from clearway.service import AFTER_S, BEFORE_S, BRIDGE_WIDTH, DIRECT_BELOW, MAX_CLIP_S, WORK_WIDTH  # noqa: E402
 from lens.client import zoom  # noqa: E402
 from prompt_experiment import PARALLEL, parse_answer, read_clip, utc_now  # noqa: E402
+import scale_fit  # noqa: E402
 from tier0.change import ChangeDetector, ChangeParams  # noqa: E402
 
 FFMPEG = r"C:\tools\ffmpeg\ffmpeg-9.0.2-essentials_build\bin\ffmpeg.exe"
@@ -150,9 +151,12 @@ def sheet(cid: str, report: np.ndarray, box_px, clip: list[np.ndarray], text: st
     return np.vstack([bar, top, row[:, :w]])
 
 
-def detect_clip(name: str, profile: str, people, out: Path, log) -> tuple[dict, list[dict]]:
+def detect_clip(name: str, profile: str, people, out: Path, log, floor=None,
+                scale_info: dict | None = None) -> tuple[dict, list[dict]]:
     path, what, _ = CLIPS[name]
     params = PROFILES[profile]()
+    if floor is not None:                       # the calibrated-floor test, 2026-10-29: a floor in square metres
+        params.min_area_fn = floor
     det = ChangeDetector(params)
     keep_s = MAX_CLIP_S + AFTER_S + 1.0
     ring: deque[tuple[float, bytes]] = deque()          # (t, jpeg) of the last keep_s seconds, as the service keeps
@@ -178,7 +182,10 @@ def detect_clip(name: str, profile: str, people, out: Path, log) -> tuple[dict, 
                     [cv2.IMWRITE_JPEG_QUALITY, 88])
         rows.append({"cid": cid, "clip": name, "profile": profile, "change": c.id, "t_start": round(c.t_start, 1),
                      "t_detect": round(c.t_detect, 1), "box": list(c.box), "box_px": [round(v) for v in box_px],
-                     "area": round(c.area, 5), "w0": round(p["w0"], 1), "w1": round(p["w1"], 1),
+                     "area": round(c.area, 5), "foot": round(box_px[3] / full[0].shape[0], 3),
+                     "world_m2": (round(scale_fit.world_m2(scale_info, box_px[3] / full[0].shape[0], c.area), 2)
+                                  if scale_info else None),
+                     "w0": round(p["w0"], 1), "w1": round(p["w1"], 1),
                      "frames": len(shown), "magnification": magnification, "view": view,
                      "avi": f"clips/{cid}.avi", "sheet": f"sheets/{cid}.jpg", "_change": c})
         log(f"  {cid}: t {c.t_start:.1f}-{c.t_detect:.1f} s, box {c.box}, x{magnification} {view}, "
@@ -234,6 +241,21 @@ def mark_duplicates(rows: list[dict]) -> int:
     return n
 
 
+def mark_same_as(rows: list[dict], baseline: list[dict]) -> int:
+    """A candidate of the same clip and setting as a baseline candidate, started within DUP_S of it with boxes
+    overlapping DUP_IOU, is the same thing the baseline already asked about: its answer is inherited, not asked
+    again (the calibrated-floor test against run/holdout-20261029)."""
+    n = 0
+    for r in rows:
+        for b in baseline:
+            if (b["clip"] == r["clip"] and b["profile"] == r["profile"] and abs(b["t_start"] - r["t_start"]) <= DUP_S
+                    and iou(b["box"], r["box"]) >= DUP_IOU):
+                r["same_as"] = b["cid"]
+                n += 1
+                break
+    return n
+
+
 def grids(out: Path, rows: list[dict], per: int = 4) -> None:
     """Four sheets per image, for labelling with fewer looks."""
     groups: dict[tuple[str, str], list[dict]] = {}
@@ -269,6 +291,10 @@ def detect(args) -> int:
         from ultralytics import YOLO
         model = YOLO(str(REPO / "models" / "yolo11m.pt"))
     people = person_finder(model)
+    scales = scale_fit.load(args.scales) if args.world_floor is not None else None
+    if scales is not None:
+        log(f"calibrated floor: {args.world_floor} m2 at the blob's row (scales {args.scales}), never below "
+            f"{args.at_least} of the frame")
     log(f"detect {utc_now().isoformat()} clips {' '.join(args.only or CLIPS)} profiles {' '.join(args.profiles)} "
         f"people {'yolo11m' if model else 'off'}; frames {BRIDGE_WIDTH} px at {FPS} fps, detector at {WORK_WIDTH} px; "
         f"window -{BEFORE_S}/+{AFTER_S} s, at most {MAX_CLIP_S} s; lens from x{DIRECT_BELOW}")
@@ -277,13 +303,19 @@ def detect(args) -> int:
         for profile in args.profiles:
             t0 = time.monotonic()
             log(f"{name} {profile}: {CLIPS[name][1]}")
-            s, rs = detect_clip(name, profile, people, out, log)
+            floor = None
+            if scales is not None:
+                floor = (lambda foot, sc=scales[name], m2=args.world_floor, least=args.at_least:
+                         max(least, scale_fit.floor_share(sc, foot, m2)))
+            s, rs = detect_clip(name, profile, people, out, log, floor=floor,
+                                scale_info=scales.get(name) if scales else None)
             s["took_s"] = round(time.monotonic() - t0, 1)
             summaries.append(s)
             rows.extend(rs)
             log(f"  {s['reports']} reports in {s['seconds']} s ({s['per_hour']} per hour), {s['scene_jumps']} scene "
                 f"jumps, {s['took_s']} s")
     n_dup = mark_duplicates(rows)
+    n_same = mark_same_as(rows, load_jsonl(args.baseline / "candidates.jsonl")) if args.baseline else 0
     grids(out, rows)
     with (out / "candidates.jsonl").open("w", encoding="utf-8") as f:
         for r in rows:
@@ -292,18 +324,21 @@ def detect(args) -> int:
         "when": utc_now().isoformat(), "params": {p: vars(PROFILES[p]()) for p in args.profiles},
         "bridge_width": BRIDGE_WIDTH, "work_width": WORK_WIDTH, "fps": FPS,
         "window": {"before_s": BEFORE_S, "after_s": AFTER_S, "max_clip_s": MAX_CLIP_S, "direct_below": DIRECT_BELOW},
-        "people": "yolo11m" if model else None, "clips": summaries, "duplicates": n_dup}, indent=1), encoding="utf-8")
+        "people": "yolo11m" if model else None, "clips": summaries, "duplicates": n_dup,
+        "world_floor_m2": args.world_floor, "at_least": args.at_least, "scales": str(args.scales) if scales else None,
+        "baseline": str(args.baseline) if args.baseline else None, "same_as_baseline": n_same}, indent=1),
+        encoding="utf-8")
     log(f"{len(rows)} candidates ({sum(r['profile'] == 'real' for r in rows)} real-setting, "
         f"{sum(r['profile'] == 'loops' for r in rows)} looped-setting of which {n_dup} the same spot as a real-setting "
-        f"one); wrote {out / 'candidates.jsonl'}")
+        f"one; {n_same} the same spot and time as a baseline candidate); wrote {out / 'candidates.jsonl'}")
     return 0
 
 
 # --- play ---------------------------------------------------------------------------------------------------------
 def choose(run: Path, cap: int) -> list[dict]:
     cands = load_jsonl(run / "candidates.jsonl")
-    real = [c for c in cands if c["profile"] == "real"]
-    extra = [c for c in cands if c["profile"] == "loops" and not c.get("dup_of")]
+    real = [c for c in cands if c["profile"] == "real" and not c.get("same_as")]
+    extra = [c for c in cands if c["profile"] == "loops" and not c.get("dup_of") and not c.get("same_as")]
     room = max(0, cap - len(real))
     if len(extra) > room:
         extra = [extra[int(i * len(extra) / room)] for i in range(room)] if room else []
@@ -533,6 +568,11 @@ def main() -> int:
     d.add_argument("--only", nargs="+", choices=list(CLIPS))
     d.add_argument("--profiles", nargs="+", choices=list(PROFILES), default=list(PROFILES))
     d.add_argument("--no-people", action="store_true")
+    d.add_argument("--scales", type=Path, help="scales.json from scale_fit.py (the calibrated-floor test)")
+    d.add_argument("--world-floor", type=float, help="square metres a blob must cover at its row (needs --scales)")
+    d.add_argument("--at-least", type=float, default=0.0,
+                   help="with --world-floor: the floor never goes below this share of the frame (0: pure)")
+    d.add_argument("--baseline", type=Path, help="a run whose candidates at the same spot and time are not asked again")
     d.set_defaults(fn=detect)
     p = sub.add_parser("play")
     p.add_argument("run", type=Path)

@@ -23,6 +23,10 @@ run/*/clips/
 run/*/snaps/
 # The hold-out check's contact sheets (scripts\holdout.py detect; CC0 frames, but bulky: regenerate)
 run/*/sheets/
+# The same, one folder deeper (run/calib-20261029/holdout-*/, eval-*/: the calibrated-floor test)
+run/*/*/frames/
+run/*/*/clips/
+run/*/*/sheets/
 run/holdout-*.detect.out
 # The service's scene images for the hotspots (footage too)
 run/*/cameras/

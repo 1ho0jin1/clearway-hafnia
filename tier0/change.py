@@ -56,6 +56,9 @@ class ChangeParams:
     diff: float = 25.0               # per-pixel colour difference (max over channels, 0-255) that counts as different
     persist_s: float = 1.5           # a pixel must stay static-changed this long
     min_area: float = 0.005          # share of the frame: smaller blobs are noise
+    min_area_fn: Callable[[float], float] | None = None   # if set, the floor (share of the frame) for a blob whose
+                                     # bottom row is the given share of the frame height; the calibrated-floor test
+                                     # of 2026-10-29 (scripts/scale_fit.py), None in the service
     max_area: float = 0.30           # larger single blobs are not objects
     global_area: float = 0.15        # this much of the frame static-changed at once: light, fog; report nothing
     global_diff: float = 0.30        # this much of the frame different from the slow background: the view itself
@@ -226,7 +229,8 @@ class ChangeDetector:
         reported, person_boxes = [], None
         for i in range(1, n):
             x, y, w, h, area = stats[i]
-            if area < p.min_area * frame_area or area > p.max_area * frame_area:
+            floor = p.min_area if p.min_area_fn is None else p.min_area_fn((y + h) / mask.shape[0])
+            if area < floor * frame_area or area > p.max_area * frame_area:
                 continue
             box = (int(x), int(y), int(x + w), int(y + h))
             if any(_iou(box, o.work_box) >= p.merge_iou for o in self.open.values()):

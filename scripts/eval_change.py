@@ -137,6 +137,10 @@ def main() -> int:
     ap.add_argument("--min-area", type=float, help="override ChangeParams.min_area (share of the frame)")
     ap.add_argument("--no-freeze", action="store_true",
                     help="let the slow background learn open changes' spots (the detector before 2026-10-27)")
+    ap.add_argument("--scales", type=Path, help="scales.json from scale_fit.py: a floor in square metres per camera")
+    ap.add_argument("--world-floor", type=float, help="square metres a blob must cover at its row (needs --scales)")
+    ap.add_argument("--at-least", type=float, default=0.0,
+                    help="with --world-floor: the floor never goes below this share of the frame (0: pure)")
     ap.add_argument("--out", type=Path, default=REPO / "run" / f"change-{dt.datetime.now(dt.timezone.utc):%Y%m%dT%H%M%SZ}")
     args = ap.parse_args()
     (args.out / "frames").mkdir(parents=True, exist_ok=True)
@@ -152,20 +156,29 @@ def main() -> int:
         from ultralytics import YOLO
         model = YOLO(str(REPO / "models" / "yolo11m.pt"))
     people = person_finder(model)
+    scales = None
+    if args.world_floor is not None:
+        import scale_fit
+        scales = scale_fit.load(args.scales)
     rows = []
     print(f"{'case':42} {'role':8} {'loops':>5} {'caught':>6} {'delay s':>14} {'false':>5} {'false/h':>8} jumps")
     for name in args.only or CASES:
         if not CASES[name][0].exists():
             print(f"{name:42} missing: {CASES[name][0]}")
             continue
+        if scales is not None:
+            sc, m2, least = scales[name], args.world_floor, args.at_least
+            params.min_area_fn = lambda foot, sc=sc, m2=m2, least=least: max(least, scale_fit.floor_share(sc, foot, m2))
         r = run_case(name, args.loops, params, args.out / "frames", people)
         rows.append(r)
         caught = "-" if r["loops_caught"] is None else f"{r['loops_caught']}/{r['loops']}"
         delay = "-" if not r["first_delay_s"] else ",".join(str(d) for d in r["first_delay_s"][:4])
         print(f"{name:42} {r['role']:8} {r['loops']:5} {caught:>6} {delay:>14} {r['false_reports']:5} "
               f"{r['false_per_hour']:8} {r['scene_jumps']}", flush=True)
-    (args.out / "results.json").write_text(json.dumps({"params": vars(params), "cases": rows}, indent=2),
-                                           encoding="utf-8")
+    meta = {"params": {k: v for k, v in vars(params).items() if k != "min_area_fn"}, "cases": rows}
+    if scales is not None:
+        meta["world_floor_m2"], meta["at_least"], meta["scales"] = args.world_floor, args.at_least, str(args.scales)
+    (args.out / "results.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
     print(f"wrote {args.out}")
     return 0
 

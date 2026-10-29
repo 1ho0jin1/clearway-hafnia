@@ -1,0 +1,293 @@
+{
+ "true_cards_m2": [
+  [
+   "bin_pushed_over_onto_sidewalk",
+   "OBSTRUCTION",
+   "open",
+   0.71
+  ],
+  [
+   "bin_pushed_over_onto_sidewalk",
+   "OBSTRUCTION",
+   "merged",
+   1.21
+  ],
+  [
+   "vehicle_breakdown_traffic_queue",
+   "STALLED_VEHICLE",
+   "open",
+   1.43
+  ],
+  [
+   "person_on_railway_tracks",
+   "PERSON_ON_TRACKS",
+   "open",
+   2.5
+  ],
+  [
+   "school_gate_break_in_night",
+   "TAMPERING",
+   "open",
+   0.03
+  ],
+  [
+   "escooter_left_across_sidewalk",
+   "OBSTRUCTION",
+   "open",
+   1.59
+  ],
+  [
+   "bin_pushed_over_onto_sidewalk",
+   "OBSTRUCTION",
+   "merged",
+   18.84
+  ],
+  [
+   "graffiti_on_standing_train",
+   "OBSTRUCTION",
+   "open",
+   1.5
+  ],
+  [
+   "school_gate_break_in_night",
+   "TAMPERING",
+   "merged",
+   0.97
+  ],
+  [
+   "person_on_railway_tracks",
+   "PERSON_ON_TRACKS",
+   "merged",
+   0.31
+  ],
+  [
+   "escooter_left_across_sidewalk",
+   "OBSTRUCTION",
+   "merged",
+   1.54
+  ],
+  [
+   "school_gate_break_in_night",
+   "TAMPERING",
+   "merged",
+   0.04
+  ],
+  [
+   "person_on_railway_tracks",
+   "PERSON_ON_TRACKS",
+   "cleared",
+   4.98
+  ]
+ ],
+ "holdout_false_m2": [
+  0.38,
+  0.44,
+  0.45,
+  0.45,
+  0.52,
+  0.83,
+  0.86,
+  0.96,
+  0.97,
+  0.99,
+  1.19,
+  1.28,
+  3.07,
+  3.56,
+  3.9,
+  3.91,
+  4.25,
+  5.93,
+  6.38,
+  11.03,
+  12.94,
+  18.05,
+  20.67,
+  27.68,
+  27.68,
+  27.68,
+  32.56,
+  38.53,
+  44.19,
+  49.88,
+  118.85
+ ],
+ "holdout_none_m2": [
+  1.01,
+  1.79,
+  1.84,
+  28.22,
+  34.19,
+  39.07,
+  40.16,
+  138.93
+ ],
+ "baseline": {
+  "candidates": 74,
+  "answered": 39,
+  "false_cards": 31
+ },
+ "holdout-pure-0.25": {
+  "totals": {
+   "cands": 1279,
+   "same": 75,
+   "new": 1204,
+   "asked": 40,
+   "answered": 40,
+   "false_new": 2,
+   "false_inh": 35,
+   "none_inh": 8,
+   "none_new": 38
+  },
+  "per_setting": {
+   "real": {
+    "cands": 25,
+    "new": 22,
+    "same": 3,
+    "seconds": 639.0999999999999,
+    "asked": 22,
+    "answered": 22,
+    "false": 0,
+    "inh_answered": 2,
+    "inh_false": 2,
+    "b_cands": 3,
+    "b_seconds": 639.0999999999999,
+    "false_per_hour": 16.9,
+    "baseline_false_per_hour": 16.9
+   },
+   "loops": {
+    "cands": 1254,
+    "new": 1182,
+    "same": 72,
+    "seconds": 639.0999999999999,
+    "asked": 18,
+    "answered": 18,
+    "false": 2,
+    "inh_answered": 41,
+    "inh_false": 33,
+    "b_cands": 71,
+    "b_seconds": 639.0999999999999,
+    "false_per_hour": 1066.2,
+    "baseline_false_per_hour": 313.5
+   }
+  },
+  "world_floor_m2": 0.25,
+  "at_least": 0.0
+ },
+ "loops": {
+  "baseline": {
+   "vehicle_breakdown_traffic_queue": {
+    "caught": 5,
+    "loops": 5,
+    "false_per_hour": 211.8
+   },
+   "bin_pushed_over_onto_sidewalk": {
+    "caught": 5,
+    "loops": 5,
+    "false_per_hour": 336.0
+   },
+   "escooter_left_across_sidewalk": {
+    "caught": 5,
+    "loops": 5,
+    "false_per_hour": 48.0
+   },
+   "school_gate_break_in_night": {
+    "caught": 5,
+    "loops": 5,
+    "false_per_hour": 1200.0
+   },
+   "person_on_railway_tracks": {
+    "caught": 0,
+    "loops": 5,
+    "false_per_hour": 0.0
+   },
+   "graffiti_on_standing_train": {
+    "caught": 5,
+    "loops": 5,
+    "false_per_hour": 0.0
+   },
+   "vandalism": {
+    "caught": 0,
+    "loops": 4,
+    "false_per_hour": 0.0
+   },
+   "traffic_flows_in_the_open_lanes": {
+    "caught": null,
+    "loops": 4,
+    "false_per_hour": 0.0
+   },
+   "city_street_7_condensation_inside_housing": {
+    "caught": null,
+    "loops": 4,
+    "false_per_hour": 2250.0
+   },
+   "busy_street": {
+    "caught": null,
+    "loops": 5,
+    "false_per_hour": 418.1
+   },
+   "highway_traffic_overcast_weather": {
+    "caught": null,
+    "loops": 1,
+    "false_per_hour": 0.0
+   }
+  },
+  "pure-0.25": {
+   "vehicle_breakdown_traffic_queue": {
+    "caught": 5,
+    "loops": 5,
+    "false_per_hour": 3472.9
+   },
+   "bin_pushed_over_onto_sidewalk": {
+    "caught": 5,
+    "loops": 5,
+    "false_per_hour": 672.0
+   },
+   "escooter_left_across_sidewalk": {
+    "caught": 5,
+    "loops": 5,
+    "false_per_hour": 624.0
+   },
+   "school_gate_break_in_night": {
+    "caught": 5,
+    "loops": 5,
+    "false_per_hour": 1536.0
+   },
+   "person_on_railway_tracks": {
+    "caught": 0,
+    "loops": 5,
+    "false_per_hour": 0.0
+   },
+   "graffiti_on_standing_train": {
+    "caught": 5,
+    "loops": 5,
+    "false_per_hour": 0.0
+   },
+   "vandalism": {
+    "caught": 0,
+    "loops": 4,
+    "false_per_hour": 0.0
+   },
+   "traffic_flows_in_the_open_lanes": {
+    "caught": null,
+    "loops": 4,
+    "false_per_hour": 2700.0
+   },
+   "city_street_7_condensation_inside_housing": {
+    "caught": null,
+    "loops": 4,
+    "false_per_hour": 16200.0
+   },
+   "busy_street": {
+    "caught": null,
+    "loops": 5,
+    "false_per_hour": 1765.2
+   },
+   "highway_traffic_overcast_weather": {
+    "caught": null,
+    "loops": 1,
+    "false_per_hour": 28.1
+   }
+  }
+ }
+}
