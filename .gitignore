@@ -31,6 +31,24 @@ run/holdout-*.detect.out
 # The service's scene images for the hotspots (footage too)
 run/*/cameras/
 
+# Old runs, 10/23 to 10/27: the detector sweeps, the dry runs and the first live runs. What is left in them is
+# logs (stdout/stderr, pickled events, the records of a run that a later one superseded); the files of theirs
+# that were committed stay tracked. Runs from 10/28 on are not covered: add a folder here by name if it is a log too.
+run/change-20261023T124841Z/
+run/change-dev*/
+run/change-g1-real-15/
+run/change-g1-real-30/
+run/change-g1-synthetic/
+run/change-persist*/
+run/change-vandalism-*/
+run/clearway-dry-2026102[5-7]T*/
+run/clearway-live-2026102[5-7]T*/
+run/ledger-dev/
+run/ledger-escalate-check/
+run/ledger-F1*/
+run/memory-p1.5/
+run/notify-test/
+
 # Raw and converted video (large; see data\README for where each clip comes from)
 data/*.mp4
 data/clips/
