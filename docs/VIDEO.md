@@ -1,6 +1,8 @@
-# The demonstration video (required for the submission: 3-5 minutes)
+# The demonstration video (required for the submission: under 3 minutes, public or unlisted)
 
-Status: **storyboard, 2026-10-27.** The portal closes 2 November 12:00 CET (extended from 1 November); the video is planned for Oct 29. Criteria it
+Status: **storyboard, 2026-10-27.** The portal closes 2 November 12:00 CET (extended from 1 November); the video is planned for Oct 29.
+**The portal form (read 2026-11-01) wants the video under 3 minutes, not the 3-5 the hackathon page recommended: the
+storyboard below runs about 4 minutes and must be cut, most easily in scenes 6 and 7.** Criteria it
 serves (the hackathon page): real-world value, use of Hafnia VLM and XProtect with results fed back into XProtect,
 technical execution, functionality, demo and user experience. The pitch is the one in `PRODUCT.md`, "What sells it
 against the field": optimization around the model, shown with numbers; the obstruction categories get one line.

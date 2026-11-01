@@ -13,8 +13,9 @@ research on Hafnia's trained formats, earlier and competing entries, and footage
 
 ## Project direction (decided 2026-10-22: plan C, right-of-way incidents)
 
-- Solo entry; the submission portal closes **2026-11-02 12:00 CET** (extended from 11-01, told on 2026-10-29; open from Oct 26; a demo video of 3-5 min is
-  required; see `docs/PRODUCT.md` for the criteria), plan to submit on Oct 30.
+- Solo entry; the submission portal closes **2026-11-02 12:00 CET** (extended from 11-01, told on 2026-10-29; open from Oct 26; a demo video **under 3 minutes**, public
+  or unlisted, is required by the portal form read 2026-11-01, not the 3-5 min the hackathon page had recommended; see
+  `docs/PRODUCT.md` for the criteria), plan to submit on Oct 30.
 - **Selling point (2026-10-27, after seeing the field):** optimization, not detection. Two public 2026 entries
   (RoadWatch, Scene Contracts) ask Hafnia on a click or a timer and claim no accuracy; the README, video and pitch
   lead with how Clearway decides when to ask, what to show, and measures and fixes the answers (`docs/PRODUCT.md`,
@@ -25,7 +26,8 @@ research on Hafnia's trained formats, earlier and competing entries, and footage
   organizers' synthetic scenes (`run/probe-20261022T054342Z`). Camera-status checks stay out of scope.
 - Concept: tier 0 notices that **something changed and stayed changed** (dual background model, no object classes, no
   per-scenario rules), plus stalled vehicles and a person in a danger zone. The **lens** shows Hafnia the change:
-  centred on the moment, cropped to the spot, with BEFORE and AFTER views. Hafnia names it in JSON; a ledger item and
+  centred on the moment, cropped to the spot (BEFORE and AFTER stills and super-resolution were measured and left
+  out, `docs/PLAN-C.md` M1). Hafnia names it in JSON; a ledger item and
   an XProtect alarm go to the owner; tier 0 closes the item, without a request, when the spot is restored.
 - **No frontier model in the product**, and no local VLM tier (nothing performant fits a T4). Opus (Claude Code) is
   used **offline only**, as a judge: scoring tests, tuning prompts, auditing answers claim by claim.

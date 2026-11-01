@@ -1,20 +1,65 @@
 # Submission text
 
-For the portal (closes 2 November 2026, 12:00 CET). The portal asks for a working solution, a solution description,
-a demonstration video and the source code. The description below is about 430 words; shorten from the bottom if the
-form has a lower limit. Paste the repository link and the video link where the form asks for them.
+For the portal (closes 2 November 2026, 12:00 CET). The form, read 2026-11-01, has these fields; the answers are
+one or two sentences each, as it asks. The video must be public or unlisted and **under 3 minutes**. Paste the
+repository link and the video link where the form asks for them.
 
-## Title
+## Short Project Description (1-3 sentences)
 
-Clearway
+Clearway keeps public ways clear: it watches a city's XProtect cameras for what blocks or endangers a way, such as a
+stalled vehicle, a person on the tracks or an object across a pavement, asks Hafnia VLM once about each incident,
+and turns the answer into an XProtect alarm, a card for the responsible owner and a push to their phone.
 
-## One line
+## What problem does your solution solve, and for whom?
 
-Clearway keeps public ways clear: it watches a city's XProtect cameras for what blocks or endangers a way, asks
-Hafnia VLM once about each incident, and turns the answer into an XProtect alarm, a card for the owner and a push to
-their phone.
+City and transit operators have many cameras and few eyes, so an obstruction sits unseen until someone complains,
+and a model asked on a timer burns the allowance and floods people with text. Clearway tells rail control, traffic
+operations and street services what is blocking a way right now, whose job it is and how long it has been there, at
+one request per incident.
 
-## Description
+## How does your solution use XProtect?
+
+Live frames come from the cameras through the MIP SDK, and each verified incident becomes an XProtect alarm with a
+snapshot and bookmarks through the REST API, closed by itself when the spot clears and reopened when it recurs. A
+magnifier camera of our own is registered in XProtect so that Hafnia, which reads only XProtect recordings, can be
+asked about an enlarged clip of a small spot.
+
+## How does your solution use Hafnia VLM?
+
+Hafnia is asked through the gateway API only when a change detector sees something arrive and stay and no earlier
+verdict covers it, and it is shown a clip centred on the moment and cropped to the spot. It answers in JSON with a
+category, a summary and the evidence, which names the owner and the priority; every answer is scored and audited
+against the frames.
+
+## What value does your solution add?
+
+Three hours on eleven cameras cost 33 requests, one per camera-hour, against 60 per camera-hour for asking every
+camera once a minute, and the operator gets one alarm per incident instead of a paragraph per request. Owners get a
+card and a push with Confirm and Reject that teach the system, and every claim is measured and reproducible from the
+repository, including the known limit on real streets.
+
+## Demonstration Video (public or unlisted, under 3 minutes)
+
+The link to `docs/video/clearway.mp4` once the final cut is built and uploaded. The storyboard in `VIDEO.md` runs
+about 4 minutes and must be cut to under 3.
+
+## What did you build during the hackathon, and what existed before? (max 100 words)
+
+Everything in the repository was written during the hackathon, from the first benchmark on 15 October: the change
+detector, the incident ledger, the service, the magnifier camera, the XProtect alarms, the owner board, the phone
+pushes, the setup script and every measurement. It builds on the organizers' XProtect 2026 R1 and Hafnia gateway,
+Milestone's MIP SDK, and open-source libraries: Ultralytics YOLO11 (people), SigLIP 2 (the look of a spot), OpenCV,
+MediaMTX and ffmpeg (the magnifier camera), ntfy (pushes). No earlier code of our own was used.
+
+(86 words. Real-ESRGAN is in the repository but not in the product: it was measured and left out of the lens.)
+
+## Links
+
+- Repository: `https://github.com/1ho0jin1/hafnia-hackathon-2026` (private today: make it public, grant the judges
+  access, or upload an archive, whichever the form takes)
+- Where to start reading: `README.md`, then `docs/walkthrough/index.html` (the pipeline step by step with figures)
+
+## Longer description (if a field allows it; about 430 words)
 
 Clearway watches a city's XProtect cameras for things that block or endanger a public way: a vehicle stalled in a
 lane, a person on the tracks, an e-scooter dropped across a pavement, a bin tipped over, damage to transit. It asks
@@ -54,10 +99,3 @@ square metres were both measured and not adopted.
 
 Built with XProtect 2026 R1 (MIP SDK frames, the REST API for alarms and bookmarks, an RTSP camera of our own
 through MediaMTX), the Hafnia gateway API, Python, YOLO11 for people and SigLIP 2 for the look of a spot.
-
-## Links
-
-- Repository: `https://github.com/1ho0jin1/hafnia-hackathon-2026` (private today: make it public, grant the judges
-  access, or upload an archive, whichever the form takes)
-- Video: `docs/video/clearway.mp4` once the final cut is built; upload or link as the form asks
-- Where to start reading: `README.md`, then `docs/walkthrough/index.html` (the pipeline step by step with figures)

@@ -193,10 +193,13 @@ The AI City Challenge clip used for `test_11` may not be redistributed and is no
 footage and its licences are listed in `docs/PLAN-near-miss.md`. Frames and clips under `run/` are git-ignored for
 the same reason.
 
-## Status (2026-10-27)
+## Status (2026-11-01)
 
 Built and measured: the pipeline, alarms and bookmarks, the board, person triggers, the shift summary, hotspots,
-phone pushes, direct asks, the lens self-check, the fade fix. Not built: a Smart Map layer and the gate's dwell
-trigger; the application layer beyond the board and the phone is a TODO (`docs/PRODUCT.md`, F13). The demo video
-and the submission are scheduled for Oct 29-31; the portal closes 2 November 2026, 12:00 CET (extended from
-1 November).
+phone pushes, direct asks, the lens self-check, the fade fix, the held-out check on real streets, the comparison
+with asking on a timer. Measured and left out of the product: super-resolution and BEFORE/AFTER stills for the
+lens, a confirming second question, a size floor in square metres; their code stays in the repository for the
+measurements (`lens/enhance.py`, `scripts/second_question.py`, `scripts/scale_fit.py`), and the service never
+loads it. Not built: a Smart Map layer and the gate's dwell trigger; the application layer beyond the board and the
+phone is a TODO (`docs/PRODUCT.md`, F13). The demo video (under 3 minutes) and the submission are due by 2 November
+2026, 12:00 CET.

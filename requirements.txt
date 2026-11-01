@@ -7,14 +7,16 @@
 ultralytics==8.4.182
 opencv-python==5.0.0.93
 numpy==2.5.2
-lap              # ByteTrack's assignment solver; Ultralytics would otherwise install it at run time
+lap              # ByteTrack's assignment solver for the earlier plan A tracker (tier0/pipeline.py, used by scripts only;
+                 # the service does not track); Ultralytics would otherwise install it at run time
 pillow>=11       # scripts/locate_event.py: matching recorded frames to a source frame
 psutil>=7        # clearway/service.py: CPU shares of the Recording Server, FrameBridge and the service in the health log
 # Plan C's verdict memory (tier0/memory.py): SigLIP 2 image and text embeddings (google/siglip2-base-patch16-224,
 # Apache-2.0, downloaded to the Hugging Face cache on first use).
 transformers==5.20.2
 # Lens super-resolution (lens/enhance.py): Real-ESRGAN weights (BSD-3-Clause, downloaded to models/realesrgan on first
-# use, SHA-256 checked) loaded with spandrel (MIT).
+# use, SHA-256 checked) loaded with spandrel (MIT). Measured and left out of the default lens (it gave the bicubic
+# answer word for word, docs/PLAN-C.md M1); only scripts/lens_pilot.py and lens_compare.py --variants crop_sr load it.
 spandrel==0.4.2
 sentencepiece==0.2.2
 protobuf==7.36.2

@@ -4,7 +4,7 @@ Status: **current.** This turns plan C (`docs/PLAN-C.md`, the pipeline and its m
 uses. Plan C stays the technical reference; where the two disagree on scope or schedule, this document wins.
 **Submission portal: 26 October to 2 November 2026, 12:00 CET** (extended from 1 November, told on 2026-10-29; the Hafnia community's hackathon page, read
 2026-10-27); finalists announced 3-6 November, finals 10-11 November at the Developer Summit in Copenhagen. Required:
-a working solution (PoC or MVP), a solution description, a demonstration video (3-5 min recommended), the source code
+a working solution (PoC or MVP), a solution description, a demonstration video (the hackathon page said 3-5 min recommended; **the portal form, read 2026-11-01, says under 3 minutes, public or unlisted**), the source code
 (open source not required); optional: a live demo link and documentation. Criteria: real-world value, innovation, use
 of Hafnia VLM and XProtect (higher scores for feeding results back into XProtect as events, alerts or actions),
 technical execution, functionality, demo and user experience. Plan: submit on Oct 30, a day's buffer. A "clearway" is
