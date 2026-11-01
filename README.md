@@ -63,17 +63,7 @@ the risks: `docs/PRODUCT.md`. The pipeline's design and gates: `docs/PLAN-C.md`.
 
 ## How it works
 
-```
-XProtect cameras ──FrameBridge (MIP .NET, JPEG at 10 fps)──> the service (clearway/service.py)
-   per camera: change detector (tier0/change.py, dual-rate background) ──> SigLIP 2 look (tier0/memory.py)
-   ──> the ledger (clearway/ledger.py): piece of a known incident | recurrence | known rejection | a question
-   a question: the event window, cropped to the spot
-      large spot ──> Hafnia on the camera's own recording
-      small spot ──> played on lens_1 (lens/publisher.py via MediaMTX) ──> Hafnia on lens_1 over the measured span
-   Hafnia's JSON answer (clearway/prompt.py) ──> the ledger ──> XProtect alarm + bookmarks (clearway/alarms.py)
-                                                           ──> owner board (clearway/board.py)
-                                                           ──> phone push, Confirm / Reject (clearway/notify.py)
-```
+![Clearway pipeline](docs/clearway_pipeline.svg)
 
 The same pipeline as a flowchart, with what the operator's verdicts change: `docs/walkthrough/flow.mermaid`; the
 step-by-step walkthrough with a figure and the numbers for each step: `docs/walkthrough/index.html`.
