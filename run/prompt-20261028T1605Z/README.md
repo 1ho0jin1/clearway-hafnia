@@ -6,7 +6,7 @@ on this machine it had never been set (the Settings API returned no stored value
 repository sets one). Clearway's prompt (`clearway/prompt.py`) is one paragraph of JSON instructions with each
 category's definition and what it is not. Hafnia was trained with the system prompt "You are a CCTV traffic
 analyst. Validate upstream alerts. Think briefly, then output in JSON format." and an AlertValidation JSON task
-(`docs/PLAN-near-miss.md`). Does any of that, or a sectioned layout, give better answers on the clips the service
+(Milestone's article, https://www.milestonesys.com/resources/content/articles/smart-city-video-intelligence/). Does any of that, or a sectioned layout, give better answers on the clips the service
 really sends?
 
 ## How

@@ -5,7 +5,7 @@ failed twice at Hafnia's end, "Transfer Assets: HTTP 403 Forbidden", and cost no
 experiment (`run/prompt-20261028T1605Z`) and every live run so far measured Clearway on the eight looped scenes on
 this machine, the same scenes the prompt's negatives and the detector's settings were tuned on. What does the
 pipeline raise, and what does Hafnia answer with the service's prompt, on footage no part of Clearway has seen?
-Three CC0 street clips from Wikimedia Commons (`data/footage/commons`, listed in `docs/PLAN-near-miss.md`): a Mumbai
+Three CC0 street clips from Wikimedia Commons (`data/footage/commons`, listed in `scripts/fetch_footage.py`): a Mumbai
 junction from above by day (3:03), a Mumbai street at night (3:31), a tram junction in Düsseldorf by day (4:35).
 Dense traffic, people crossing between moving cars and over tram rails, cars and taxis queued at lights, motorbikes
 paused in the junction, stalls and parked vans on pavements: nothing blocks or endangers a way, so every candidate

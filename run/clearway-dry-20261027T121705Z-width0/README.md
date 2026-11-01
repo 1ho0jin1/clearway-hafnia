@@ -22,7 +22,7 @@ model loading).
 
 What it shows:
 
-- **The Recording Server is not the bottleneck.** The investigation (`docs/INVESTIGATION-2026-10-27.md` 4.4)
+- **The Recording Server is not the bottleneck.** The investigation of 2026-10-27
   assumed it transcoded every camera to JPEG; it uses under 2 % of the machine. The MIP .NET library decodes the
   H.264 streams and makes the JPEGs inside FrameBridge, which takes about a core, and the service's own work
   (decoding, the detector at 320 or 640 px for eleven cameras, YOLO, SigLIP) takes more than two of the four. The

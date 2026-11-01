@@ -9,7 +9,7 @@ written against (2026-10-29).
 Why: the prompt experiment (run/prompt-20261028T1605Z) compared prompts on 28 clips from the eight looped scenes on
 this machine, the scenes the prompt had been written against: a comparison between prompts, not an accuracy. This
 script asks what the detector raises, and what Hafnia answers with the service's prompt, on three CC0 street clips
-(Wikimedia Commons: Mumbai 02 and 03, Duesseldorf; docs/PLAN-near-miss.md) that no part of Clearway was tuned on:
+(Wikimedia Commons: Mumbai 02 and 03, Duesseldorf; scripts/fetch_footage.py) that no part of Clearway was tuned on:
 fixed cameras over dense streets, people crossing between moving cars, cars turning across tram tracks, nothing
 that blocks a way for long. Every candidate is a hard negative unless the labels say otherwise.
 
@@ -64,7 +64,7 @@ TABLES_MARK = "<!-- tables: written by holdout.py score; the text above is kept 
 DUP_IOU = 0.3           # a looped-setting report whose box overlaps a real-setting report this much, started within
 DUP_S = 5.0             # ... this many seconds of it, is the same thing reported earlier: not asked twice
 
-# name: (file, what it shows, licence); docs/PLAN-near-miss.md, "Footage"
+# name: (file, what it shows, licence); sources and checksums in scripts/fetch_footage.py
 CLIPS = {
     "mumbai02": (FOOTAGE / "mumbai02.webm", "a Mumbai junction from above by day, 3:03, 960x540", "CC0"),
     "mumbai03": (FOOTAGE / "mumbai03.webm", "a Mumbai street at night, street level, 3:31, 960x540", "CC0"),

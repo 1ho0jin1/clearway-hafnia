@@ -67,7 +67,7 @@ run/*/pipeline.html
 run/lens/
 run/board/
 
-# Candidate footage downloaded for evaluation (licences per source in docs/PLAN-near-miss.md)
+# Candidate footage downloaded for evaluation (the held-out clips' licences and checksums are in scripts/fetch_footage.py)
 data/footage/
 
 # Owner inbox (scripts/owner_inbox.py): received notifications carry snapshots (camera footage)

@@ -7,9 +7,9 @@ and Hafnia VLM (a vision-language model reached through the Hafnia gateway on th
 **Judging weighs creativity and validity most** (organizer Q&A). Reproducibility counts too, but a best-effort
 setup script plus documented manual steps is enough. Deliverable: this repository; a demo video is optional.
 The product, its scope and the schedule are in `docs/PRODUCT.md` (2026-10-24: Clearway, an owner board for
-right-of-way incidents); the pipeline and its measurements in `docs/PLAN-C.md`. Keep both current. Earlier plans, kept for
-reference: `docs/PLAN.md` (verified accident alarms) and `docs/PLAN-near-miss.md` (near-miss observatory; also the
-research on Hafnia's trained formats and footage sources with licence notes).
+right-of-way incidents); the pipeline step by step in `docs/walkthrough/`. Keep both current. The earlier plans
+(verified accident alarms, a near-miss observatory) and plan C's design document were removed on 2026-11-02; their
+findings are below.
 
 ## Project direction (decided 2026-10-22: plan C, right-of-way incidents)
 
@@ -26,7 +26,7 @@ research on Hafnia's trained formats and footage sources with licence notes).
 - Concept: tier 0 notices that **something changed and stayed changed** (dual background model, no object classes, no
   per-scenario rules), plus stalled vehicles and a person in a danger zone. The **lens** shows Hafnia the change:
   centred on the moment, cropped to the spot (BEFORE and AFTER stills and super-resolution were measured and left
-  out, `docs/PLAN-C.md` M1). Hafnia names it in JSON; a ledger item and
+  out, `run/pilot-20261023T162040Z`). Hafnia names it in JSON; a ledger item and
   an XProtect alarm go to the owner; tier 0 closes the item, without a request, when the spot is restored.
 - **No frontier model in the product**, and no local VLM tier (nothing performant fits a T4). Opus (Claude Code) is
   used **offline only**, as a judge: scoring tests, tuning prompts, auditing answers claim by claim.
@@ -126,8 +126,8 @@ an API; never write XProtect or gateway paths and fields from memory.
 
 Python 3.12 (installed from python.org, `py` launcher). The gateway and XProtect clients use only the standard
 library; tier 0, the lens and the verdict memory run in `.venv` (`requirements.txt`). The pipeline as a flow
-diagram (Mermaid, current): `docs/walkthrough/flow.mermaid`, rendered in `docs/walkthrough/index.html`; plan C's
-original diagram stays in `docs/PLAN-C.md`, "Pipeline".
+diagram (Mermaid, current): `docs/walkthrough/flow.mermaid`, rendered in `docs/walkthrough/index.html`; the README's figure is
+`docs/clearway_pipeline.svg`.
 
 | Path | What |
 |---|---|
@@ -609,7 +609,7 @@ list; summary details vary between loop occurrences (two wrong this time), categ
 
 **Lens camera, first test** (`run/lens-test_11-20261021T144445Z/README.md`, 6 requests): on `test_11`'s distant crash
 (the SUV is about 30 px long), the plain 6 s window got NONE twice; the same window cropped and enlarged on `lens_1`
-got ACCIDENT twice, in slow motion too. One event: an anecdote that motivates E6 in `docs/PLAN-near-miss.md`. Lens
+got ACCIDENT twice, in slow motion too. One event: an anecdote, not a measurement. Lens
 recordings match send times within about 10 ms; after a publisher restart XProtect resumes recording about 10 s later.
 
 **Clip windows:** cameras record on motion, so a window can have no recording ("Fetch Video: ... No recordings

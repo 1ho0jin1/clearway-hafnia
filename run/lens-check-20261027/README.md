@@ -1,6 +1,6 @@
 # Lens check (2026-10-27): what `lens_1` recorded against what the publisher sent during M3
 
-Done by the investigation of 2026-10-27 (`docs/INVESTIGATION-2026-10-27.md`), before M3's recordings expired
+Done by the investigation of 2026-10-27, before M3's recordings expired
 (24 h retention, about 14:16 UTC). No Hafnia requests. `export.ps1` saved one recorded frame per second of `lens_1`
 around seven of M3's asked spans (`Get-Snapshot`, MilestonePSTools); `sheets.py` tiled them (rows marked REC, with
 the recorded timestamp) under frames of the clip the publisher sent for that question (rows marked SENT, from the

@@ -26,8 +26,7 @@ scenes). The comparison is the last section; the plain way's answers are read on
   roadworks in the bus lane ("flows smoothly without incidents"). Nothing invented in 24 answers.
 - **The `vandalism` camera, 6 of 6: "throws a small object toward a window, the glass shatters".** That is DAMAGE by
   Clearway's own definition (glass broken), and Clearway has never asked about it: a thrown object and a crack are
-  not a change that stays, so the detector at the real-camera setting reports nothing there
-  (`docs/INVESTIGATION-2026-10-27.md`, the camera table). The plain way reports it every minute. This is the one
+  not a change that stays, so the detector at the real-camera setting reports nothing there. The plain way reports it every minute. This is the one
   thing in the comparison the plain way finds and Clearway does not.
 - **Answers are paragraphs**, 359 characters on average, 6-21 s each; an operator reads 66 of them for six minutes
   of eleven cameras, with no category, no verdict, no link between them.

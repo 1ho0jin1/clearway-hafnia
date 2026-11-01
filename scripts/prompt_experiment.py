@@ -8,7 +8,7 @@ r"""prompt_experiment.py - does a system prompt, or a structured prompt, improve
 The question (2026-10-28): the gateway's Advanced Settings hold a *System Prompt*, empty on this machine, sent
 before the prompt with every request; Clearway's prompt (clearway/prompt.py) is one paragraph of JSON instructions.
 Hafnia was trained with "You are a CCTV traffic analyst. Validate upstream alerts. Think briefly, then output in
-JSON format." and an AlertValidation JSON task (docs/PLAN-near-miss.md). Which of these helps on the clips the
+JSON format." and an AlertValidation JSON task (Milestone's article on Hafnia's training). Which of these helps on the clips the
 service really sends?
 
 Test set: the clips the service sent on 2026-10-26 (the three-hour shift) and 2026-10-27 (the 20-minute run), kept
@@ -107,7 +107,7 @@ TESTSET = [
 # --- system prompts (the gateway's Advanced Settings) -------------------------------------------------------------
 SYSTEM = {
     "none": "",
-    # Milestone's article on Hafnia's training (docs/PLAN-near-miss.md, docs/INVESTIGATION-2026-10-27.md item 6)
+    # Milestone's article on Hafnia's training: https://www.milestonesys.com/resources/content/articles/smart-city-video-intelligence/
     "trained": "You are a CCTV traffic analyst. Validate upstream alerts. Think briefly, then output in JSON format.",
     # Clearway's own context: what every clip is, and the two habits seen in wrong answers (invented objects, crops)
     "clearway": (
