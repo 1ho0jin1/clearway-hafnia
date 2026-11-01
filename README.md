@@ -100,7 +100,11 @@ step-by-step walkthrough with a figure and the numbers for each step: `docs/walk
   of 39 hard negatives became false cards, most of them cars waiting at a light called stalled
   (`run/holdout-20261029`). That is the known limit of the entry as it stands: the fix lies upstream of the model
   (how long a vehicle must stay before a question, the operator's rejections teaching the memory) and is not
-  built. A second question in Hafnia's own alert-validation form, the first answer put back to the model to
+  built. A floor in square metres, from a scale per camera and row fitted on the people and cars in view, was
+  measured and does not help: the true incidents and the false cards overlap in size, so a floor that removes the
+  junction's waiting cars removes the school gate and the graffiti first, and a floor set low enough for the far
+  rows multiplies the candidates eight times with the false cards unchanged (`run/calib-20261029`). A second
+  question in Hafnia's own alert-validation form, the first answer put back to the model to
   confirm or discard, was measured and not adopted as a gate: it removed 19 of those 31 false cards (every
   invented collision among them) but also held 3 of 18 true incidents, two of them a person on the tracks
   (`run/validate-20261029`). Nothing in XProtect is wired to Hafnia on its own: no motion event or gateway rule
