@@ -2,24 +2,33 @@
 
 Status: **storyboard, 2026-10-27.** The portal closes 2 November 12:00 CET (extended from 1 November); the video is planned for Oct 29.
 **The portal form (read 2026-11-01) wants the video under 3 minutes, not the 3-5 the hackathon page recommended: the
-storyboard below runs about 4 minutes and must be cut, most easily in scenes 6 and 7.** Criteria it
+storyboard was cut on 2026-11-01 from about 4 minutes to 2:40 with the synthetic voice (`make_video.py --list`).** Criteria it
 serves (the hackathon page): real-world value, use of Hafnia VLM and XProtect with results fed back into XProtect,
 technical execution, functionality, demo and user experience. The pitch is the one in `PRODUCT.md`, "What sells it
 against the field": optimization around the model, shown with numbers; the obstruction categories get one line.
 
-## Storyboard (about 4 minutes)
+## Storyboard (2:40 with the synthetic voice; cut 2026-11-01 from about 4 minutes)
 
-| # | Time | On screen | Narration (draft) | Made from |
+The narration below is the script in `scripts/make_video.py` (`SCENES`), the one to record; the times are the
+synthetic voice's (`--list`), each scene its narration plus 0.8 s or its least length. What was cut: the exact-clip
+and one-sentence-verdict phrasing, the comparison's "to be fair" sentence (the card's foot keeps it), "a large spot
+is asked about on its own recording", the setup script in the numbers narration (the card's foot keeps it); what
+came in: the known limit, one sentence on the numbers scene.
+
+| # | Time | On screen | Narration | Made from |
 |---|---|---|---|---|
-| 1 | 0:00-0:15 | Title card: **Clearway**. "What is blocking a public way right now, whose job is it, and how long has it been there?" | Clearway watches a city's XProtect cameras for things that block or endanger a public way, asks the Hafnia VLM once about each, and turns the answer into one alarm, one card for its owner, and one push to a phone. | card |
-| 2 | 0:15-0:35 | The eleven cameras in Smart Client (a view), then the service starting in a terminal: the planned request count printed before anything starts. | Eleven cameras, six of them with a staged incident each. The service announces what it will spend before it starts: at most this many requests of the day's five hundred. | screen capture |
-| 3 | 0:35-1:15 | The owner board filling: columns per owner, cards appearing 20 seconds after each change; one card opened: the clip Hafnia judged, its summary, the alarm state, the time open. | Within a minute every incident has a card in its owner's column: the stalled truck for traffic operations, the person on the tracks for rail control, the tipped bin for street services. Each card shows the exact clip Hafnia judged and its one-sentence verdict. | board footage (headless render, 1 frame per second) or screen capture |
-| 4 | 1:15-1:40 | Smart Client's Alarm Manager: the alarm named with the category, the owner and Hafnia's summary; the bookmark on the camera; the alarm closing by itself when the spot clears. | The same incident is an XProtect alarm, with a snapshot and a bookmark on the camera, closed by itself when the spot clears and reopened when it happens again. | screen capture (Smart Client) |
-| 5 | 1:40-2:00 | The phone: the push with the snapshot and Confirm / Reject; a tap; the board's card marked confirmed within a second. | The owner gets a push with two buttons. A tap reaches the ledger in under a second, and teaches it: a rejected look at that spot is not asked about again. | phone screen recording |
-| 6 | 2:00-2:50 | "How it decides": the change detector stills (something arrived and stopped; a person held back; fog and light not objects), the verdict memory, the lens: the 30-pixel crash the full frame called NONE and the crop named; the frame code strip and the measured time base; the fade replay (silent after 7 minutes, steady after the fix). | Nothing asks Hafnia on a timer. A change detector notices what stayed changed; a memory skips what was already judged; a small spot is cropped and enlarged on a lens camera of our own, and the lens frames carry a code that proves which seconds the recording holds. Every one of these was measured, and two of them were found wrong and fixed on the way. | stills from `docs/walkthrough/`, cards with numbers |
-| 7 | 2:50-3:30 | The numbers card: M3 three hours (33 requests, 11 cards, the 4 false traced to one cause), the clean run (14 requests, 7 cards, none false, 20-42 s), one request per camera-hour, every run folder with its README, one setup script. | Three hours on eleven cameras cost 33 requests, one per camera-hour. The four false cards it produced were traced to one cause and fixed; the next run had none. Everything is in the repository: the runs, their numbers, and a single setup script for a fresh machine. | card |
-| 7b | 3:30-4:05 | The comparison card (`compare.html`): 60 against 1 request per camera-hour; 45 minutes until the plain way has spent the day's 500 on eleven cameras; 0 of 6 plain answers that put the person on the tracks; the foot: the smashed window the plain way reports and Clearway never asks about. | The plain way asks every camera on a timer. Once a minute on eleven cameras is sixty requests per camera-hour, the day's five hundred gone in forty-five minutes, and a paragraph to read per request. Clearway spent one request per camera-hour over a three-hour shift. Six times out of six, the plain way's full frame left the person on the platform; the magnified clip put them on the tracks. To be fair, the plain way reports the smashed window every minute, and Clearway never asks about it, because nothing stays changed. | card; measured in `run/vanilla-20261029T0714Z-compare` (66 requests, 2026-10-29) against the 10-27 run and the 10-26 shift |
-| 8 | 4:05-4:25 | Close: the repository, what is next (owners' own channels, the application layer). | Clearway keeps public ways clear, and spends the model's attention only where it earns it. | card |
+| 1 | 0:00-0:14 | Title card: **Clearway**. "What is blocking a public way right now, whose job is it, and how long has it been there?" | Clearway watches a city's XProtect cameras for what blocks a public way, asks Hafnia VLM once per incident, and turns the answer into one alarm, one card for its owner, one push to a phone. | card |
+| 2 | 0:14-0:25 | The eleven cameras in Smart Client (a view), then the service starting in a terminal: the planned request count printed before anything starts. | Eleven cameras, six with a staged incident. The service says what it will spend before it starts: at most this many of the day's five hundred. | screen capture (`cameras.mp4`) |
+| 3 | 0:25-0:41 | The owner board filling: columns per owner, cards appearing 20 seconds after each change; one card opened. | Within a minute every incident has a card in its owner's column: the truck for traffic operations, the person on the tracks for rail control, the bin for street services, each with the clip Hafnia judged, its verdict, the time open and its alarm. | board footage (`record_board.py` beside a clean live run) |
+| 4 | 0:41-0:52 | The stalled truck's clip as the board served it, with Hafnia's verdict. | The clip for the stalled truck as Hafnia saw it, and the verdict: a silver pickup stalls in the lane with its door open and smoke rising, blocking traffic. | `captures/clip.mp4` (there) |
+| 5 | 0:52-1:05 | Smart Client's Alarm Manager: the alarm named with the category, the owner and Hafnia's summary; the bookmark; the alarm closing by itself when the spot clears. | The same incident is an XProtect alarm with the category, the owner, Hafnia's summary, a snapshot and a bookmark. It closes itself when the spot clears and reopens if it happens again. | screen capture (`smartclient.mp4`) |
+| 6 | 1:05-1:16 | The phone: the push with the snapshot and Confirm / Reject; a tap; the board's card marked confirmed within a second. | The owner gets a push with two buttons. A tap reaches the system in under a second and teaches it: a rejected look at that spot is not asked about again. | phone screen recording (`phone.mp4`) |
+| 7 | 1:16-1:33 | "How it decides": the change detector stills, the verdict memory, the magnified crop of the 30-pixel crash the full frame called NONE. | Nothing asks Hafnia on a timer. A change detector notices what stayed changed, a memory skips what was already judged, and a small spot is enlarged on a magnifier camera of our own: a thirty-pixel crash the full frame called nothing is named a collision. | card `decides.html` (stills from `docs/walkthrough/`) |
+| 8 | 1:33-1:48 | "Measured": the frame code strip and the time base, the fade replay before and after, the alarm latency before and after. | All of it was measured, and three faults were found and fixed: the magnifier camera's clock, now proven by a code in every frame; a detector that faded after seven minutes; alarms slowed by our own load. | card `measured.html` |
+| 9 | 1:48-2:06 | The numbers card: 33 requests for three hours, 0 false cards in the clean run, 20-42 s to a card; the foot: the known limit on real streets, one setup script. | Three hours on eleven cameras: thirty-three requests, one per camera-hour, and the next run had no false cards. On real streets it had never seen, waiting cars became false cards: the known limit. Everything is in the repository. | card `numbers.html` |
+| 10 | 2:06-2:26 | The comparison card: 60 against 1 request per camera-hour; 45 minutes until the plain way has spent the day's 500; 0 of 6 plain answers that put the person on the tracks; the foot: the smashed window the plain way reports and Clearway never asks about. | The plain way asks every camera once a minute: sixty requests per camera-hour, the day's five hundred gone in forty-five minutes. Clearway spent one per camera-hour. Six times out of six, the full frame left the person on the platform; the magnified clip put them on the tracks. | card `compare.html`; measured in `run/vanilla-20261029T0714Z-compare` (66 requests, 2026-10-29) against the 10-27 run and the 10-26 shift |
+| 11 | 2:26-2:34 | The shift summary page. | At the end of a shift, the summary: incidents by owner, how fast, where it keeps happening. | `render/summary-final.png` |
+| 12 | 2:34-2:40 | Close: the repository. | Clearway keeps public ways clear, and spends the model's attention only where it earns it. | card `close.html` |
 
 ## Additions decided 2026-10-29 (not in the cut yet)
 
@@ -31,8 +40,9 @@ against the field": optimization around the model, shown with numbers; the obstr
   same morning: do not run the poller beside a live run on this machine (the CPU saturates and the detector starves;
   that run's Clearway numbers are in the README as a degraded data point, not the reference).
 - **The held-out check** (`run/holdout-20261029`): one line on the numbers card, as the known limit and the next
-  fix (31 of 39 hard negatives on real streets became false cards). Its CC0 clips may be shown, and
-  `scripts/fetch_footage.py` makes the check reproducible on a judge's machine.
+  fix (31 of 39 hard negatives on real streets became false cards). **On the card and in the narration since
+  2026-11-01.** Its CC0 clips may be shown, and `scripts/fetch_footage.py` makes the check reproducible on a judge's
+  machine.
 
 ## Production
 
@@ -67,6 +77,9 @@ against the field": optimization around the model, shown with numbers; the obstr
 **State (2026-10-27):** a first cut of 2.6 minutes exists with the scratch narration, the cards, the walkthrough
 stills, the stalled truck's clip, the board's and the summary's final state, and placeholders for the three captures
 by hand. Still to do: the recorded live run with the board filmed and the three captures, the author's narration,
-then the cut again (expected 3.5-4 minutes). **2026-10-29:** the comparison scene added (7b); the board recording
+then the cut again. **2026-10-29:** the comparison scene added (7b); the board recording
 made beside the comparison run is 6 s long (the recorder starved with the poller running) and is not usable: film
-the board again during the live run for scenes 2-5, with nothing else asking Hafnia at the time.
+the board again during the live run for scenes 2-6, with nothing else asking Hafnia at the time. **2026-11-01:** the
+narration cut for the portal's 3-minute limit: 2:40 with the synthetic voice, so a reading up to 12 % slower still
+fits; if the recorded voice runs longer, the comparison's second sentence and the measured scene's list are the
+next cuts.

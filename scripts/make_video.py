@@ -31,50 +31,45 @@ CARDS, RENDER, AUDIO, VOICE, SEGMENTS, CAPTURES = (VIDEO / d for d in ("cards", 
 
 # visual: ("card", html name) | ("still", path) | ("video", capture name, fallback visual)
 SCENES = [
+    # Cut 2026-11-01 to stay under the portal's 3 minutes (the synthetic voice gives about 2.5; a slower reading
+    # still fits): shorter narration everywhere, the comparison without its "to be fair" sentence (the card's foot
+    # keeps it), the known limit said on the numbers scene.
     {"id": "title", "min_s": 8, "visual": ("card", "title.html"),
-     "say": "Clearway watches a city's XProtect cameras for things that block or endanger a public way, asks the "
-            "Hafnia V L M once about each, and turns the answer into one alarm, one card for its owner, and one push "
-            "to a phone."},
-    {"id": "cameras", "min_s": 10, "visual": ("video", "cameras.mp4", ("still", REPO / "docs" / "walkthrough" / "01_cameras.jpg")),
-     "say": "Eleven cameras, six of them with a staged incident each. The service announces what it will spend before "
-            "it starts: at most this many requests of the day's five hundred."},
-    {"id": "board", "min_s": 20, "visual": ("video", "board.mp4", ("still", RENDER / "board-final.png")),
-     "say": "Within a minute every incident has a card in its owner's column: the stalled truck for traffic "
-            "operations, the person on the tracks for rail control, the tipped bin for street services. Each card "
-            "shows the exact clip Hafnia judged and its one-sentence verdict, how long the spot has been that way, "
-            "and the state of its alarm."},
+     "say": "Clearway watches a city's XProtect cameras for what blocks a public way, asks Hafnia V L M once per "
+            "incident, and turns the answer into one alarm, one card for its owner, one push to a phone."},
+    {"id": "cameras", "min_s": 8, "visual": ("video", "cameras.mp4", ("still", REPO / "docs" / "walkthrough" / "01_cameras.jpg")),
+     "say": "Eleven cameras, six with a staged incident. The service says what it will spend before it starts: at "
+            "most this many of the day's five hundred."},
+    {"id": "board", "min_s": 16, "visual": ("video", "board.mp4", ("still", RENDER / "board-final.png")),
+     "say": "Within a minute every incident has a card in its owner's column: the truck for traffic operations, the "
+            "person on the tracks for rail control, the bin for street services, each with the clip Hafnia judged, "
+            "its verdict, the time open and its alarm."},
     {"id": "clip", "min_s": 8, "visual": ("video", "clip.mp4", ("card", "placeholder.html?t=The clip Hafnia judged")),
-     "say": "This is the clip for the stalled truck as Hafnia saw it, and the verdict: a silver pickup stalls in the "
-            "middle of the lane with its door open and smoke rising, blocking traffic."},
-    {"id": "smartclient", "min_s": 12, "visual": ("video", "smartclient.mp4",
+     "say": "The clip for the stalled truck as Hafnia saw it, and the verdict: a silver pickup stalls in the lane "
+            "with its door open and smoke rising, blocking traffic."},
+    {"id": "smartclient", "min_s": 10, "visual": ("video", "smartclient.mp4",
                                                  ("card", "placeholder.html?t=Smart Client: the alarm, the bookmark, the close")),
-     "say": "The same incident is an XProtect alarm, named with the category, the owner and Hafnia's summary, with a "
-            "snapshot and a bookmark on the camera. It closes by itself when the spot clears and reopens when it "
-            "happens again."},
-    {"id": "phone", "min_s": 10, "visual": ("video", "phone.mp4", ("card", "placeholder.html?t=The phone: Confirm or Reject")),
-     "say": "The owner gets a push with the snapshot and two buttons. A tap reaches the ledger in under a second, and "
-            "teaches it: a rejected look at that spot is not asked about again."},
-    {"id": "decides", "min_s": 16, "visual": ("card", "decides.html"),
-     "say": "Nothing asks Hafnia on a timer. A change detector notices what stayed changed. A memory skips what was "
-            "already judged. A small spot is cropped and enlarged on a lens camera of our own, so that a thirty-pixel "
-            "crash the full frame called nothing is named a collision; a large spot is asked about on its own "
-            "recording."},
-    {"id": "measured", "min_s": 16, "visual": ("card", "measured.html"),
-     "say": "Every one of these was measured, and three things were found wrong and fixed on the way: the lens "
-            "recording's clock, which every lens frame now proves with a code; a detector that faded after seven "
-            "minutes; and alarms slowed by our own load."},
-    {"id": "numbers", "min_s": 16, "visual": ("card", "numbers.html"),
-     "say": "Three hours on eleven cameras cost thirty-three requests, one per camera-hour. The false cards that run "
-            "produced were traced to one cause and fixed; the next run had none. Everything is in the repository: "
-            "the runs, their numbers, and a single setup script for a fresh machine."},
-    {"id": "compare", "min_s": 16, "visual": ("card", "compare.html"),
-     "say": "The plain way asks every camera on a timer. Once a minute on eleven cameras is sixty requests per "
-            "camera-hour, the day's five hundred gone in forty-five minutes, and a paragraph to read per request. "
-            "Clearway spent one request per camera-hour over a three-hour shift. Six times out of six, the plain "
-            "way's full frame left the person on the platform; the magnified clip put them on the tracks. To be "
-            "fair, the plain way reports the smashed window every minute, and Clearway never asks about it, "
-            "because nothing stays changed."},
-    {"id": "summary", "min_s": 8, "visual": ("still", RENDER / "summary-final.png"),
+     "say": "The same incident is an XProtect alarm with the category, the owner, Hafnia's summary, a snapshot and a "
+            "bookmark. It closes itself when the spot clears and reopens if it happens again."},
+    {"id": "phone", "min_s": 8, "visual": ("video", "phone.mp4", ("card", "placeholder.html?t=The phone: Confirm or Reject")),
+     "say": "The owner gets a push with two buttons. A tap reaches the system in under a second and teaches it: a "
+            "rejected look at that spot is not asked about again."},
+    {"id": "decides", "min_s": 14, "visual": ("card", "decides.html"),
+     "say": "Nothing asks Hafnia on a timer. A change detector notices what stayed changed, a memory skips what was "
+            "already judged, and a small spot is enlarged on a magnifier camera of our own: a thirty-pixel crash the "
+            "full frame called nothing is named a collision."},
+    {"id": "measured", "min_s": 12, "visual": ("card", "measured.html"),
+     "say": "All of it was measured, and three faults were found and fixed: the magnifier camera's clock, now proven "
+            "by a code in every frame; a detector that faded after seven minutes; alarms slowed by our own load."},
+    {"id": "numbers", "min_s": 12, "visual": ("card", "numbers.html"),
+     "say": "Three hours on eleven cameras: thirty-three requests, one per camera-hour, and the next run had no false "
+            "cards. On real streets it had never seen, waiting cars became false cards: the known limit. Everything "
+            "is in the repository."},
+    {"id": "compare", "min_s": 14, "visual": ("card", "compare.html"),
+     "say": "The plain way asks every camera once a minute: sixty requests per camera-hour, the day's five hundred "
+            "gone in forty-five minutes. Clearway spent one per camera-hour. Six times out of six, the full frame "
+            "left the person on the platform; the magnified clip put them on the tracks."},
+    {"id": "summary", "min_s": 7, "visual": ("still", RENDER / "summary-final.png"),
      "say": "At the end of a shift, the summary: incidents by owner, how fast, where it keeps happening."},
     {"id": "close", "min_s": 6, "visual": ("card", "close.html"),
      "say": "Clearway keeps public ways clear, and spends the model's attention only where it earns it."},
