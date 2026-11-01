@@ -4,8 +4,8 @@ Status: **storyboard, 2026-10-27.** The portal closes 2 November 12:00 CET (exte
 **The portal form (read 2026-11-01) wants the video under 3 minutes, not the 3-5 the hackathon page recommended: the
 storyboard was cut on 2026-11-01 from about 4 minutes to 2:40 with the synthetic voice (`make_video.py --list`).** Criteria it
 serves (the hackathon page): real-world value, use of Hafnia VLM and XProtect with results fed back into XProtect,
-technical execution, functionality, demo and user experience. The pitch is the one in `PRODUCT.md`, "What sells it
-against the field": optimization around the model, shown with numbers; the obstruction categories get one line.
+technical execution, functionality, demo and user experience. The pitch is the one in `PRODUCT.md`, "What sells
+it": optimization around the model, shown with numbers; the obstruction categories get one line.
 
 ## Storyboard (2:40 with the synthetic voice; cut 2026-11-01 from about 4 minutes)
 

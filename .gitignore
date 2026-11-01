@@ -81,3 +81,13 @@ docs/video/voice/
 docs/video/segments/
 docs/video/captures/
 docs/video/*.mp4
+
+# Run logs stay local (removed before the repository went public, 2026-11-02); each run's README keeps the numbers.
+# The hold-out's hand-made labels stay: the reproduce steps copy them.
+run/**/*.json
+run/**/*.jsonl
+run/**/*.log
+run/**/*.err
+run/**/*.pkl
+run/**/*.npz
+!run/holdout-20261029/labels.json

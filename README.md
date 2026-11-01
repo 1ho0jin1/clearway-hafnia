@@ -11,8 +11,7 @@ Entry for the Hafnia Hackathon 2026 (Milestone XProtect 2026 R1, the Hafnia VLM 
 ## What it is not
 
 Noticing an obstruction with a VLM is table stakes: Milestone's own plug-in verifies alerts, and any entry can send
-the gateway a clip. Clearway's point is the **optimization** around the model, which no other entry we have seen
-shows:
+the gateway a clip. Clearway's point is the **optimization** around the model:
 
 1. **Every request is earned.** No timer, no motion event. A change detector on the live frames notices what stayed
    changed, a verdict memory skips what Hafnia or the operator already judged, a ledger merges the pieces and
@@ -178,8 +177,9 @@ Copy-Item run\holdout-20261029\labels.json run\holdout-<date>\
 SigLIP verdict memory, the danger zones; `lens/` the lens camera (publisher, frame code, clock, client);
 `bridge/FrameBridge/` the C# live-frame bridge; `hafnia/` the gateway and XProtect REST clients; `incident/` the
 bridge reader and the earlier plan A pipeline; `scripts/` the run, setup, evaluation and report scripts; `config/`
-owners and zones; `docs/` plans and the investigation; `run/` every measured run with its README. The full table
-with one line per file is in `CLAUDE.md`, "Repository layout".
+owners and zones; `docs/` plans and the investigation; `run/` every measured run with its README (the raw logs
+each run wrote stay local; the README keeps the numbers). The full table with one line per file is in `CLAUDE.md`,
+"Repository layout".
 
 ## Licences and footage
 

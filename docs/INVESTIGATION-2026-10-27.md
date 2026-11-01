@@ -59,7 +59,7 @@ reorder so that the README and the setup script exist by the evening of Oct 28, 
 **Yes, since 2026-10-22, and the goal is better than most hackathon goals.** It names a user (city and transit
 operators, owner teams, planners), a question, a measurable promise (few false cards, right clip on each card, no
 request wasted on repeats), and honesty rules for the demo. The pitch sits in the organizers' own idea list
-(`hackathon_qna.png`): intelligent alerting, smart dashboards, video summaries. The judges' stated criteria are
+(the hackathon page's "What you can build"): intelligent alerting, smart dashboards, video summaries. The judges' stated criteria are
 creativity, validity and reproducibility (participant guide, page 5: "the judges must be able to set your solution
 up on a fresh machine").
 
@@ -76,7 +76,7 @@ Critical observations:
 - **A differentiator without evidence.** CLAUDE.md lists "results on real footage as well as the synthetic loops"
   among the differentiators. The real crime clips are out of scope and disabled, the AI City video is "internal only,
   licence not cleared", and the CC0 street clips were cut from the plan. As it stands, a judge sees results on the
-  organizers' synthetic loops only, which every other entry also has.
+  organizers' synthetic loops only.
 - **The answer key is wrong where it matters.** The "stand-in" that scores Hafnia live expects TAMPERING for every
   change on the gate camera, including lit pavement. Ten of Hafnia's twelve gate answers were NONE, most of them
   rightly. "Hafnia agrees with the stand-in on 14 of 32" is not a number to show anyone; the audit against frames,

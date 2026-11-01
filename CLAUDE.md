@@ -9,17 +9,16 @@ setup script plus documented manual steps is enough. Deliverable: this repositor
 The product, its scope and the schedule are in `docs/PRODUCT.md` (2026-10-24: Clearway, an owner board for
 right-of-way incidents); the pipeline and its measurements in `docs/PLAN-C.md`. Keep both current. Earlier plans, kept for
 reference: `docs/PLAN.md` (verified accident alarms) and `docs/PLAN-near-miss.md` (near-miss observatory; also the
-research on Hafnia's trained formats, earlier and competing entries, and footage sources with licence notes).
+research on Hafnia's trained formats and footage sources with licence notes).
 
 ## Project direction (decided 2026-10-22: plan C, right-of-way incidents)
 
 - Solo entry; the submission portal closes **2026-11-02 12:00 CET** (extended from 11-01, told on 2026-10-29; open from Oct 26; a demo video **under 3 minutes**, public
   or unlisted, is required by the portal form read 2026-11-01, not the 3-5 min the hackathon page had recommended; see
   `docs/PRODUCT.md` for the criteria), plan to submit on Oct 30.
-- **Selling point (2026-10-27, after seeing the field):** optimization, not detection. Two public 2026 entries
-  (RoadWatch, Scene Contracts) ask Hafnia on a click or a timer and claim no accuracy; the README, video and pitch
-  lead with how Clearway decides when to ask, what to show, and measures and fixes the answers (`docs/PRODUCT.md`,
-  "What sells it against the field"). The obstruction categories get one line.
+- **Selling point (2026-10-27):** optimization, not detection. The README, video and pitch lead with how Clearway
+  decides when to ask, what to show, and measures and fixes the answers (`docs/PRODUCT.md`, "What sells it"). The
+  obstruction categories get one line.
 - **Scope: right-of-way incidents**, things that block or endanger a public way, for city and transit operators: a
   person on the tracks, a vehicle stalled in a lane, an object lying across a pavement, damage to transit. Security
   (break-ins) is a footnote: Hafnia scored 0 of 8 on real crime CCTV (`run/bench-20261018`), although it reads the
@@ -181,7 +180,7 @@ original diagram stays in `docs/PLAN-C.md`, "Pipeline".
 | `scripts/probe_cameras.py` | Neutral description and one-word class per camera over one loop (cameras × 2 requests) |
 | `scripts/inspect_footage.py`, `scripts/remote_zip.py` | Candidate footage: contact sheet and YOLO road-user counts; single files out of huge remote zips by HTTP range requests |
 | `data/clips.json` | Incident clips: neutral camera name, source file, length, label, ground truth; organizer cameras as controls |
-| `run/<name>/` | Model run results, committed: `results.jsonl` (Hafnia rows, with answers), `report.html`; for comparisons `opus_results.jsonl`, `scores.json`, `compare.html` |
+| `run/<name>/` | Model run results: the README and rendered reports (`report.html`, `compare.html`) are committed; the raw logs (`*.json`, `*.jsonl`, `*.log`, `*.pkl`, `*.npz`) were removed before the repository went public (2026-11-02) and are git-ignored, except `run/holdout-20261029/labels.json` (hand-made labels the reproduce steps copy) |
 | `data/` | Source videos (`*.mp4`) and converted clips (`data/clips/`), both git-ignored: too large, and judges must download them from their source |
 
 ## Commands

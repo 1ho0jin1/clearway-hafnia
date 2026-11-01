@@ -34,9 +34,7 @@ owner; tier 0 closes the item, without another request, when the spot looks as i
 - **Real footage keeps us honest:** on real crime CCTV Hafnia scored 0 of 8 (`run/bench-20261018`); synthetic clips are
   easier. We report on both, and stay in the road-and-public-space domain where Hafnia is competent; security
   (break-in) is a footnote, not the product.
-- **Prior and competing entries** are application work (`docs/PLAN-near-miss.md`, "What earlier and current entries
-  did"); the 2026 "Scene Contracts" entry uses fixed per-camera templates (property damage, roadway visibility). Ours
-  needs no per-camera rules and measures what it claims.
+- **No per-camera rules:** ours needs no per-camera templates and measures what it claims.
 
 ## Who it is for
 

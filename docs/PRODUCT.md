@@ -37,28 +37,20 @@ product itself. The pitch leads with the board and uses the measurements as evid
 
 ## Why this framing (evidence, 2026-10-24)
 
-- **Every 2025 finalist built something a person uses** (a map, a triage view, a recap, a workflow builder); none
-  improved the model (`docs/PLAN-near-miss.md`, "What earlier and current entries did"). The winner wanted something
-  "relevant and useful in real life"; the judges (Milestone and NVIDIA) said he "really nailed it". The 2025 results
-  name no criteria.
-- **The organizers' own idea list** (`hackathon_qna.png`) names "Smart dashboards: turn video understanding into
+- **The organizers' own idea list** (the hackathon page's "What you can build") names "Smart dashboards: turn video understanding into
   safety, traffic and incident dashboards for operators" and "Video summaries: shift summaries, explanations of unusual
   activity and structured data from hours of footage". The board and the shift summary are both on it.
 - **Our gap:** plan C stops at "an alarm fires in XProtect". The ledger and the page that would show it to a person were
   still "to build" and scheduled last.
-- **Our strength stays:** no 2025 entry measured or improved what the VLM sees. Here that work becomes product
+- **Our strength stays:** measuring and improving what the VLM sees. Here that work becomes product
   properties a judge can check: few false cards, the right clip on each card, no request wasted on repeats.
 
-Source of the framing: an external review of the plan (2026-10-24), checked against the 2025 press material, the
-organizers' list and Milestone's documentation.
+Source of the framing: an external review of the plan (2026-10-24), checked against the organizers' list and
+Milestone's documentation.
 
-## What sells it against the field (2026-10-27)
+## What sells it (2026-10-27)
 
-Two of this year's entries are public on GitHub (looked up 2026-10-27): RoadWatch (road obstructions with Hafnia and
-XProtect, by a 2025 finalist) and Scene Contracts (a camera's "operational responsibility" as a fixed-template
-contract). Both ask Hafnia when an operator clicks or on a bounded timer, judge one recorded interval per request,
-hand the result to XProtect as an analytics event, and claim no accuracy. Noticing an obstruction with a VLM is
-table stakes: Milestone's own plug-in verifies alerts, and any entry can send the gateway a clip. The category list
+Noticing an obstruction with a VLM is table stakes: Milestone's own plug-in verifies alerts, and any entry can send the gateway a clip. The category list
 gets one line in the README and the video. What is sold is the **optimization**: a pipeline that decides when to ask
 and what to show, measures each answer, and removes the causes of the wrong ones. Five claims, each with its number:
 
@@ -236,8 +228,7 @@ The allowance resets at 00:00 UTC; stay under the cap each day. Requests are the
 
 ## Sources
 
-- 2025 finalists and the winner's quote: `docs/PLAN-near-miss.md` and its sources
-- The organizers' idea list: `hackathon_qna.png`
+- The organizers' idea list: the hackathon page, "What you can build"
 - Smart Client web page view item: https://doc.milestonesys.com/2025R1/en-US/standard_features/sf_sc/sf_createviews/sc_addotherwebp.htm
 - Smart Map overview (alarms on maps not confirmed for our case): https://www.milestonesys.com/articles/xprotect-smart-map/
 - Hafnia's trained output formats (MonitoringSummary): `docs/PLAN-near-miss.md`, "Why consider a change"

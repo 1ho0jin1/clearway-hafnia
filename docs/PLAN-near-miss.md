@@ -16,8 +16,7 @@ enlarged, in slow motion, with the road users marked) and play that back as a ca
 - **Our current concept is Milestone's own pitch.** Hafnia was fine-tuned for "alert validation" (an upstream alert
   goes in, confirm or discard comes out) and Milestone advertises "+4.4% alert-verification accuracy". NVIDIA's VSS
   blueprint ships an alert-verification service. Judges from Milestone and NVIDIA know "detector → VLM verifies".
-- **Search and Q&A are taken.** Milestone announced AI Search in March 2026. The 2025 hackathon was won by "Ask The
-  City" (questions about a camera picked on a map).
+- **Search and Q&A are taken.** Milestone announced AI Search in March 2026.
 - **Hafnia's trained formats** (Milestone's technical article): clips of about 30 s at 2 fps; three JSON tasks:
   AlertValidation (alert type and confidence in; `confirm`/`discard`, reason, evidence frames out), MonitoringSummary
   (weather, light, visibility, road state, event counts) and IncidentReport (type, parties, key moments, cause).
@@ -25,26 +24,8 @@ enlarged, in slow motion, with the road users marked) and play that back as a ca
 - **No product or paper found that audits near-miss counts with a VLM.** A Kansas DOT study notes that the accuracy of
   commercial near-miss tools has not been independently checked.
 
-### What earlier and current entries did (reviewed 2026-10-21)
-
-The 2025 hackathon gave API access to the base Cosmos-Reason1-7B (no traffic fine-tune, no XProtect machine). Only
-one finalist's code is public. Everything public is application work: web apps around the API, prompts and UI; no
-model training, no input processing beyond a frame-rate change.
-
-| Entry | What it did | Overlap |
-|---|---|---|
-| Ask The City (1st) | Pick a camera on a map, ask a question in plain language; answers from the last few seconds | None |
-| VLM for Emergency Response (Blaize, 2nd) | Edge devices raise events; the VLM triages them and drafts response plans | **Plan A** (detector → VLM triage) |
-| SmartMap (Citilog, 3rd) | Incident detection, traffic levels and weather on live map overlays with operator actions | **Plan A**; plan B only in dashboard form |
-| RevoFlow (audience award) | No-code builder for VLM video-analytics workflows | None |
-| Clipnotes ([public repo](https://github.com/magnusgp/clipnotes)) | FastAPI + React app: clip in, structured recap out, follow-up chat, usage metrics | None |
-| Hafnia Video Event Analyzer | Metadata, search, summaries and event detection | None |
-| Two public non-finalists | Intent before vehicle theft (prompts plus a frame-rate change); voice guide for vision-impaired users | None |
-| 2026: Scene Contracts ([public repo](https://github.com/magnusgp/hafnia-hackathon-2026), the Clipnotes author, machine p022) | Fixed-template "contracts" per camera (property damage, roadway visibility), operator console, evidence cases, native alarm round trip; "learned CV models" and "training" deferred | None |
-
-Reading: plan A sits next to the 2025 second and third places and Milestone's product; plan B has no public overlap.
-The field is application-first, so a measured ML contribution (the lens) sets the entry apart, if it is shown as a
-product capability ("verdicts stay right at night and for small road users"), not as a benchmark score.
+A measured ML contribution (the lens) matters most if it is shown as a product capability ("verdicts stay right at
+night and for small road users"), not as a benchmark score.
 
 ## What a near miss is, and who needs it
 
@@ -235,10 +216,6 @@ router, clip injection, the evaluation and report scripts, and every measured fi
 
 - Milestone, Hafnia training and output formats: https://www.milestonesys.com/resources/content/articles/smart-city-video-intelligence/
 - Milestone, AI Search and alert verification: https://www.milestonesys.com/company/news/press-releases/ai-built-for-security-operations/
-- 2025 hackathon finalists: https://www.milestonesys.com/company/news/press-releases/developers-innovate-safer-video-intelligence/,
-  https://internationalsecurityjournal.com/milestone-developer-summit-2025/
-- Public entries: https://github.com/magnusgp/clipnotes, https://github.com/magnusgp/hafnia-hackathon-2026,
-  https://github.com/HugoGR-7/ProjectHafnia-IntentDetector, https://github.com/osquera/Loriens-Guide
 - NVIDIA VSS alert verification: https://docs.nvidia.com/vss/3.2.0/alert-verification-service.html
 - FHWA SSAM thresholds and conflict definition: https://www.fhwa.dot.gov/publications/research/safety/08051/03a.cfm,
   https://www.fhwa.dot.gov/publications/research/safety/08051/06.cfm
