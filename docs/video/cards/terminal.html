@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Terminal</title><link rel="stylesheet" href="card.css">
+<style>
+  .term { margin-top: 36px; background: #0b0f13; border: 1px solid var(--rule); border-radius: 14px; padding: 34px 40px;
+    font-family: Consolas, "Cascadia Mono", monospace; font-size: 34px; line-height: 1.45; color: var(--ink);
+    white-space: pre-wrap; max-height: 760px; overflow: hidden; }
+  .term .hl { color: #7ee787; }
+</style></head>
+<body><div class="card">
+  <div class="mark"><div class="dot"></div><span id="m">The service starting: what it will spend, said first</span></div>
+  <div class="term" id="t">PS C:\hafnia-hackathon-2026&gt; .venv\Scripts\python.exe scripts\run_clearway.py ...</div>
+</div>
+<script>
+  const p = new URLSearchParams(location.search);
+  if (p.get('m')) document.getElementById('m').textContent = p.get('m');
+  if (p.get('t')) {
+    const el = document.getElementById('t'); el.textContent = '';
+    for (const line of p.get('t').split('\n')) {
+      const s = document.createElement('span');
+      if (/^(live run|dry run)/.test(line)) s.className = 'hl';
+      s.textContent = line + '\n'; el.appendChild(s);
+    }
+  }
+</script></body></html>

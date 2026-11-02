@@ -30,6 +30,7 @@ CARDS, RENDER, AUDIO, VOICE, SEGMENTS, CAPTURES = (VIDEO / d for d in ("cards", 
                                                                         "segments", "captures"))
 
 # visual: ("card", html name) | ("still", path) | ("video", capture name, fallback visual)
+#       | ("text", html name, text file in captures/): the card with the file's lines as its ?t= (a terminal)
 SCENES = [
     # Cut 2026-11-01 to stay under the portal's 3 minutes (the synthetic voice gives about 2.5; a slower reading
     # still fits): shorter narration everywhere, the comparison without its "to be fair" sentence (the card's foot
@@ -37,9 +38,11 @@ SCENES = [
     {"id": "title", "min_s": 8, "visual": ("card", "title.html"),
      "say": "Clearway watches a city's XProtect cameras for what blocks a public way, asks Hafnia V L M once per "
             "incident, and turns the answer into one alarm, one card for its owner, one push to a phone."},
-    {"id": "cameras", "min_s": 8, "visual": ("video", "cameras.mp4", ("still", REPO / "docs" / "walkthrough" / "01_cameras.jpg")),
-     "say": "Eleven cameras, six with a staged incident. The service says what it will spend before it starts: at "
-            "most this many of the day's five hundred."},
+    {"id": "cameras", "min_s": 5, "visual": ("video", "cameras.mp4", ("still", REPO / "docs" / "walkthrough" / "01_cameras.jpg")),
+     "say": "Eleven cameras, six with a staged incident."},
+    # the terminal card: the first lines the service printed in the run that was filmed (captures/plan.txt)
+    {"id": "plan", "min_s": 5, "visual": ("text", "terminal.html", "plan.txt"),
+     "say": "The service says what it will spend before it starts: at most this many of the day's five hundred."},
     {"id": "board", "min_s": 16, "visual": ("video", "board.mp4", ("still", RENDER / "board-final.png")),
      "say": "Within a minute every incident has a card in its owner's column: the truck for traffic operations, the "
             "person on the tracks for rail control, the bin for street services, each with the clip Hafnia judged, "
@@ -47,11 +50,13 @@ SCENES = [
     {"id": "clip", "min_s": 8, "visual": ("video", "clip.mp4", ("card", "placeholder.html?t=The clip Hafnia judged")),
      "say": "The clip for the stalled truck as Hafnia saw it, and the verdict: a silver pickup stalls in the lane "
             "with its door open and smoke rising, blocking traffic."},
-    {"id": "smartclient", "min_s": 10, "visual": ("video", "smartclient.mp4",
-                                                 ("card", "placeholder.html?t=Smart Client: the alarm, the bookmark, the close")),
+    # Smart Client's Alarm Manager list did not draw the alarms on this machine (2026-11-02; a screen capture
+    # smartclient.mp4 was planned): the card shows them as the REST API returns them (captures/alarms.txt, JSON)
+    {"id": "smartclient", "min_s": 10, "visual": ("text", "alarms.html", "alarms.txt"),
      "say": "The same incident is an XProtect alarm with the category, the owner, Hafnia's summary, a snapshot and a "
             "bookmark. It closes itself when the spot clears and reopens if it happens again."},
-    {"id": "phone", "min_s": 8, "visual": ("video", "phone.mp4", ("card", "placeholder.html?t=The phone: Confirm or Reject")),
+    {"id": "phone", "min_s": 17, "visual": ("video", "phone.mp4", ("card", "placeholder.html?t=The phone: Confirm or Reject")),
+     # 17 s: the author's phone recording (the push in the shade, the app, the tap at 13 s, the acknowledgement)
      "say": "The owner gets a push with two buttons. A tap reaches the system in under a second and teaches it: a "
             "rejected look at that spot is not asked about again."},
     {"id": "decides", "min_s": 14, "visual": ("card", "decides.html"),
@@ -139,7 +144,17 @@ def resolve(scene: dict) -> tuple[str, Path]:
         v = v[2]
     if v[0] == "card":
         return "image", RENDER / (v[1].split("?")[0].replace(".html", "") + ("-" + scene["id"] if "?" in v[1] else "") + ".png")
+    if v[0] == "text":
+        return "image", RENDER / (v[1].replace(".html", "") + "-" + scene["id"] + ".png")
     return "image", Path(v[1])
+
+
+def text_card(scene: dict) -> str:
+    """The ("text", html, file) visual as a card name with its ?t= query (the file's lines, or a placeholder)."""
+    from urllib.parse import quote
+    src = CAPTURES / scene["visual"][2]
+    text = src.read_text(encoding="utf-8") if src.exists() else f"({src.name} is not there yet)"
+    return scene["visual"][1] + "?t=" + quote(text.strip())
 
 
 def narration(scene: dict) -> Path | None:
@@ -191,7 +206,11 @@ def main() -> int:
         for s in SCENES:
             v = s["visual"]
             card = v[1] if v[0] == "card" else (v[2][1] if v[0] == "video" and v[2][0] == "card" else None)
-            if card:
+            if v[0] == "text":
+                _, png = resolve(s)
+                render_card(text_card(s), png)
+                print(f"rendered {png.name}")
+            elif card:
                 _, png = resolve({**s, "visual": ("card", card)})
                 render_card(card, png)
                 print(f"rendered {png.name}")

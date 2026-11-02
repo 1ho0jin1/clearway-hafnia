@@ -1,0 +1,7 @@
+PS C:\hafnia-hackathon-2026> .venv\Scripts\python.exe scripts\run_clearway.py --cameras <the eleven> --real <the five streets>
+    --answers hafnia --max-requests 15 --minutes 10 --alarms --notify
+
+live run: at most 15 Hafnia requests (today's count 0), 3 at once; spots the lens would magnify less than 2.5x on their own camera, the rest on lens_1 (spans read back from its frames)
+notify: 10 targets for ['Asset owner', 'Rail control', 'Security', 'Street services', 'Traffic operations']; following 1 ntfy reply topic(s) for Confirm / Reject
+01:22:49 start      {"lens": true, "direct_below": 2.5, "width": 832, "detect_every": 2}
+01:22:50 priority   {"below_normal": true, "pids": [16652, 19160]}

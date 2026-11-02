@@ -7,7 +7,7 @@ with Confirm / Reject.
 
 Solo entry for the Hafnia Hackathon 2026 (Milestone XProtect 2026 R1, the Hafnia VLM gateway).
 
-## Demo video (2:35)
+## Demo video (2:43)
 
 https://github.com/user-attachments/assets/4a74724c-64a2-412d-9476-e7812f92980e
 

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>XProtect alarms</title><link rel="stylesheet" href="card.css">
+<style>
+  .wrap { display: grid; grid-template-columns: 1120px 600px; gap: 40px; margin-top: 30px; align-items: start; }
+  table { border-collapse: collapse; width: 100%; font-size: 24px; line-height: 1.22; }
+  th { text-align: left; color: var(--muted); font-weight: 500; font-size: 22px; padding: 0 12px 10px 0;
+       border-bottom: 1px solid var(--rule); letter-spacing: 0.02em; }
+  td { padding: 10px 12px 10px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  td.t { color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  td.p { white-space: nowrap; font-weight: 600; }
+  .High { color: #f0675c; } .Medium { color: #e8b84a; } .Low { color: #8fb6e0; }
+  td.s { white-space: nowrap; color: var(--muted); }
+  td.n b { display: block; font-weight: 600; } td.n span { color: var(--muted); font-size: 22px; }
+  td.m { color: #c8d1da; font-size: 22px; max-width: 420px; }
+  .snap img { width: 600px; border-radius: 10px; border: 1px solid var(--rule); display: block; }
+  .snap .cap { color: var(--muted); font-size: 24px; margin-top: 12px; line-height: 1.35; }
+  .foot { color: var(--muted); font-size: 23px; line-height: 1.35; margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--rule); }
+</style></head>
+<body><div class="card">
+  <div class="mark"><div class="dot"></div><span id="m">The alarms as XProtect holds them, read back through its REST API</span></div>
+  <div class="wrap">
+    <table><thead><tr><th>Time</th><th>Priority</th><th>State</th><th>Alarm · owner · camera</th><th>Message (Hafnia's summary)</th></tr></thead>
+      <tbody id="rows"></tbody></table>
+    <div class="snap"><img id="snap" src="../captures/alarm-snapshot.jpg" alt="">
+      <div class="cap" id="cap">The snapshot attached to the stalled-vehicle alarm: the spot the detector reported, as the owner sees it on the alarm.</div>
+      <div class="foot" id="foot">Each incident is one alarm on its own camera, with a bookmark on the recording. Closed by the service once the spot stayed clear for 60 s; reopened, not duplicated, when it happens again. Smart Client's Alarm Manager list did not draw these on this machine (its filters counted them), so they are shown as the API returns them.</div></div>
+  </div>
+</div>
+<script>
+  const p = new URLSearchParams(location.search);
+  const rows = p.get('t') ? JSON.parse(p.get('t')) : [];
+  const tb = document.getElementById('rows');
+  for (const r of rows.slice(-6)) {        // the last six: the second filmed run's
+    const tr = document.createElement('tr');
+    const [cat, owner] = r.name.split(', ');
+    let msg = r.message.split(' [AI-')[0].split(' (AI-')[0];     // the alarm's own "AI-generated" mark, dropped
+    msg = msg.length > 115 ? msg.slice(0, 115).replace(/\s+\S*$/, '') : msg;
+    if (!/[.!?]$/.test(msg)) msg += ' …';   // the API returns the message's first 110 characters
+    tr.innerHTML = `<td class="t">${r.time}</td><td class="p ${r.priority}">${r.priority}</td><td class="s">${r.state}</td>` +
+      `<td class="n"><b>${cat}</b><span>${owner} · ${r.source}</span></td><td class="m">${msg}</td>`;
+    tb.appendChild(tr);
+  }
+</script></body></html>

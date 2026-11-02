@@ -27,9 +27,12 @@ EDGE = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
 
 def render(url: str, png: Path, size: str = "1920,1080", budget_ms: int = 4000) -> bool:
     """One headless screenshot of url into png (the page's scripts get budget_ms of virtual time to fetch and draw)."""
-    r = subprocess.run([EDGE, "--headless=new", "--disable-gpu", "--hide-scrollbars", f"--window-size={size}",
-                        f"--virtual-time-budget={budget_ms}", f"--screenshot={png}", url],
-                       capture_output=True, timeout=60)
+    try:
+        r = subprocess.run([EDGE, "--headless=new", "--disable-gpu", "--hide-scrollbars", f"--window-size={size}",
+                            f"--virtual-time-budget={budget_ms}", f"--screenshot={png}", url],
+                           capture_output=True, timeout=30)
+    except subprocess.TimeoutExpired:              # Edge held by the saturated machine (2026-11-02): the frame is
+        return False                               # skipped, the recording goes on
     return r.returncode == 0 and png.exists()
 
 

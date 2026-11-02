@@ -80,10 +80,12 @@ docs/video/render/
 docs/video/audio/
 docs/video/voice/
 docs/video/segments/
-docs/video/captures/
+docs/video/captures/*
 docs/video/*.mp4
-# The finished cut is kept (organizers' cameras and our own pages only): the README links it, with poster.jpg
+# The finished cut is kept (organizers' cameras and our own pages only): the README links it, with poster.jpg;
+# so is the terminal card's text (the filmed run's first lines)
 !docs/video/clearway.mp4
+!docs/video/captures/plan.txt
 
 # Run logs stay local (removed before the repository went public, 2026-11-02); each run's README keeps the numbers.
 # The hold-out's hand-made labels stay: the reproduce steps copy them.
