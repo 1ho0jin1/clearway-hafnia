@@ -13,7 +13,10 @@ Solo entry for the Hafnia Hackathon 2026 (Milestone XProtect 2026 R1, the Hafnia
      docs/video/clearway.mp4 into the editor, and paste the https://github.com/user-attachments/assets/... line it
      inserts in place of the poster link below. The poster link opens the same file in GitHub's own player. -->
 
-[![Clearway demo video](docs/video/poster.jpg)](docs/video/clearway.mp4)
+
+https://github.com/user-attachments/assets/4a74724c-64a2-412d-9476-e7812f92980e
+
+
 
 The file is `docs/video/clearway.mp4`; the storyboard and how it is built are in `docs/VIDEO.md`.
 
