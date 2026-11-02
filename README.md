@@ -7,9 +7,9 @@ with Confirm / Reject.
 
 Solo entry for the Hafnia Hackathon 2026 (Milestone XProtect 2026 R1, the Hafnia VLM gateway).
 
-## Demo video (2:43)
+## Demo video (2:57)
 
-https://github.com/user-attachments/assets/4a74724c-64a2-412d-9476-e7812f92980e
+https://github.com/user-attachments/assets/7d4c948f-0b6c-458a-b310-14fda63504db
 
 The same file is in the repository as `docs/video/clearway.mp4` (the player above is GitHub's upload of it); the
 storyboard and how it is built are in `docs/VIDEO.md`.
