@@ -11,8 +11,7 @@ Solo entry for the Hafnia Hackathon 2026 (Milestone XProtect 2026 R1, the Hafnia
 
 https://github.com/user-attachments/assets/7d4c948f-0b6c-458a-b310-14fda63504db
 
-The same file is in the repository as `docs/video/clearway.mp4` (the player above is GitHub's upload of it); the
-storyboard and how it is built are in `docs/VIDEO.md`.
+The storyboard and how it is built are in `docs/VIDEO.md`.
 
 ## How it works
 

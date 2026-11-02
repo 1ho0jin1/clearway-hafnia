@@ -40,8 +40,7 @@ repository, including the known limit on real streets.
 
 ## Demonstration Video (public or unlisted, under 3 minutes)
 
-The link to `docs/video/clearway.mp4` once the final cut is built and uploaded. The storyboard in `VIDEO.md` runs
-about 4 minutes and must be cut to under 3.
+The video in the README (2:57, GitHub's upload). The storyboard is in `VIDEO.md`.
 
 ## What did you build during the hackathon, and what existed before? (max 100 words)
 

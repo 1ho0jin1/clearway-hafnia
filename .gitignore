@@ -82,9 +82,8 @@ docs/video/voice/
 docs/video/segments/
 docs/video/captures/*
 docs/video/*.mp4
-# The finished cut is kept (organizers' cameras and our own pages only): the README links it, with poster.jpg;
-# so is the terminal card's text (the filmed run's first lines)
-!docs/video/clearway.mp4
+# The finished cut is not kept either (the README's player is GitHub's upload of it); the terminal card's text
+# (the filmed run's first lines) is
 !docs/video/captures/plan.txt
 
 # The rev. 3 video kit (docs/video-rev3, 2026-11-02): its script, tools, cards and shot lists are tracked; the footage

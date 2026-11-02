@@ -86,10 +86,11 @@ came in: the known limit, one sentence on the numbers scene.
   as its narration plus 0.8 s, at least its `min_s`; Kokoro's pace is SAPI's within a second per scene (2:35 in all).
 - **Assembly**: one segment per scene in `docs/video/segments/` (1920x1080, 30 fps, H.264, AAC), concatenated into
   `docs/video/clearway.mp4`. A video shorter than its narration loops; a capture smaller than 1000 px wide is shown
-  at twice its size, not blown up. The finished cut and its poster (`docs/video/poster.jpg`, the title frame) are
-  committed since 2026-11-01 and linked from the README; everything else under `docs/video/` but the cards and
-  this file is git-ignored (camera footage, intermediate renders).
-- **Size**: the assembler's output (CRF 20) is about 14 MB for 2:43; the committed `clearway.mp4` is that file
+  at twice its size, not blown up. The poster (`docs/video/poster.jpg`, the title frame) is
+  committed; the finished cut is not (removed 2026-11-02: the README's player is GitHub's upload of it), and
+  everything else under `docs/video/` but the cards and this file is git-ignored (camera footage, intermediate
+  renders).
+- **Size**: the assembler's output (CRF 20) is about 14 MB for 2:43; the uploaded `clearway.mp4` is that file
   re-encoded at CRF 26 with 96 kbit/s audio (8.5 MB) so it stays under GitHub's 10 MB attachment limit for the
   README's inline player; the CRF 20 cut is kept beside it as `clearway-hq.mp4` (git-ignored):
   `ffmpeg -i clearway-hq.mp4 -c:v libx264 -preset slow -crf 26 -c:a aac -b:a 96k -movflags +faststart clearway.mp4`.
