@@ -1,0 +1,8 @@
+# The demonstration video's narration (scripts/narrate.py): Kokoro-82M, an open text-to-speech model (Apache-2.0,
+# hexgrad/Kokoro-82M, downloaded to the Hugging Face cache on first use). Its own environment, so the project's
+# pinned one (requirements.txt) is untouched; it pulls a CPU torch of its own (about 250 MB):
+#   py -3.12 -m venv .venv-tts
+#   .venv-tts\Scripts\python.exe -m pip install -r requirements-tts.txt
+# Not needed to run or reproduce Clearway: only to rebuild the video with a synthetic voice.
+kokoro==0.9.4
+soundfile==0.14.0

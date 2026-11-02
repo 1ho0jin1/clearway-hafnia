@@ -1,14 +1,16 @@
 r"""make_video.py - the demonstration video (docs/VIDEO.md) from cards, stills, captures and narration, with ffmpeg.
 
-    .venv\Scripts\python.exe scripts\make_video.py --render-cards --tts --build [--voice Zira] [--out docs\video\clearway.mp4]
+    .venv\Scripts\python.exe scripts\make_video.py --render-cards --tts --build [--voice af_heart] [--out docs\video\clearway.mp4]
     .venv\Scripts\python.exe scripts\make_video.py --list                 # the scenes, their visuals and lengths
 
 Scenes (SCENES below) each have a narration and a visual. The visual is a card (docs/video/cards/*.html, rendered
 to 1920x1080 PNG by Edge headless with --render-cards), a still, or a video: a capture in docs/video/captures/
 (the board filmed by scripts/record_board.py, Smart Client or the phone recorded by hand, a card's clip from the
 board) when it exists, else the fallback named in the scene. Narration: the author's recording docs/video/voice/<id>.wav
-when it exists, else Windows text-to-speech into docs/video/audio/<id>.wav (--tts, the scratch track for timing a
-cut). Each scene lasts as long as its narration (at least its min_s); a video shorter than that loops, a longer one
+when it exists, else synthetic speech into docs/video/audio/<id>.wav (--tts): Kokoro, an open model, through
+scripts/narrate.py in its own environment .venv-tts (--engine kokoro, the default; requirements-tts.txt), or
+Windows text-to-speech (--engine sapi, --voice Zira or David: the scratch track the first cuts were timed with).
+Each scene lasts as long as its narration (at least its min_s); a video shorter than that loops, a longer one
 is cut. --build encodes one segment per scene (1920x1080, 30 fps, H.264, AAC) and concatenates them. Only the
 organizers' cameras and our own pages appear; never test_11. The outputs hold camera footage and are git-ignored.
 """
@@ -20,10 +22,8 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(REPO))
-from lens.publisher import FFMPEG  # noqa: E402
-
-FFPROBE = str(Path(FFMPEG).with_name("ffprobe.exe"))
+FFMPEG = r"C:\tools\ffmpeg\ffmpeg-9.0.2-essentials_build\bin\ffmpeg.exe"   # as lens/publisher.py (not imported:
+FFPROBE = str(Path(FFMPEG).with_name("ffprobe.exe"))                       # narrate.py's environment has no cv2)
 EDGE = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
 VIDEO = REPO / "docs" / "video"
 CARDS, RENDER, AUDIO, VOICE, SEGMENTS, CAPTURES = (VIDEO / d for d in ("cards", "render", "audio", "voice",
@@ -107,10 +107,26 @@ def render_page(url: str, png: Path, budget_ms: int = 6000) -> None:
 
 
 def tts(text: str, wav: Path, voice: str) -> None:
+    """Windows text-to-speech (System.Speech), the scratch track."""
     script = (f"Add-Type -AssemblyName System.Speech; $s = New-Object System.Speech.Synthesis.SpeechSynthesizer; "
               f"$s.SelectVoice('Microsoft {voice} Desktop'); $s.Rate = 0; $s.SetOutputToWaveFile('{wav}'); "
               f"$s.Speak([string]'{text.replace(chr(39), chr(39) * 2)}'); $s.Dispose()")
     run(["powershell", "-NoProfile", "-NonInteractive", "-Command", script])
+
+
+TTS_PY = REPO / ".venv-tts" / "Scripts" / "python.exe"
+
+
+def narrate_kokoro(scene_ids: list[str], voice: str, speed: float) -> None:
+    """Kokoro through scripts/narrate.py in .venv-tts (see requirements-tts.txt); writes AUDIO/<id>.wav."""
+    if not TTS_PY.exists():
+        raise SystemExit(f"{TTS_PY} is missing: py -3.12 -m venv .venv-tts; "
+                         f".venv-tts\\Scripts\\python.exe -m pip install -r requirements-tts.txt")
+    r = subprocess.run([str(TTS_PY), str(REPO / "scripts" / "narrate.py"), "--voice", voice, "--speed", f"{speed}",
+                        "--only", *scene_ids], capture_output=True, text=True, encoding="utf-8", errors="replace")
+    print(r.stdout, end="")
+    if r.returncode:
+        raise SystemExit(f"narrate.py failed:\n{r.stderr[-1500:]}")
 
 
 def resolve(scene: dict) -> tuple[str, Path]:
@@ -157,8 +173,12 @@ def main() -> int:
     ap.add_argument("--render-cards", action="store_true", help="cards to PNG (Edge headless), and the board and "
                                                                 "summary of --board-url to board-final / summary-final")
     ap.add_argument("--board-url", default="http://127.0.0.1:8766", help="a board showing the run to picture")
-    ap.add_argument("--tts", action="store_true", help="Windows text-to-speech narration where no voice/<id>.wav exists")
-    ap.add_argument("--voice", default="Zira", help="Zira or David")
+    ap.add_argument("--tts", action="store_true", help="synthetic narration where no voice/<id>.wav exists")
+    ap.add_argument("--engine", choices=("kokoro", "sapi"), default="kokoro",
+                    help="kokoro: scripts/narrate.py in .venv-tts (default); sapi: Windows text-to-speech")
+    ap.add_argument("--voice", help="kokoro: af_heart (default), am_michael, bm_george, ... (narrate.py --samples); "
+                                    "sapi: Zira (default) or David")
+    ap.add_argument("--speed", type=float, default=1.0, help="kokoro: speaking rate, 1.0 = the voice's own")
     ap.add_argument("--build", action="store_true")
     ap.add_argument("--only", nargs="*", help="scene ids to build (default all)")
     ap.add_argument("--list", action="store_true")
@@ -182,9 +202,12 @@ def main() -> int:
         except SystemExit as e:
             print(f"board not rendered: {e}")
     if args.tts:
-        for s in scenes:
-            if not (VOICE / f"{s['id']}.wav").exists():
-                tts(s["say"], AUDIO / f"{s['id']}.wav", args.voice)
+        todo = [s for s in scenes if not (VOICE / f"{s['id']}.wav").exists()]
+        if args.engine == "kokoro" and todo:
+            narrate_kokoro([s["id"] for s in todo], args.voice or "af_heart", args.speed)
+        else:
+            for s in todo:
+                tts(s["say"], AUDIO / f"{s['id']}.wav", args.voice or "Zira")
                 print(f"spoken {s['id']}: {seconds(AUDIO / (s['id'] + '.wav')):.1f} s")
     if args.list or not (args.build or args.render_cards or args.tts):
         total = 0.0

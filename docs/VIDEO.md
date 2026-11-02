@@ -65,11 +65,19 @@ came in: the known limit, one sentence on the numbers scene.
   `phone.mp4` (the push, the tap, the card confirmed). `clip.mp4` is the stalled truck's clip as the board served it
   (`/clips/cw-0003.mp4`), already there.
 - **Narration**: `docs/video/voice/<scene id>.wav` (the author's voice, one take per scene, the script in
-  `make_video.py`) takes precedence; otherwise Windows text-to-speech (`--tts`, Zira by default) into
-  `docs/video/audio/`. A scene lasts as long as its narration plus 0.8 s, at least its `min_s`.
+  `make_video.py`) takes precedence; otherwise synthetic speech (`--tts`) into `docs/video/audio/`: **Kokoro**
+  (`hexgrad/Kokoro-82M`, Apache-2.0, an open model that runs on the CPU at about real time) through
+  `scripts/narrate.py` in its own environment `.venv-tts` (`requirements-tts.txt`; `--engine kokoro`, the default,
+  `--voice af_heart` unless another is chosen, `--speed`), or Windows text-to-speech (`--engine sapi`, Zira or David:
+  the machine-sounding scratch track the first cuts were timed with, replaced on 2026-11-01). `narrate.py --samples`
+  speaks the title line in eight Kokoro voices into `docs/video/audio/samples/` to choose one by ear. Kokoro's
+  phonemizer reads "Hafnia" and "XProtect" as expected; "V L M" is spelled out in the script. A scene lasts as long
+  as its narration plus 0.8 s, at least its `min_s`; Kokoro's pace is SAPI's within a second per scene (2:35 in all).
 - **Assembly**: one segment per scene in `docs/video/segments/` (1920x1080, 30 fps, H.264, AAC), concatenated into
   `docs/video/clearway.mp4`. A video shorter than its narration loops; a capture smaller than 1000 px wide is shown
-  at twice its size, not blown up. Everything but the cards and this file is git-ignored (camera footage).
+  at twice its size, not blown up. The finished cut and its poster (`docs/video/poster.jpg`, the title frame) are
+  committed since 2026-11-01 and linked from the README; everything else under `docs/video/` but the cards and
+  this file is git-ignored (camera footage, intermediate renders).
 - **Footage shown**: only the organizers' cameras (on every machine), the three CC0 street clips
   (`scripts/fetch_footage.py`) and our own pages; never `test_11` (the AI City licence forbids redistribution).
 - **Requests**: the live run recorded for scenes 2-5 costs about 15 (today's count 41 of 500 after the day's work).
@@ -82,4 +90,7 @@ made beside the comparison run is 6 s long (the recorder starved with the poller
 the board again during the live run for scenes 2-6, with nothing else asking Hafnia at the time. **2026-11-01:** the
 narration cut for the portal's 3-minute limit: 2:40 with the synthetic voice, so a reading up to 12 % slower still
 fits; if the recorded voice runs longer, the comparison's second sentence and the measured scene's list are the
-next cuts.
+next cuts. Later that day the Windows voice (plainly machine-made) was replaced by Kokoro, an open model, in the
+same pace: the cut is 2:35 (`clearway.mp4`; the SAPI cut kept beside it as `clearway-sapi.mp4`, git-ignored),
+voice `af_heart` until one is chosen from the samples. The author's own recording still takes precedence per
+scene if made.
