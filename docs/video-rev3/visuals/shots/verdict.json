@@ -1,0 +1,13 @@
+{
+  "_doc": "Camera keyframes for the Confirm / Reject chart (visuals/verdict@2x.png: the SVG at 2x, 1920x1080). Same format as pipeline.json.",
+  "scale": 2, "oy": 0, "canvas": [1920, 1080], "move": 1.3, "fade": 0.7, "lead_s": 0.4,
+  "start": {"box": "all", "hi": [[24,110,1872,186]]},
+  "lines": [
+    [{"at": 0, "box": "all", "hi": [[24,110,1872,186]]}],
+    [{"at": 0, "box": [14, 330, 940], "hi": [[344,410,580,110]]},
+     {"at": 0.5, "box": [14, 330, 940], "hi": [[100,536,820,316]]}],
+    [{"at": 0, "box": [966, 330, 940], "hi": [[996,410,880,110]]}],
+    [{"at": 0, "box": [1000, 555, 896], "hi": [[1020,540,860,420]]}]
+  ],
+  "end": {"box": "all", "hi": "all"}
+}

@@ -1,0 +1,309 @@
+{
+  "title": "Clearway demo video, rev. 3 (2026-11-02)",
+  "limit_s": 180,
+  "lead_s": 0.25,
+  "tail_s": 0.55,
+  "default_pause_s": 0.25,
+  "scenes": [
+    {
+      "id": "title",
+      "min_s": 8,
+      "optional": false,
+      "screen": "Title card",
+      "visual": {
+        "kind": "image",
+        "src": "visuals/title.png"
+      },
+      "lines": [
+        {
+          "say": "Hello everyone, this is Clearway.",
+          "pause_after_s": 0.25
+        },
+        {
+          "say": "It watches cameras managed by XProtect for anything blocking a public way, asks Hafnia VLM once per incident, and turns the answer into one alarm in XProtect, one card on the owner board, and one push to the team that owns it.",
+          "pause_after_s": 0.0
+        }
+      ]
+    },
+    {
+      "id": "spoiler",
+      "min_s": 10,
+      "optional": false,
+      "screen": "The finished owner board: one column per team. The view moves to each card as you name it.",
+      "visual": {
+        "kind": "camera",
+        "image": "visuals/board-final.png",
+        "spec": "visuals/shots/spoiler.json"
+      },
+      "lines": [
+        {
+          "say": "Here's where we'll end up: one column per responsible team.",
+          "pause_after_s": 0.6,
+          "on_screen": "the whole owner board"
+        },
+        {
+          "say": "A person on the tracks goes to rail control,",
+          "pause_after_s": 0.5,
+          "on_screen": "Rail control column: the person on the tracks"
+        },
+        {
+          "say": "a stalled truck to traffic operations,",
+          "pause_after_s": 0.5,
+          "on_screen": "Traffic operations column: the stalled truck"
+        },
+        {
+          "say": "and a bin on the pavement to street services.",
+          "pause_after_s": 0.0,
+          "on_screen": "Street services column: the bin on the pavement"
+        }
+      ]
+    },
+    {
+      "id": "pipeline",
+      "min_s": 14,
+      "optional": false,
+      "screen": "The pipeline flowchart. The view moves to each stage as you name it.",
+      "visual": {
+        "kind": "camera",
+        "image": "visuals/pipeline@3x.png",
+        "spec": "visuals/shots/pipeline.json"
+      },
+      "lines": [
+        {
+          "say": "Now, how does it work?",
+          "pause_after_s": 0.6,
+          "on_screen": "the whole pipeline"
+        },
+        {
+          "say": "A change detector finds what arrived and stayed.",
+          "pause_after_s": 1.4,
+          "on_screen": "① Input and ② the change detector"
+        },
+        {
+          "say": "YOLO holds back passing people and watches the tracks.",
+          "pause_after_s": 1.4,
+          "on_screen": "YOLO11m"
+        },
+        {
+          "say": "SigLIP 2 fingerprints the spot,",
+          "pause_after_s": 0.4,
+          "on_screen": "SigLIP 2"
+        },
+        {
+          "say": "and the incident memory skips what was already judged.",
+          "pause_after_s": 0.6,
+          "on_screen": "③ the incident memory"
+        },
+        {
+          "say": "Only something new reaches Hafnia VLM, small spots magnified first: one request, one answer.",
+          "pause_after_s": 0.0,
+          "on_screen": "④ Hafnia VLM and ⑤ one incident"
+        }
+      ]
+    },
+    {
+      "id": "board",
+      "min_s": 16,
+      "optional": false,
+      "screen": "Smart Client's eleven cameras, then the owner board filling (16 s of footage)",
+      "visual": {
+        "kind": "per_line",
+        "src": [
+          "visuals/cameras.mp4",
+          "visuals/board.mp4"
+        ]
+      },
+      "lines": [
+        {
+          "say": "Here it is live, on eleven cameras.",
+          "pause_after_s": 0.4
+        },
+        {
+          "say": "Within a minute, every incident has a card in its owner's column, with the clip Hafnia judged, its verdict, and its alarm.",
+          "pause_after_s": 0.0
+        }
+      ]
+    },
+    {
+      "id": "clip",
+      "min_s": 8,
+      "optional": false,
+      "screen": "The stalled truck's clip",
+      "visual": {
+        "kind": "video",
+        "src": "visuals/clip.mp4"
+      },
+      "lines": [
+        {
+          "say": "Let's open one card.",
+          "pause_after_s": 0.4
+        },
+        {
+          "say": "This is the clip Hafnia saw, and its verdict: a silver pickup stalls in the lane, door open, smoke rising, blocking traffic.",
+          "pause_after_s": 0.0
+        }
+      ]
+    },
+    {
+      "id": "smartclient",
+      "min_s": 10,
+      "optional": false,
+      "screen": "The XProtect alarms card",
+      "visual": {
+        "kind": "image",
+        "src": "visuals/alarms-smartclient.png"
+      },
+      "lines": [
+        {
+          "say": "In XProtect, the same incident is one alarm, with the category, the owner, Hafnia's summary, and a snapshot.",
+          "pause_after_s": 0.25
+        },
+        {
+          "say": "It closes when the spot clears, and reopens if it happens again.",
+          "pause_after_s": 0.0
+        }
+      ]
+    },
+    {
+      "id": "phone",
+      "min_s": 17,
+      "optional": false,
+      "screen": "Your phone recording: the push, the tap (17 s of footage)",
+      "visual": {
+        "kind": "video",
+        "src": "visuals/phone.mp4"
+      },
+      "lines": [
+        {
+          "say": "The owner also gets it on their phone, with two buttons: Confirm and Reject.",
+          "pause_after_s": 0.25
+        },
+        {
+          "say": "A tap reaches the system in under a second, and either answer teaches the memory.",
+          "pause_after_s": 0.0
+        }
+      ]
+    },
+    {
+      "id": "verdict",
+      "min_s": 8,
+      "optional": false,
+      "screen": "The Confirm / Reject chart. The view moves through both lanes as you go.",
+      "visual": {
+        "kind": "camera",
+        "image": "visuals/verdict@2x.png",
+        "spec": "visuals/shots/verdict.json"
+      },
+      "lines": [
+        {
+          "say": "So what does each answer do?",
+          "pause_after_s": 0.6,
+          "on_screen": "the whole Confirm / Reject chart"
+        },
+        {
+          "say": "Confirm puts the alarm in progress, and look-alikes there are no longer skipped.",
+          "pause_after_s": 0.6,
+          "on_screen": "the Confirm lane"
+        },
+        {
+          "say": "Reject closes the alarm and marks that look harmless at that spot;",
+          "pause_after_s": 0.5,
+          "on_screen": "the Reject lane: at once"
+        },
+        {
+          "say": "a look-alike is asked about again only if it stays thirty seconds.",
+          "pause_after_s": 0.0,
+          "on_screen": "the Reject lane: later, at the same spot"
+        }
+      ]
+    },
+    {
+      "id": "numbers",
+      "min_s": 12,
+      "optional": false,
+      "screen": "The Numbers card",
+      "visual": {
+        "kind": "image",
+        "src": "visuals/numbers.png"
+      },
+      "lines": [
+        {
+          "say": "So, does it pay off?",
+          "pause_after_s": 0.25
+        },
+        {
+          "say": "Three hours on eleven cameras cost thirty-three requests, one per camera-hour, and the next run had no false cards.",
+          "pause_after_s": 0.25
+        },
+        {
+          "say": "On real streets it had never seen, waiting cars became false cards; that's our known limit.",
+          "pause_after_s": 0.0
+        }
+      ]
+    },
+    {
+      "id": "compare",
+      "min_s": 14,
+      "optional": false,
+      "screen": "The plain way against Clearway",
+      "visual": {
+        "kind": "image",
+        "src": "visuals/compare.png"
+      },
+      "lines": [
+        {
+          "say": "Compare the plain way: asking every camera once a minute.",
+          "pause_after_s": 0.25
+        },
+        {
+          "say": "That's sixty requests per camera-hour, the day's five hundred gone in forty-five minutes, against Clearway's one.",
+          "pause_after_s": 0.25
+        },
+        {
+          "say": "And the full frame never put the person on the tracks; the magnified clip did.",
+          "pause_after_s": 0.0
+        }
+      ]
+    },
+    {
+      "id": "close",
+      "min_s": 6,
+      "optional": false,
+      "screen": "The closing card",
+      "visual": {
+        "kind": "image",
+        "src": "visuals/close.png"
+      },
+      "lines": [
+        {
+          "say": "To sum up, Clearway keeps public ways clear, and spends the model's attention only where it earns it.",
+          "pause_after_s": 0.25
+        },
+        {
+          "say": "Thank you.",
+          "pause_after_s": 0.0
+        }
+      ]
+    },
+    {
+      "id": "measured",
+      "min_s": 12,
+      "optional": true,
+      "screen": "Optional: the Measured card (added back only if there is room)",
+      "visual": {
+        "kind": "image",
+        "src": "visuals/measured.png"
+      },
+      "lines": [
+        {
+          "say": "How do we know it works?",
+          "pause_after_s": 0.25
+        },
+        {
+          "say": "We measured every step, and fixed three faults we found: the magnifier camera's clock, a detector that faded, and alarms slowed by our own load.",
+          "pause_after_s": 0.0
+        }
+      ]
+    }
+  ]
+}

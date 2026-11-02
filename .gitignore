@@ -87,6 +87,18 @@ docs/video/*.mp4
 !docs/video/clearway.mp4
 !docs/video/captures/plan.txt
 
+# The rev. 3 video kit (docs/video-rev3, 2026-11-02): its script, tools, cards and shot lists are tracked; the footage
+# (captures, the phone recording, the previews), the narration, the segments, the cuts and the zip it came in are not
+docs/video-rev3/visuals/*.mp4
+docs/video-rev3/preview/
+docs/video-rev3/audio/*
+docs/video-rev3/voice/*
+docs/video-rev3/segments/
+docs/video-rev3/*.mp4
+!docs/video-rev3/audio/README.txt
+!docs/video-rev3/voice/README.txt
+docs/*.zip
+
 # Run logs stay local (removed before the repository went public, 2026-11-02); each run's README keeps the numbers.
 # The hold-out's hand-made labels stay: the reproduce steps copy them.
 run/**/*.json

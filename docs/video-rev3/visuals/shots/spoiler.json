@@ -1,0 +1,12 @@
+{
+  "_doc": "Camera keyframes for the finished owner board (visuals/board-final.png, 1920x1080). Same format as pipeline.json.",
+  "scale": 1, "oy": 0, "canvas": [1920, 1080], "move": 1.2, "fade": 0.7, "lead_s": 0.4,
+  "start": {"box": "all", "hi": "all"},
+  "lines": [
+    [{"at": 0, "box": "all", "hi": "all"}],
+    [{"at": 0, "box": [0, 96, 820], "hi": [[22,104,364,420]]}],
+    [{"at": 0, "box": [170, 96, 820], "hi": [[402,104,364,434]]}],
+    [{"at": 0, "box": [550, 96, 820], "hi": [[782,104,364,400]]}]
+  ],
+  "end": {"box": "all", "hi": [[22,104,364,420],[402,104,364,434],[782,104,364,400]]}
+}

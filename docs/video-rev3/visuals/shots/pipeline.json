@@ -1,0 +1,15 @@
+{
+  "_doc": "Camera keyframes for the pipeline chart (visuals/pipeline@3x.png: the SVG at 3x, 1800x1013 canvas, the 1800x820 drawing 96 px down). box = [x, y, width] in SVG units (16:9, height follows) or \"all\"; hi = rectangles [x, y, w, h] kept bright, the rest dimmed, or \"all\". Each line's list: shots at a fraction (at) of that line's time.",
+  "scale": 3, "oy": 96, "canvas": [1800, 1013], "move": 1.4, "fade": 0.8, "lead_s": 0.4,
+  "start": {"box": "all", "hi": "all"},
+  "lines": [
+    [{"at": 0, "box": "all", "hi": "all"}],
+    [{"at": 0, "box": [14, 100, 720], "hi": [[24,110,200,470],[262,150,222,96]]}],
+    [{"at": 0, "box": [14, 100, 720], "hi": [[262,150,222,240]]}],
+    [{"at": 0, "box": [470, 150, 640], "hi": [[504,206,190,126]]}],
+    [{"at": 0, "box": [470, 150, 640], "hi": [[732,110,320,470]]}],
+    [{"at": 0, "box": [1022, 108, 768], "hi": [[1076,110,360,470]]},
+     {"at": 0.55, "box": [1022, 108, 768], "hi": [[1076,110,360,470],[1460,110,316,470]]}]
+  ],
+  "end": {"box": "all", "hi": "all"}
+}

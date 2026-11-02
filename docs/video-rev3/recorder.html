@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clearway Narration Booth</title>
+<style>
+/* Layout: scene list on the left, teleprompter + transport on the right; one dark world, the video cards' palette. */
+:root {
+  --bg: #0f141a; --surface: #1a2128; --raise: #222b34; --ink: #e6ebf0; --muted: #9aa7b4; --rule: #2c3640;
+  --signal: #f0a530; --rec: #f07068; --go: #3fb950; --info: #58a6ff;
+  --display: "Bahnschrift SemiCondensed", "Bahnschrift", "Arial Narrow", sans-serif;
+  --body: "Segoe UI", system-ui, sans-serif;
+  --mono: "Cascadia Mono", Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.45 var(--body); display: grid;
+  grid-template-columns: 300px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+header { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px;
+  padding: 12px 20px; border-bottom: 1px solid var(--rule); background: var(--surface); }
+header h1 { font: 700 22px/1 var(--display); margin: 0; letter-spacing: .01em; }
+header .dot { width: 14px; height: 14px; border-radius: 4px; background: var(--go); display: inline-block; margin-right: 8px; vertical-align: -1px; }
+.spacer { flex: 1; }
+.folder { font-size: 13px; color: var(--muted); }
+.folder b { color: var(--ink); font-weight: 600; }
+.total { display: grid; gap: 4px; min-width: 260px; }
+.total .row { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.total .row b { color: var(--ink); font: 700 18px/1 var(--display); }
+.bar { height: 8px; background: var(--raise); border-radius: 4px; overflow: hidden; position: relative; }
+.bar i { position: absolute; inset: 0 auto 0 0; background: var(--go); border-radius: 4px; }
+.bar.warn i { background: var(--signal); } .bar.over i { background: var(--rec); }
+.bar s { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--ink); left: 97.2%; text-decoration: none; }
+
+nav { border-right: 1px solid var(--rule); overflow-y: auto; padding: 10px; display: grid; align-content: start; gap: 4px; }
+nav button { all: unset; cursor: pointer; display: grid; grid-template-columns: 26px 1fr auto; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: 8px; color: var(--muted); }
+nav button:hover { background: var(--surface); }
+nav button:focus-visible { outline: 2px solid var(--info); }
+nav button.on { background: var(--raise); color: var(--ink); }
+nav .n { font: 600 13px var(--mono); color: var(--muted); }
+nav .id { font-weight: 600; }
+nav .st { font: 12px var(--mono); font-variant-numeric: tabular-nums; }
+nav .st.saved { color: var(--go); } nav .st.take { color: var(--signal); } nav .st.none { color: var(--rule); }
+nav .opt { font-size: 11px; color: var(--muted); font-weight: 400; margin-left: 6px; }
+
+main { overflow-y: auto; padding: 22px 28px 40px; display: grid; gap: 20px; align-content: start; }
+.top { display: grid; gap: 14px; }
+.view { width: min(384px, 100%); justify-self: center; }
+.eyebrow { font-size: 13px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; display: flex; gap: 14px; flex-wrap: wrap; }
+.eyebrow b { color: var(--signal); font-weight: 600; }
+h2 { font: 700 44px/1 var(--display); margin: 6px 0 0; }
+.screen { font-size: 14px; color: var(--muted); margin-top: 8px; }
+.thumb { width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; border: 1px solid var(--rule); background: var(--surface) center / cover no-repeat; overflow: hidden; }
+.thumb video { width: 100%; height: 100%; display: block; object-fit: cover; }
+.thumbcap { font-size: 12px; color: var(--muted); margin-top: 6px; text-align: center; }
+
+.prompter { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 16px 22px; }
+.prompter p { margin: 0; font-size: 15px; line-height: 1.55; max-width: 60em; }
+.prompter p + p { margin-top: 6px; }
+.prompter .cue { display: block; font: 600 12px var(--mono); color: var(--info); letter-spacing: .08em; margin: 10px 0 2px; }
+.prompter.recording { border-color: var(--rec); box-shadow: 0 0 0 1px var(--rec); }
+.editbox { display: grid; gap: 10px; }
+.editbox textarea { width: 100%; min-height: 160px; resize: vertical; background: var(--surface); color: var(--ink); border: 1px solid var(--info);
+  border-radius: 14px; padding: 16px 22px; font: 15px/1.55 var(--body); }
+.editbox textarea:focus { outline: 2px solid var(--info); outline-offset: 2px; }
+.editbar { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; font-size: 13px; color: var(--muted); }
+.btn.save { background: var(--info); color: #06121f; border-color: var(--info); }
+.btn.save kbd { color: #06121f; border-color: #06121f55; }
+nav .ed { color: var(--info); font-size: 12px; margin-left: 6px; font-weight: 400; }
+
+.transport { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.btn { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 10px;
+  background: var(--raise); color: var(--ink); font-weight: 600; border: 1px solid var(--rule); }
+.btn:hover { border-color: var(--muted); }
+.btn:focus-visible { outline: 2px solid var(--info); outline-offset: 2px; }
+.btn[disabled] { opacity: .4; pointer-events: none; }
+.btn kbd { font: 11px var(--mono); color: var(--muted); border: 1px solid var(--rule); border-radius: 4px; padding: 1px 5px; }
+.btn.rec { background: var(--rec); color: #1a0d0c; border-color: var(--rec); }
+.btn.rec kbd { color: #1a0d0c; border-color: #1a0d0c55; }
+.btn.rec.live { animation: pulse 1.2s ease-in-out infinite; }
+.btn.keep { background: var(--go); color: #08160c; border-color: var(--go); }
+.btn.keep kbd { color: #08160c; border-color: #08160c55; }
+@keyframes pulse { 50% { opacity: .65; } }
+@media (prefers-reduced-motion: reduce) { .btn.rec.live { animation: none; } }
+
+.meter { flex: 1; min-width: 200px; display: grid; gap: 6px; }
+.meter .lvl { height: 10px; background: var(--raise); border-radius: 5px; overflow: hidden; position: relative; }
+.meter .lvl i { position: absolute; inset: 0 auto 0 0; width: 0; background: linear-gradient(90deg, var(--go) 70%, var(--signal) 88%, var(--rec)); }
+.meter .read { display: flex; justify-content: space-between; font: 13px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.meter .read b { color: var(--ink); font-weight: 600; }
+
+.takeinfo { display: flex; flex-wrap: wrap; gap: 10px 22px; font-size: 14px; color: var(--muted); }
+.takeinfo b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.msg { font-size: 14px; padding: 10px 14px; border-radius: 8px; background: var(--raise); border-left: 3px solid var(--info); }
+.msg.warn { border-left-color: var(--signal); } .msg.err { border-left-color: var(--rec); } .msg.ok { border-left-color: var(--go); }
+
+.setup { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 14px; }
+.setup select { background: var(--surface); color: var(--ink); border: 1px solid var(--rule); border-radius: 6px; padding: 5px 8px; font: inherit; max-width: 320px; }
+.setup label { display: inline-flex; gap: 6px; align-items: center; }
+.keys { font: 12px var(--mono); color: var(--muted); }
+
+@media (max-width: 900px) {
+  body { grid-template-columns: 1fr; grid-template-rows: auto auto minmax(0, 1fr); }
+  nav { border-right: 0; border-bottom: 1px solid var(--rule); grid-auto-flow: column; overflow-x: auto; }
+  .top { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="dot"></span>Clearway narration booth</h1>
+  <span class="folder" id="folderInfo">No folder connected: takes will be downloaded instead.</span>
+  <button class="btn" id="connectBtn" type="button">Connect voice folder</button>
+  <span class="spacer"></span>
+  <div class="total">
+    <div class="row"><span>Estimated cut</span><b id="totalTime">0:00</b><span>limit 3:00</span></div>
+    <div class="bar" id="totalBar"><i id="totalFill"></i><s title="2:55, the safe target"></s></div>
+  </div>
+</header>
+
+<nav id="list" aria-label="Scenes"></nav>
+
+<main>
+  <div class="top">
+    <div>
+      <div class="eyebrow"><span id="sceneNo"></span><b id="target"></b><span id="fileName"></span></div>
+      <h2 id="sceneTitle"></h2>
+      <div class="screen" id="screen"></div>
+    </div>
+    <div class="view">
+      <div class="thumb" id="thumb" role="img" aria-label="What is on screen"><video id="thumbVid" muted loop playsinline hidden></video></div>
+      <div class="thumbcap" id="thumbCap"></div>
+    </div>
+  </div>
+
+  <div class="prompter" id="prompter"></div>
+  <div class="editbox" id="editBox" hidden>
+    <label for="editText" class="keys">Edit the narration. Each line is spoken as one phrase; in scenes where the view moves, a new line is where you pause.</label>
+    <textarea id="editText" spellcheck="true"></textarea>
+    <div class="editbar">
+      <button class="btn save" id="saveEdit" type="button">Save script <kbd>Ctrl+Enter</kbd></button>
+      <button class="btn" id="cancelEdit" type="button">Cancel <kbd>Esc</kbd></button>
+      <button class="btn" id="revertEdit" type="button">Restore original</button>
+      <span id="editCount"></span>
+    </div>
+  </div>
+
+  <div class="transport">
+    <button class="btn rec" id="recBtn" type="button">● Record <kbd>Space</kbd></button>
+    <button class="btn" id="playBtn" type="button" disabled>▶ Play <kbd>P</kbd></button>
+    <button class="btn keep" id="keepBtn" type="button" disabled>Keep &amp; next <kbd>Enter</kbd></button>
+    <button class="btn" id="editBtn" type="button">✎ Edit script <kbd>E</kbd></button>
+    <div class="meter">
+      <div class="lvl"><i id="lvl"></i></div>
+      <div class="read"><span>time <b id="clock">0.0 s</b></span><span id="peakRead">peak –</span></div>
+    </div>
+  </div>
+
+  <div class="takeinfo" id="takeInfo"></div>
+  <div id="msg"></div>
+
+  <div class="setup">
+    <label for="mic">Microphone <select id="mic"><option value="">default</option></select></label>
+    <label><input type="checkbox" id="ns" checked> Noise suppression</label>
+    <span class="keys">Space record/stop · P play · Enter keep &amp; next · E edit script · ←/→ scenes</span>
+  </div>
+</main>
+
+<audio id="player" hidden></audio>
+
+<script>
+const SCENES = [
+  {"id": "title", "min": 8, "screen": "Title card", "say": ["Hello everyone, this is Clearway.", "It watches cameras managed by XProtect for anything blocking a public way, asks Hafnia VLM once per incident, and turns the answer into one alarm in XProtect, one card on the owner board, and one push to the team that owns it."]},
+  {"id": "spoiler", "min": 10, "preview": true, "screen": "The finished owner board: one column per team. The view moves to each card as you name it.", "say": ["Here's where we'll end up: one column per responsible team.", "A person on the tracks goes to rail control,", "a stalled truck to traffic operations,", "and a bin on the pavement to street services."], "shots": ["the whole owner board", "Rail control column: the person on the tracks", "Traffic operations column: the stalled truck", "Street services column: the bin on the pavement"]},
+  {"id": "pipeline", "min": 14, "screen": "The pipeline flowchart. The view moves to each stage as you name it.", "say": ["Now, how does it work?", "A change detector finds what arrived and stayed.", "YOLO holds back passing people and watches the tracks.", "SigLIP 2 fingerprints the spot,", "and the incident memory skips what was already judged.", "Only something new reaches Hafnia VLM, small spots magnified first: one request, one answer."], "shots": ["the whole pipeline", "① Input and ② the change detector", "YOLO11m", "SigLIP 2", "③ the incident memory", "④ Hafnia VLM and ⑤ one incident"], "preview": true},
+  {"id": "board", "min": 16, "screen": "Smart Client's eleven cameras, then the owner board filling (16 s of footage)", "say": ["Here it is live, on eleven cameras.", "Within a minute, every incident has a card in its owner's column, with the clip Hafnia judged, its verdict, and its alarm."]},
+  {"id": "clip", "min": 8, "screen": "The stalled truck's clip", "say": ["Let's open one card.", "This is the clip Hafnia saw, and its verdict: a silver pickup stalls in the lane, door open, smoke rising, blocking traffic."]},
+  {"id": "smartclient", "min": 10, "screen": "The XProtect alarms card", "say": ["In XProtect, the same incident is one alarm, with the category, the owner, Hafnia's summary, and a snapshot.", "It closes when the spot clears, and reopens if it happens again."]},
+  {"id": "phone", "min": 17, "screen": "Your phone recording: the push, the tap (17 s of footage)", "say": ["The owner also gets it on their phone, with two buttons: Confirm and Reject.", "A tap reaches the system in under a second, and either answer teaches the memory."]},
+  {"id": "verdict", "min": 8, "screen": "The Confirm / Reject chart. The view moves through both lanes as you go.", "say": ["So what does each answer do?", "Confirm puts the alarm in progress, and look-alikes there are no longer skipped.", "Reject closes the alarm and marks that look harmless at that spot;", "a look-alike is asked about again only if it stays thirty seconds."], "shots": ["the whole Confirm / Reject chart", "the Confirm lane", "the Reject lane: at once", "the Reject lane: later, at the same spot"], "preview": true},
+  {"id": "numbers", "min": 12, "screen": "The Numbers card", "say": ["So, does it pay off?", "Three hours on eleven cameras cost thirty-three requests, one per camera-hour, and the next run had no false cards.", "On real streets it had never seen, waiting cars became false cards; that's our known limit."]},
+  {"id": "compare", "min": 14, "screen": "The plain way against Clearway", "say": ["Compare the plain way: asking every camera once a minute.", "That's sixty requests per camera-hour, the day's five hundred gone in forty-five minutes, against Clearway's one.", "And the full frame never put the person on the tracks; the magnified clip did."]},
+  {"id": "close", "min": 6, "screen": "The closing card", "say": ["To sum up, Clearway keeps public ways clear, and spends the model's attention only where it earns it.", "Thank you."]},
+  {"id": "measured", "min": 12, "optional": true, "screen": "Optional: the Measured card (added back only if there is room)", "say": ["How do we know it works?", "We measured every step, and fixed three faults we found: the magnifier camera's clock, a detector that faded, and alarms slowed by our own load."]},
+];
+const PAD = 0.8, LIMIT = 180, SAFE = 175, WPS = 2.4;
+const countWords = (lines) => lines.join(" ").split(/\s+/).filter(Boolean).length;
+for (const s of SCENES) { s.orig = [...s.say]; s.words = countWords(s.say); s.take = null; s.saved = null; }
+const esc = (t) => t.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const isEdited = (s) => s.say.join("\n") !== s.orig.join("\n");
+function setSay(s, lines) { s.say = lines.length ? lines : [...s.orig]; s.words = countWords(s.say); }
+
+// ---------- script edits: kept in this browser, and as script.json in the voice folder for the video build ----------
+const EDIT_KEY = "clearway-booth-script-v1";
+function applyEdits(map) { for (const s of SCENES) if (Array.isArray(map?.[s.id]) && map[s.id].length) setSay(s, map[s.id].map(String)); }
+try { applyEdits(JSON.parse(localStorage.getItem(EDIT_KEY) || "{}")); } catch {}
+function editsMap() { const m = {}; for (const s of SCENES) if (isEdited(s)) m[s.id] = s.say; return m; }
+async function persistScript() {
+  try { localStorage.setItem(EDIT_KEY, JSON.stringify(editsMap())); } catch {}
+  if (!dir) return false;
+  try {
+    if ((await dir.queryPermission({ mode: "readwrite" })) !== "granted") return false;
+    const body = { saved_at: new Date().toISOString(), note: "The narration as recorded in recorder.html; one array item per spoken line.",
+      scenes: SCENES.map((s) => ({ id: s.id, optional: !!s.optional, edited: isEdited(s), say: s.say })) };
+    const w = await (await dir.getFileHandle("script.json", { create: true })).createWritable();
+    await w.write(JSON.stringify(body, null, 2)); await w.close();
+    return true;
+  } catch { return false; }
+}
+async function loadFolderScript() {
+  try {
+    const f = await (await dir.getFileHandle("script.json")).getFile();
+    const body = JSON.parse(await f.text()), m = {};
+    for (const sc of body.scenes || []) if (sc.edited) m[sc.id] = sc.say;
+    applyEdits(m);
+  } catch {}
+}
+
+const $ = (id) => document.getElementById(id);
+let cur = 0, dir = null, ctx = null, stream = null, src = null, proc = null, analyser = null, chunks = null, t0 = 0, peak = 0;
+
+// ---------- folder (File System Access API; falls back to downloads) ----------
+const canPick = "showDirectoryPicker" in window;
+function idb(mode, fn) {
+  return new Promise((res) => {
+    try {
+      const r = indexedDB.open("clearway-booth", 1);
+      r.onupgradeneeded = () => r.result.createObjectStore("kv");
+      r.onsuccess = () => { try { const tx = r.result.transaction("kv", mode); const q = fn(tx.objectStore("kv")); q.onsuccess = () => res(q.result); q.onerror = () => res(null); } catch { res(null); } };
+      r.onerror = () => res(null);
+    } catch { res(null); }
+  });
+}
+async function connect(handle) {
+  dir = handle;
+  $("folderInfo").innerHTML = `Saving to <b>${dir.name}/</b> as <span class="keys">&lt;scene&gt;.wav</span>; replaced takes go to <span class="keys">_old/</span>.`;
+  $("connectBtn").textContent = "Change folder";
+  if (dir.name !== "voice") say(`The connected folder is "${dir.name}". The video build reads takes from video/voice/.`, "warn");
+  await loadFolderScript();
+  await persistScript();
+  await scanFolder();
+}
+$("connectBtn").onclick = async () => {
+  if (!canPick) return say("This browser cannot write to a folder. Open this page in Edge or Chrome, or keep going: each take downloads as <scene>.wav.", "warn");
+  try {
+    if (dir && (await dir.queryPermission({ mode: "readwrite" })) !== "granted" && $("connectBtn").dataset.reconnect) {
+      if ((await dir.requestPermission({ mode: "readwrite" })) === "granted") { delete $("connectBtn").dataset.reconnect; return connect(dir); }
+    }
+    const h = await window.showDirectoryPicker({ id: "clearway-voice", mode: "readwrite" });
+    await idb("readwrite", (st) => st.put(h, "dir"));
+    await connect(h);
+  } catch (e) { if (e.name !== "AbortError") say(`Could not open the folder: ${e.message}`, "err"); }
+};
+(async () => {
+  if (!canPick) { $("connectBtn").hidden = true; $("folderInfo").textContent = "This browser cannot write to a folder: each kept take downloads as <scene>.wav."; return; }
+  const h = await idb("readonly", (st) => st.get("dir"));
+  if (!h) return;
+  try {
+    if ((await h.queryPermission({ mode: "readwrite" })) === "granted") return connect(h);
+    dir = h; $("connectBtn").textContent = `Reconnect "${h.name}"`; $("connectBtn").dataset.reconnect = "1";
+  } catch {}
+})();
+
+async function scanFolder() {
+  if (!dir) return;
+  const ac = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 1, 48000);
+  for (const s of SCENES) {
+    s.saved = null;
+    try {
+      const f = await (await dir.getFileHandle(`${s.id}.wav`)).getFile();
+      const buf = await ac.decodeAudioData(await f.arrayBuffer());
+      const pcm = buf.getChannelData(0);
+      s.saved = { dur: buf.duration, ...analyse(pcm, buf.sampleRate), url: URL.createObjectURL(f) };
+    } catch {}
+  }
+  renderList(); renderScene();
+}
+
+// ---------- audio ----------
+async function openMic() {
+  if (!ctx) ctx = new AudioContext();
+  if (ctx.state === "suspended") await ctx.resume();
+  if (stream) return;
+  const ns = $("ns").checked, id = $("mic").value;
+  stream = await navigator.mediaDevices.getUserMedia({ audio: {
+    deviceId: id ? { exact: id } : undefined, channelCount: 1,
+    echoCancellation: false, noiseSuppression: ns, autoGainControl: false } });
+  src = ctx.createMediaStreamSource(stream);
+  analyser = ctx.createAnalyser(); analyser.fftSize = 2048; src.connect(analyser);
+  proc = ctx.createScriptProcessor(4096, 1, 1);
+  const mute = ctx.createGain(); mute.gain.value = 0;
+  src.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
+  proc.onaudioprocess = (e) => { if (chunks) chunks.push(new Float32Array(e.inputBuffer.getChannelData(0))); };
+  if (!looping) meterLoop();
+  listMics();
+}
+function closeMic() { if (stream) stream.getTracks().forEach((t) => t.stop()); stream = null; try { src?.disconnect(); proc?.disconnect(); } catch {} }
+async function listMics() {
+  const devs = (await navigator.mediaDevices.enumerateDevices()).filter((d) => d.kind === "audioinput");
+  const sel = $("mic"), keep = sel.value;
+  sel.innerHTML = `<option value="">default</option>` + devs.map((d) => `<option value="${d.deviceId}">${d.label || "microphone"}</option>`).join("");
+  sel.value = keep;
+}
+$("mic").onchange = $("ns").onchange = async () => { closeMic(); try { await openMic(); say("Microphone switched.", "ok"); } catch (e) { micError(e); } };
+
+const buf = new Float32Array(2048);
+let looping = false;
+function meterLoop() {
+  if (!analyser) { looping = false; return; }
+  looping = true;
+  analyser.getFloatTimeDomainData(buf);
+  let m = 0; for (const v of buf) m = Math.max(m, Math.abs(v));
+  if (chunks) peak = Math.max(peak, m);
+  const db = 20 * Math.log10(m + 1e-6);
+  $("lvl").style.width = `${Math.max(0, Math.min(100, (db + 60) / 60 * 100))}%`;
+  if (chunks) $("clock").textContent = `${(ctx.currentTime - t0).toFixed(1)} s`;
+  requestAnimationFrame(meterLoop);
+}
+
+async function record() {
+  if (!$("editBox").hidden) return say("Save or cancel the script edit before recording.", "warn");
+  stopPlay();
+  try { await openMic(); } catch (e) { return micError(e); }
+  chunks = []; peak = 0; t0 = ctx.currentTime;
+  if (!$("thumbVid").hidden) { $("thumbVid").currentTime = 0; $("thumbVid").play().catch(() => {}); }
+  $("recBtn").classList.add("live"); $("recBtn").innerHTML = "■ Stop <kbd>Space</kbd>";
+  $("prompter").classList.add("recording"); say("");
+}
+function stop() {
+  const parts = chunks; chunks = null;
+  $("recBtn").classList.remove("live"); $("recBtn").innerHTML = "● Record <kbd>Space</kbd>";
+  $("prompter").classList.remove("recording");
+  const n = parts.reduce((a, c) => a + c.length, 0), pcm = new Float32Array(n);
+  let o = 0; for (const c of parts) { pcm.set(c, o); o += c.length; }
+  if (n < ctx.sampleRate * 0.5) return say("That take was under half a second; it was not kept.", "warn");
+  const s = SCENES[cur], blob = wav(pcm, ctx.sampleRate);
+  if (s.take?.url) URL.revokeObjectURL(s.take.url);
+  s.take = { pcm, rate: ctx.sampleRate, blob, url: URL.createObjectURL(blob), dur: n / ctx.sampleRate, ...analyse(pcm, ctx.sampleRate) };
+  renderList(); renderScene(); judge(s);
+}
+function analyse(pcm, rate) {
+  const win = Math.round(rate * 0.02), rms = [];
+  let pk = 0;
+  for (let i = 0; i + win <= pcm.length; i += win) {
+    let a = 0; for (let j = i; j < i + win; j++) { a += pcm[j] * pcm[j]; pk = Math.max(pk, Math.abs(pcm[j])); }
+    rms.push(Math.sqrt(a / win));
+  }
+  const top = [...rms].sort((a, b) => b - a)[Math.floor(rms.length * 0.1)] || 0;
+  const th = Math.max(0.006, top * 0.08);
+  const first = rms.findIndex((v) => v > th), last = rms.length - 1 - [...rms].reverse().findIndex((v) => v > th);
+  const voiced = first < 0 ? 0 : (last - first + 1) * 0.02;
+  return { voiced, peak: pk, quiet: top < 0.02 };
+}
+function judge(s) {
+  const t = s.take, notes = [];
+  if (t.peak >= 0.99) notes.push("The take clips (peak at full scale). Move back from the mic or lower the input level, then record again.");
+  else if (t.quiet) notes.push("The take is very quiet. Move closer to the mic or raise the input level in Windows sound settings.");
+  const len = sceneLen(s, t.voiced);
+  if (len > estLen(s) + 3) notes.push(`This reading makes the scene ${len.toFixed(1)} s, ${(len - estLen(s)).toFixed(1)} s over the plan. Keep it if the total stays under 3:00.`);
+  say(notes.length ? notes.join(" ") : "Take recorded. Play it back, then Keep & next (Enter), or record again (Space).", notes.length ? "warn" : "ok");
+}
+function wav(pcm, rate) {
+  const b = new ArrayBuffer(44 + pcm.length * 2), v = new DataView(b);
+  const w = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  w(0, "RIFF"); v.setUint32(4, 36 + pcm.length * 2, true); w(8, "WAVE"); w(12, "fmt ");
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, rate, true);
+  v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, "data"); v.setUint32(40, pcm.length * 2, true);
+  for (let i = 0; i < pcm.length; i++) v.setInt16(44 + i * 2, Math.max(-1, Math.min(1, pcm[i])) * 0x7fff, true);
+  return new Blob([b], { type: "audio/wav" });
+}
+function micError(e) {
+  say(e.name === "NotAllowedError" ? "The browser was not allowed to use the microphone. Allow it in the address bar's site settings, then press Record again."
+    : `The microphone could not start: ${e.message}`, "err");
+}
+
+// ---------- keep / play ----------
+async function keep() {
+  const s = SCENES[cur];
+  if (!s.take) return;
+  if (dir) {
+    try {
+      if ((await dir.queryPermission({ mode: "readwrite" })) !== "granted" && (await dir.requestPermission({ mode: "readwrite" })) !== "granted")
+        return say("Saving needs permission to write to the folder. Press Keep again and allow it.", "err");
+      try {
+        const old = await (await dir.getFileHandle(`${s.id}.wav`)).getFile();
+        const bak = await dir.getDirectoryHandle("_old", { create: true });
+        const stamp = new Date().toISOString().slice(11, 19).replace(/:/g, "");
+        const wr0 = await (await bak.getFileHandle(`${s.id}-${stamp}.wav`, { create: true })).createWritable();
+        await wr0.write(await old.arrayBuffer()); await wr0.close();
+      } catch {}
+      const wr = await (await dir.getFileHandle(`${s.id}.wav`, { create: true })).createWritable();
+      await wr.write(s.take.blob); await wr.close();
+    } catch (e) { return say(`Could not save ${s.id}.wav: ${e.message}`, "err"); }
+  } else {
+    const a = document.createElement("a"); a.href = s.take.url; a.download = `${s.id}.wav`; a.click();
+  }
+  s.saved = { dur: s.take.dur, voiced: s.take.voiced, peak: s.take.peak, url: s.take.url };
+  s.take = null;
+  say(`Saved ${s.id}.wav${dir ? ` in ${dir.name}/` : " to your downloads"}.`, "ok");
+  if (cur < SCENES.length - 1) cur++;
+  renderList(); renderScene();
+}
+const player = $("player");
+function play() {
+  const s = SCENES[cur], url = (s.take || s.saved)?.url;
+  if (!url) return;
+  if (!player.paused) return stopPlay();
+  player.src = url; player.play(); $("playBtn").innerHTML = "■ Stop <kbd>P</kbd>";
+}
+function stopPlay() { player.pause(); $("playBtn").innerHTML = "▶ Play <kbd>P</kbd>"; }
+player.onended = stopPlay;
+
+// ---------- rendering ----------
+const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
+const sceneLen = (s, voiced) => Math.max(s.min, voiced + PAD);
+const estLen = (s) => Math.max(s.min, s.words / WPS + PAD);
+function lenOf(s) { const t = s.take || s.saved; return t ? sceneLen(s, t.voiced) : estLen(s); }
+
+function renderList() {
+  $("list").innerHTML = SCENES.map((s, i) => {
+    const t = s.take || s.saved, cls = s.take ? "take" : s.saved ? "saved" : "none";
+    const st = t ? `${t.voiced.toFixed(1)} s` : "–";
+    return `<button type="button" class="${i === cur ? "on" : ""}" data-i="${i}"><span class="n">${String(i + 1).padStart(2, "0")}</span>
+      <span class="id">${s.id}${s.optional ? '<span class="opt">optional</span>' : ""}${isEdited(s) ? '<span class="ed" title="script edited">✎</span>' : ""}</span><span class="st ${cls}">${s.take ? "● " : s.saved ? "✓ " : ""}${st}</span></button>`;
+  }).join("");
+  const total = SCENES.filter((s) => !s.optional).reduce((a, s) => a + lenOf(s), 0);
+  const withOpt = total + (SCENES.find((s) => s.optional && (s.saved || s.take)) ? lenOf(SCENES.find((s) => s.optional)) : 0);
+  $("totalTime").textContent = fmt(total) + (withOpt > total ? ` (+measured ${fmt(withOpt)})` : "");
+  $("totalFill").style.width = `${Math.min(100, total / LIMIT * 100)}%`;
+  $("totalBar").className = "bar" + (total > LIMIT ? " over" : total > SAFE ? " warn" : "");
+  const done = SCENES.filter((s) => !s.optional && s.saved).length, need = SCENES.filter((s) => !s.optional).length;
+  $("totalBar").title = `${done} of ${need} scenes saved; unrecorded scenes are estimated at ${WPS} words per second`;
+}
+$("list").onclick = (e) => { const b = e.target.closest("button"); if (b && !chunks) { closeEditor(); cur = +b.dataset.i; stopPlay(); renderList(); renderScene(); say(""); } };
+
+function renderScene() {
+  const s = SCENES[cur], t = s.take || s.saved;
+  $("sceneNo").textContent = `Scene ${cur + 1} of ${SCENES.length}`;
+  $("target").textContent = `target ≈ ${Math.round(estLen(s))} s on screen`;
+  $("fileName").textContent = `${s.id}.wav`;
+  $("sceneTitle").textContent = s.id;
+  $("screen").textContent = s.screen;
+  const vid = $("thumbVid");
+  if (s.preview) {
+    $("thumb").style.backgroundImage = "none"; vid.hidden = false;
+    if (!vid.src.endsWith(`preview/${s.id}_preview.mp4`)) { vid.src = `preview/${s.id}_preview.mp4`; vid.play().catch(() => {}); }
+    $("thumbCap").textContent = "Preview with guessed timing. Read at your own pace: the final cut moves the view on your pauses.";
+  } else {
+    vid.pause(); vid.removeAttribute("src"); vid.hidden = true;
+    $("thumb").style.backgroundImage = `url("recorder-thumbs/${s.id}.jpg")`; $("thumbCap").textContent = "";
+  }
+  $("prompter").innerHTML = s.say.map((l, i) => (s.shots && s.shots[i] ? `<span class="cue">${i ? "⏸ pause · " : ""}on screen: ${esc(s.shots[i])}</span>` : "") + `<p>${esc(l)}</p>`).join("");
+  $("playBtn").disabled = !t; $("keepBtn").disabled = !s.take;
+  $("takeInfo").innerHTML = t ? `<span>${s.take ? "New take, not saved yet" : "Saved take"}</span><span>speech <b>${t.voiced.toFixed(1)} s</b></span>
+    <span>scene <b>${sceneLen(s, t.voiced).toFixed(1)} s</b> (plan ${estLen(s).toFixed(1)} s)</span><span>peak <b>${(20 * Math.log10(t.peak + 1e-6)).toFixed(1)} dBFS</b></span>`
+    : `<span>No take yet. ${s.words} words; at a calm pace about ${(s.words / WPS).toFixed(0)} s of speech.</span>`;
+  $("peakRead").textContent = t ? `peak ${(20 * Math.log10(t.peak + 1e-6)).toFixed(1)} dBFS` : "peak –";
+  $("clock").textContent = t ? `${t.dur.toFixed(1)} s` : "0.0 s";
+}
+function say(text, kind = "") { $("msg").innerHTML = text ? `<div class="msg ${kind}"></div>` : ""; if (text) $("msg").firstChild.textContent = text; }
+
+// ---------- the editor ----------
+function openEditor() {
+  if (chunks) return;
+  const s = SCENES[cur];
+  $("editText").value = s.say.join("\n");
+  $("prompter").hidden = true; $("editBox").hidden = false; $("editText").focus();
+  updateCount();
+  if (s.saved || s.take) say("This scene already has a take. If you change the words, record it again so the audio matches.", "warn");
+}
+function closeEditor() { $("editBox").hidden = true; $("prompter").hidden = false; }
+function updateCount() {
+  const lines = $("editText").value.split("\n").map((l) => l.trim()).filter(Boolean), n = countWords(lines), s = SCENES[cur];
+  $("editCount").textContent = `${n} words · about ${(n / WPS).toFixed(0)} s of speech · scene ≈ ${Math.max(s.min, n / WPS + PAD).toFixed(0)} s (was ${estLen(s).toFixed(0)} s)`
+    + (s.shots ? ` · ${lines.length} of ${s.shots.length} lines: line ${s.shots.map((x, i) => `${i + 1} shows ${x}`).join(", ")}` : "");
+}
+async function saveEditor() {
+  const s = SCENES[cur], lines = $("editText").value.split("\n").map((l) => l.trim()).filter(Boolean);
+  if (!lines.length) return say("The script for a scene cannot be empty. Use Restore original to go back to the first version.", "err");
+  setSay(s, lines); closeEditor();
+  const toFolder = await persistScript();
+  renderList(); renderScene();
+  say(toFolder ? `Saved the ${s.id} script here and in ${dir.name}/script.json.` : `Saved the ${s.id} script in this browser. Connect the voice folder so the video build gets it too.`, toFolder ? "ok" : "warn");
+}
+$("editText").addEventListener("input", updateCount);
+$("editBtn").onclick = openEditor;
+$("saveEdit").onclick = saveEditor;
+$("cancelEdit").onclick = () => { closeEditor(); say(""); };
+$("revertEdit").onclick = () => { $("editText").value = SCENES[cur].orig.join("\n"); updateCount(); $("editText").focus(); };
+
+document.addEventListener("click", (e) => e.target.closest(".btn, nav button")?.blur());
+$("recBtn").onclick = () => (chunks ? stop() : record());
+$("playBtn").onclick = play;
+$("keepBtn").onclick = keep;
+document.addEventListener("keydown", (e) => {
+  if (!$("editBox").hidden) {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); saveEditor(); }
+    else if (e.key === "Escape") { e.preventDefault(); closeEditor(); say(""); }
+    return;
+  }
+  if (e.target.closest("select, input, textarea") || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === "e" || e.key === "E") { e.preventDefault(); return openEditor(); }
+  if (e.code === "Space") { e.preventDefault(); chunks ? stop() : record(); }
+  else if (e.key === "p" || e.key === "P") { if (!chunks) play(); }
+  else if (e.key === "Enter") { e.preventDefault(); if (!chunks) keep(); }
+  else if ((e.key === "ArrowRight" || e.key === "ArrowDown") && !chunks) { e.preventDefault(); cur = Math.min(SCENES.length - 1, cur + 1); stopPlay(); renderList(); renderScene(); say(""); }
+  else if ((e.key === "ArrowLeft" || e.key === "ArrowUp") && !chunks) { e.preventDefault(); cur = Math.max(0, cur - 1); stopPlay(); renderList(); renderScene(); say(""); }
+});
+window.addEventListener("beforeunload", (e) => { if (SCENES.some((s) => s.take)) { e.preventDefault(); e.returnValue = ""; } });
+
+renderList(); renderScene();
+say("Connect the video/voice folder once, then: Space to record, Space to stop, P to listen, Enter to keep and move on. E edits the script.", "");
+</script>
+</body>
+</html>
