@@ -63,6 +63,36 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\open_board.ps1
 
 Hafnia allows 500 requests a day; the run script stops at 450.
 
+### Phone notifications (ntfy)
+
+The owner gets each incident on their phone through [ntfy](https://ntfy.sh): a push with Hafnia's summary and the
+snapshot, and Confirm / Reject buttons that go back to Clearway like the board's (the XProtect alarm follows within
+a second or two). Nothing on the machine listens for incoming connections; the service follows a reply topic.
+
+1. Create the topic once (`setup.ps1 -Ntfy` does the same). It prints the topic name to subscribe to:
+
+   ```powershell
+   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\setup_ntfy.ps1    # -Show prints it again later
+   ```
+
+2. On the phone, install the ntfy app (Android: Play Store or F-Droid; iOS: App Store), tap **+** and subscribe to
+   that topic on the server `https://ntfy.sh`. A browser at `https://ntfy.sh/<topic>` works too.
+3. Send a sample push and wait two minutes for a tap on its buttons:
+
+   ```powershell
+   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\setup_ntfy.ps1 -Test -Listen 120
+   ```
+
+4. Add `--notify` to a run (a new PowerShell, so it has the variables). It works in a dry run too, at no request:
+
+   ```powershell
+   .venv\Scripts\python.exe scripts\run_clearway.py --minutes 5 --alarms --notify
+   ```
+
+The topic name is the credential: anyone who knows it can read the pushes, so keep it out of git, chat and slides
+(it lives in user-scope environment variables). Snapshots leave the machine with the push. Every owner shares one
+topic by default; `config/owners.json` gives an owner its own by naming another variable.
+
 ## Reproduce the measurements
 
 No requests, one at a time (each loads a model):
