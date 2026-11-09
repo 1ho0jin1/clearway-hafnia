@@ -13,6 +13,13 @@ https://github.com/user-attachments/assets/7d4c948f-0b6c-458a-b310-14fda63504db
 
 The storyboard and how it is built are in `docs/VIDEO.md`.
 
+### Demo video trimmed (1:57)
+
+[2-minute trimmed version](https://github.com/user-attachments/assets/aee5ae49-4279-4f16-b578-e7462401f935)
+
+This is a trimmed version of the demo video above.
+
+
 ## How it works
 
 ![Clearway pipeline](docs/clearway_pipeline.svg)
